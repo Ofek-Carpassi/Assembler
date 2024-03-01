@@ -1,8 +1,0 @@
-Steps:
-0. (first pass) Check for errors.
-1. (first pass) Clean the file from empty lines, unnecessary spaces, and comments.
-2. (first pass) Spread macros and constants.
-3. (second pass) Identify the labels that appear in the code and give each label a numerical value that is the address in memory that the symbol represents.
-4. (third pass) Using the values of the labels and operation codes and register numbers, build the machine code.
-5. (fourth pass) Convert the machine code to base 4.
-6. (fifth pass) Convert the base 4 to encrypted base 4.
