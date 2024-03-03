@@ -1,45 +1,41 @@
-# Compilation macros
- CC = gcc
- CFLAGS = -ansi -Wall -pedantic -g # Flags
- GLOBAL_DEPS = globals.h # Dependencies for everything
- EXE_DEPS = assembler.o  util.o table.o preproc.o first_pass.o second_pass.o code_conversion.o data_strct.o Errors.o handle_text.o lexer.o # Deps for exe
+# Compiler
+CC = gcc
+# Compiler flags
+CFLAGS = -Wall -Wextra -IHeaders
 
- ## Executable
-assembler: $(EXE_DEPS) $(GLOBAL_DEPS)
-	$(CC) -g $(EXE_DEPS) $(CFLAGS) -o $@
+# Source files directory
+SRCDIR = Source
+# Header files directory
+INCDIR = Headers
+# Object files directory
+OBJDIR = obj
 
-assembler.o:  ../SourceFiles $(GLOBAL_DEPS)
-	$(CC) -c assembler.c $(CFLAGS) -o $@
+# Source files
+SOURCES = $(wildcard $(SRCDIR)/*.c)
+# Object files
+OBJECTS = $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(SOURCES))
 
-preproc.o: ../SourceFiles Header $(GLOBAL_DEPS)
-	$(CC) -c preproc.c $(CFLAGS) -o $@
+# Executable name
+EXECUTABLE = my_program
 
-first_pass.o: ../SourceFiles Header $(GLOBAL_DEPS)
-	$(CC) -c first_pass.c $(CFLAGS) -o $@
+# Phony targets
+.PHONY: all clean
 
-second_pass.o: ../SourceFiles Header $(GLOBAL_DEPS)
-	$(CC) -c second_pass.c $(CFLAGS) -o $@
+# Default target
+all: $(EXECUTABLE)
 
-code_conversion.o: ../SourceFiles Header $(GLOBAL_DEPS)
-	$(CC) -c code_conversion.c $(CFLAGS) -o $@
+# Linking the object files to create the executable
+$(EXECUTABLE): $(OBJECTS)
+	$(CC) $(CFLAGS) $^ -o $@
 
-data_strct.o: ../SourceFiles Header $(GLOBAL_DEPS)
-	$(CC) -c data_strct.c $(CFLAGS) -o $@
+# Compiling each source file into object files
+$(OBJDIR)/%.o: $(SRCDIR)/%.c | $(OBJDIR)
+	$(CC) $(CFLAGS) -c $< -o $@
 
-table.o: ../SourceFiles Header $(GLOBAL_DEPS)
-	$(CC) -c table.c $(CFLAGS) -o $@
+# Create the object directory if it does not exist
+$(OBJDIR):
+	mkdir -p $(OBJDIR)
 
-util.o: ../SourceFiles Header $(GLOBAL_DEPS)
-	$(CC) -c util.c $(CFLAGS) -o $@
-
-Errors.o: ../SourceFiles Header $(GLOBAL_DEPS)
-	$(CC) -c Errors.c $(CFLAGS) -o $@
-
-handle_text.o: ../SourceFiles Header $(GLOBAL_DEPS)
-	$(CC) -c handle_text.c $(CFLAGS) -o $@
-
-lexer.o: ../SourceFiles Header $(GLOBAL_DEPS)
-	$(CC) -c lexer.c $(CFLAGS) -o $@
-
+# Clean rule
 clean:
-	rm -rf *.o *.am *.ob *.ent *.ext
+	rm -rf $(OBJDIR) $(EXECUTABLE)

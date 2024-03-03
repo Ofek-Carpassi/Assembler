@@ -41,7 +41,7 @@ void addNode(Node **head, char *name, char *data, int line);
 *
 * @param node A pointer to the node to free.
 */
-void freeNodes(Node *node);
+void freeNode(Node *node);
 
 /**
 * This function frees the memory of the entire linked list.
