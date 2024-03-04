@@ -2,7 +2,7 @@
 #define PREASSEM_H
 
 #include <stdio.h>
-#include "DataStructers.h"
+#include "dataStructers.h"
 
 /**
  * @brief This function is used to clean and organize a line.
@@ -23,7 +23,7 @@ char *cleanLine(char *line);
  * @param line - a string containing the line to copy.
  * @return - 1 if the line was copied successfully, 0 otherwise.
  */
-int copyLineToFile(FILE *file, char *line);
+int copyLineToFile(char *fileName, char *line);
 
 /**
  * @brief This function is used to add a macro to the macros linked list.
@@ -34,7 +34,7 @@ int copyLineToFile(FILE *file, char *line);
  * @param head - a pointer to the head of the linked list.
  * @return - 1 if the macro was added successfully, 0 otherwise.
  */
-int saveMacroToList(char *file, node **head);
+int saveMacroToList(char *file, Node **head);
 
 /**
  * @brief This function is used to check if the macro's name is valid.
@@ -55,7 +55,7 @@ int isValidMacroName(char *line);
  * @param file - the file to write to.
  * @return - 1 if the macro call was replaced successfully, 0 otherwise.
  */
-int *replaceMacroCall(node *macro, FILE *file);
+int *replaceMacroCall(Node *macro, FILE *file);
 
 /**
 * Execute the pre assembler (the macro expansion) for the source file.
@@ -94,5 +94,6 @@ The pre assembler algorithm will work as follows:
     c. If the line isn't a macro call or macro declaration - copy the line to the new file using "copyLineToFile" and return to step 3.
     d. If the line is a macro call - replace the macro call with the macro's definition using "replaceMacroCall" and return to step 3.
     e. If the line is a macro declaration - check if the macro's name is valid using "isValidMacroName" and add the macro to the macros linked list using "saveMacroToList" and return to step 3.
+    f. If the line is a comment (starts with ';') - ignore the line and return to step 3.
 6. Free the memory and close the files.
 */
