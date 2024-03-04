@@ -5,9 +5,10 @@
 #include "dataStructers.h"
 
 /**
- * @brief This function is used to clean and organize a line.
+ * @brief This function is used to clean a line from white spaces.
  * 
- * This function will use an algorithm written in the matrices calculator project to clean the line from white spaces and organize it.
+ * This function will clean a line from white spaces and return the cleaned line.
+ * The function adds a space at the end of the line and returns the cleaned line.
  * 
  * @param line - a string containing the line to clean.
  * @return - a string containing the cleaned line.
@@ -15,47 +16,65 @@
 char *cleanLine(char *line);
 
 /**
- * @brief This function is used to copy a line to the new file.
+ * @brief This function is used to check if a line is a declaration of a macro.
  * 
- * This function will copy a line to the new file and return 1 if the line was copied successfully, 0 otherwise.
+ * This function will check if a line is a declaration of a macro by parsing the first word in the line and checking if it's "mcr".
+ * The function will return 1 if the line is a declaration of a macro, 0 otherwise.
  * 
- * @param file - the file to write to.
- * @param line - a string containing the line to copy.
- * @return - 1 if the line was copied successfully, 0 otherwise.
+ * @param line - a string containing the line to check.
+ * @return - 1 if the line is a declaration of a macro, 0 otherwise.
  */
-int copyLineToFile(char *fileName, char *line);
+int isMacroDeclaration(char *line);
 
 /**
- * @brief This function is used to add a macro to the macros linked list.
+ * @brief This function is used to get the name of a macro from a line of a macro declaration.
  * 
- * This function will add a macro to the macros linked list and return 1 if the macro was added successfully, 0 otherwise.
+ * This function will parse the line and return the name of the macro (the second word in the line).
+ * 
+ * @param line - a string containing the line to parse.
+ * @return - a string containing the name of the macro.
+ */
+char *getMacroName(char *line);
+
+/**
+ * @brief This function is used to save a macro to a linked list.
+ * 
+ * This function will save a macro to a linked list.
+ * This function opens the file and reads the lines in the declaration of the macro (not the mcr and not the endmcr).
+ * The function will save the macro to the linked list and return 1 if the macro was saved successfully, 0 otherwise.
  * 
  * @param file - a string containing the file name to read from.
  * @param head - a pointer to the head of the linked list.
- * @return - 1 if the macro was added successfully, 0 otherwise.
+ * @param lineNumber - a pointer to an integer containing the line the macro is declared in (the line with the mcr).
+ * @param name - a string containing the name of the macro.
+ * @return - 1 if the macro was saved successfully, 0 otherwise.
  */
-int saveMacroToList(char *file, Node **head);
+int saveMacroToList(char *file, Node **head, int *lineNumber, char *name);
 
 /**
- * @brief This function is used to check if the macro's name is valid.
+ * @brief This function is used to check if a macro's name is valid.
  * 
- * This function parses the macro's name and checks if it's valid.
+ * This function uses an array of invalid names and checks if the macro's name is not in the array.
+ * The array holds the names of all opcodes and registers (r0-r7).
+ * The function will return 1 if the macro's name is valid, 0 otherwise.
  * 
- * @param name - a string containing the macro line to check.
+ * @param name - a string containing the name of the macro to check.
  * @return - 1 if the macro's name is valid, 0 otherwise.
  */
-int isValidMacroName(char *line);
+int isValidMacroName(char *name);
 
 /**
- * @brief This function is used to replace a macro call with the macro's definition (copy the macro's definition to the new file).
+ * @brief This function is used to replace a macro call with the macro's definition.
  * 
  * This function will get a node containing a macro and will copy the macro's definition to the new file.
+ * This function uses the data in the node and copies each line in the data to the .am file.
+ * The function will return 1 if the macro call was replaced successfully, 0 otherwise.
  * 
  * @param macro - a pointer to a node containing the macro to replace.
- * @param file - the file to write to.
+ * @param file - the name of the file to write to.
  * @return - 1 if the macro call was replaced successfully, 0 otherwise.
  */
-int *replaceMacroCall(Node *macro, FILE *file);
+int *replaceMacroCall(Node *macro, char *file);
 
 /**
 * Execute the pre assembler (the macro expansion) for the source file.
@@ -71,7 +90,7 @@ int *replaceMacroCall(Node *macro, FILE *file);
 * @param file - a string containing the file name to read from.
 * @return - 1 if the pre assembler executed successfully, 0 otherwise.
 */
-int preAssemblerExecuter(char *file);
+void executePreAssembler(char *file, char **outputFileName);
 
 #endif
 
