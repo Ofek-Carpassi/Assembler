@@ -4,7 +4,6 @@
 #include <stdarg.h>
 #include "../Headers/dataStructers.h"
 
-
 /**
  * @brief A function to create a new node
  * 

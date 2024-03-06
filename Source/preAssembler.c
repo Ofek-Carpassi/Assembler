@@ -64,7 +64,6 @@ void executePreAssembler(char *file, char *outputFileName[])
     if (inputFile == NULL)
     {
         printIntError(ERROR_CODE_11);
-        return;
     }
 
     /* Create the output file name */
