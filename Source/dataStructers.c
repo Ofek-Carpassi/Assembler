@@ -9,12 +9,12 @@
  * 
  * The function creates a new node with the given name, data and line number.
  * The function allocates memory for the new node and its fields.
- * The function returns a pointer to the new node.
+ * The function returns a pointer to the new node. david
  * 
  * @param name The name of the new node
  * @param data The data to be stored in the new node
  * @param line The line number of the new node
- * @return Node* A pointer to the new node
+ * @return Node* A pointer to the new nodes
  */
 Node *createNode(char *name, char *data, int line)
 {
@@ -27,6 +27,7 @@ Node *createNode(char *name, char *data, int line)
     if (node->name == NULL)
     {
         free(node);
+
         return NULL;
     }
     strcpy(node->name, name);
