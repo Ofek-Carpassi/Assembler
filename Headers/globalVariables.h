@@ -5,7 +5,7 @@
 
 #define MAX_LABEL_LENGTH 31
 
-#define IC_INIT_VALUE 100
+#define IC_INITIAL_VALUE 100
 
 #define BIG_NUMBER_CONST 10000
 
