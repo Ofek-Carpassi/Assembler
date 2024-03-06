@@ -9,7 +9,7 @@
  * 
  * The function creates a new node with the given name, data and line number.
  * The function allocates memory for the new node and its fields.
- * The function returns a pointer to the new node.
+ * The function returns a pointer to the new node. ofek
  * 
  * @param name The name of the new node
  * @param data The data to be stored in the new node
