@@ -159,6 +159,12 @@ int handleConstantDeclaration(char *line, Node **symbolTableHead);
  */
 char *checkLineType(char *line);
 
+/**
+ * @brief This function executes the first pass algorithm
+ * 
+ * @param file - The input file to read from.
+ * @param outputFileName - The name of the output file.
+ */
 void executeFirstPass(char *file, char **outputFileName);
 
 #endif
