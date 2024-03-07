@@ -160,3 +160,5 @@ int handleConstantDeclaration(char *line, Node **symbolTableHead);
 char *checkLineType(char *line);
 
 void executeFirstPass(char *file, char **outputFileName);
+
+#endif
