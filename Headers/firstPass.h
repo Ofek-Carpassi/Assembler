@@ -1,3 +1,8 @@
+#ifndef FIRSTPASS_H
+#define FIRSTPASS_H
+
+#include <stdio.h>
+#include "dataStructers.h"
 /*
 Algorithm:
 1. IC (Instruction Counter) and DC (Data Counter) are initialized to 0.
@@ -23,3 +28,135 @@ Algorithm:
 18. Update the symbol table of each data type with the value of IC + 100.
 19. Start the second pass.
 */
+
+/*
+Algorithm - written codly so we know which functions we need to write:
+1. IC (Instruction Counter) and DC (Data Counter) are initialized to 0.
+2. Read a line from the input file - if the input has ended, go to step 11. (executeFirstPass - loops through the file)
+3. Check the type of the line. (checkLineType)
+4. If the line is empty or a comment, go to step 2. (continue the loop)
+5. Is the line a constant declaration? if so call handleConstantDeclaration. (handleConstantDeclaration)
+6. Is the line a label declaration? if so call handleLabelDeclaration. (handleLabelDeclaration)
+7. Is it an instruction to save data? if so call handleDataDeclaration. (handleDataDeclaration)
+8. Is it an instruction to save code? if so call handleCodeDeclaration. (handleCodeDeclaration)
+9. Calculate L (amount of words the instruction takes). (calcLength)
+10. Update IC by L. Go to step 2. (continue the loop)
+11. The input file was read, if there were any errors on the first pass, stop here.
+12. Update the symbol table of each data type with the value of IC + 100.
+13. Start the second pass.
+*/
+
+/**
+ * @brief This function calculates the length of an instruction.
+ * 
+ * This function counts the amount of word in the instruction and returns it.
+ * 
+ * @param line The line to calculate the length of.
+ * @return The amount of words in the instruction.
+ */
+int calcLength(char *line);
+
+/**
+ * @brief This function handles a code declaration.
+ * 
+ * This function adds the label to the symbol table with code as its type and its value as IC+100.
+ * The function receives the line to handle and the symbol table (a pointer to the head of the linked list).
+ * The function returns 1 if the label was added to the symbol table, 0 otherwise.
+ * 
+ * @param line The line to handle.
+ * @param symbolTableHead A pointer to the head of the linked list.
+ * @return 1 if the label was added to the symbol table, 0 otherwise.
+ */
+int handleCodeDeclaration(char *line, Node **symbolTableHead);
+
+/**
+ * @brief This function handles a string declaration.
+ * 
+ * This function adds the label to the symbol table with data as its type and its value as DC.
+ * The function receives the line to handle and the symbol table (a pointer to the head of the linked list).
+ * The function returns 1 if the label was added to the symbol table, 0 otherwise.
+ * 
+ * @param line The line to handle.
+ * @param symbolTableHead A pointer to the head of the linked list.
+ * @return 1 if the label was added to the symbol table, 0 otherwise.
+ */
+int handleStringDeclaration(char *line, Node **symbolTableHead);
+
+/**
+ * @brief This function handles a string declaration.
+ * 
+ * This function adds the label to the symbol table with data as its type and its value as DC.
+ * The function receives the line to handle and the symbol table (a pointer to the head of the linked list).
+ * The function returns 1 if the label was added to the symbol table, 0 otherwise.
+ * 
+ * @param line The line to handle.
+ * @param symbolTableHead A pointer to the head of the linked list.
+ * @return 1 if the label was added to the symbol table, 0 otherwise.
+ */
+int handleStringDeclaration(char *line, Node **symbolTableHead);
+
+/**
+ * @brief This function handles a string declaration.
+ * 
+ * This function adds the label to the symbol table with data as its type and its value as DC.
+ * The function receives the line to handle and the symbol table (a pointer to the head of the linked list).
+ * The function returns 1 if the label was added to the symbol table, 0 otherwise.
+ * 
+ * @param line The line to handle.
+ * @param symbolTableHead A pointer to the head of the linked list.
+ * @return 1 if the label was added to the symbol table, 0 otherwise.
+ */
+
+/**
+ * @brief This function handles a data declaration.
+ * 
+ * This function adds the label to the symbol table with data as its type and its value as DC.
+ * The function receives the line to handle and the symbol table (a pointer to the head of the linked list).
+ * The function returns 1 if the label was added to the symbol table, 0 otherwise.
+ * 
+ * @param line The line to handle.
+ * @param symbolTableHead A pointer to the head of the linked list.
+ * @return 1 if the label was added to the symbol table, 0 otherwise.
+ */
+int handleDataDeclaration(char *line, Node **symbolTableHead);
+
+/**
+ * @brief This function handles a label declaration.
+ * 
+ * This function adds the label to the symbol table with code as its type and its value as IC+100.
+ * The function receives the line to handle and the symbol table (a pointer to the head of the linked list).
+ * The function returns 1 if the label was added to the symbol table, 0 otherwise.
+ * 
+ * @param line The line to handle.
+ * @param symbolTableHead A pointer to the head of the linked list.
+ * @return 1 if the label was added to the symbol table, 0 otherwise.
+ */
+int handleLabelDeclaration(char *line, Node **symbolTableHead);
+
+/**
+ * @brief This function handles a constant declaration.
+ * 
+ * This function adds the constant to the symbol table with mdefine as its type and its value as its value.
+ * The function receives the line to handle and the symbol table (a pointer to the head of the linked list).
+ * The function returns 1 if the constant was added to the symbol table, 0 otherwise.
+ * 
+ * @param line The line to handle.
+ * @param symbolTableHead A pointer to the head of the linked list.
+ * @return 1 if the constant was added to the symbol table, 0 otherwise.
+ */
+int handleConstantDeclaration(char *line, Node **symbolTableHead);
+
+/**
+ * @brief This function checks the type of the line and returns it.
+ * 
+ * This function checks if the line is empty, a comment, a constant declaration, 
+ * a label declaration, a data declaration, a string declaration, 
+ * an entry declaration, an extern declaration, or an instruction.
+ * The function returns a string with the type of the line.
+ * 
+ * @param line The line to check.
+ * @return A string with the type of the line.
+ */
+char *checkLineType(char *line);
+
+void executeFirstPass(char *file, char **outputFileName);
