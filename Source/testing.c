@@ -14,4 +14,4 @@ int main()
     return 0;
 }
 
-// gcc Source/dataStructers.c Source/errors.c Source/preAssembler.c Source/testing.c -o test
+// gcc Source/dataStructers.c Source/errors.c Source/preAssembler.c Source/testing.c Source/utilities.c -o test
