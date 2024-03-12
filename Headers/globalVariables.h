@@ -33,6 +33,18 @@
 
 #define MIN_NUM (-(1 << (WORD_LENGTH - 1)))
 
+enum lineType {
+    ERROR,
+    COMMENT,
+    CONSTANT,
+    LABEL,
+    DATA,
+    STRING,
+    ENTRY,
+    EXTERN,
+    INSTRUCTION
+};
+
 typedef struct location {
     char *fileName;
     int line;

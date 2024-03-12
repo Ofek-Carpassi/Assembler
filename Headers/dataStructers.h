@@ -1,3 +1,6 @@
+#ifndef DATASTRUCTERS_H
+#define DATASTRUCTERS_H
+
 /* A node in the linked list. */
 typedef struct node {
     char *name;         /* The name associated with the node. */
@@ -49,3 +52,5 @@ void freeNode(Node *node);
 * @param head A pointer to the head of the linked list.
 */
 void freeList(Node **head);
+
+#endif

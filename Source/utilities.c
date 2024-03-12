@@ -62,3 +62,44 @@ char *cleanLine(char *line)
     /* Return the cleaned line */
     return cleanedLine;
 }
+
+/* Explained in the header file */
+void parseLine(char *line, char *parsedOutput[])
+{
+    printf("line: %s\n", line);
+    // print the array
+    int c = 0; /* Index for the parsed output */
+    int startIndex = 0;
+    int arrayIndex = 0;
+    int lineIndex = 0;
+
+    while((c = line[lineIndex]) != '\0' && c != '\n')
+    {
+        if(c == ' ')
+        {
+            if(lineIndex == 0)
+            {
+                continue;
+            }
+            else
+            {
+                parsedOutput[arrayIndex] = (char *)malloc(sizeof(char) * (lineIndex - startIndex + 1));
+                for(int i = startIndex; i < lineIndex; i++)
+                {
+                    parsedOutput[arrayIndex][i-startIndex] = line[i];
+                }
+                parsedOutput[arrayIndex][lineIndex - startIndex] = '\0';
+                arrayIndex++;
+                startIndex = lineIndex + 1;
+            }
+        }
+        lineIndex++;
+    }
+    parsedOutput[arrayIndex] = (char *)malloc(sizeof(char) * (lineIndex - startIndex + 1));
+    for(int i = startIndex; i < lineIndex; i++)
+    {
+        parsedOutput[arrayIndex][i-startIndex] = line[i];
+    }
+    parsedOutput[arrayIndex][lineIndex - startIndex] = '\0';
+    arrayIndex++;
+}

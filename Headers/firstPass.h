@@ -96,18 +96,6 @@ int handleStringDeclaration(char *line, Node **symbolTableHead);
 int handleStringDeclaration(char *line, Node **symbolTableHead);
 
 /**
- * @brief This function handles a string declaration.
- * 
- * This function adds the label to the symbol table with data as its type and its value as DC.
- * The function receives the line to handle and the symbol table (a pointer to the head of the linked list).
- * The function returns 1 if the label was added to the symbol table, 0 otherwise.
- * 
- * @param line The line to handle.
- * @param symbolTableHead A pointer to the head of the linked list.
- * @return 1 if the label was added to the symbol table, 0 otherwise.
- */
-
-/**
  * @brief This function handles a data declaration.
  * 
  * This function adds the label to the symbol table with data as its type and its value as DC.
@@ -155,9 +143,18 @@ int handleConstantDeclaration(char *line, Node **symbolTableHead);
  * The function returns a string with the type of the line.
  * 
  * @param line The line to check.
- * @return A string with the type of the line.
+ * @return 
+ *          1 if the line is empty or a comment
+ *          2 if the line is a constant declaration
+ *          3 if the line is a label declaration
+ *          4 if the line is a data declaration
+ *          5 if the line is a string declaration
+ *          6 if the line is an entry declaration
+ *          7 if the line is an extern declaration
+ *          8 if the line is an instruction
+ *          0 if the line is none of the above
  */
-char *checkLineType(char *line);
+int checkLineType(char *line);
 
 /**
  * @brief This function executes the first pass algorithm

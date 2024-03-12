@@ -14,4 +14,14 @@
  */
 char *cleanLine(char *line);
 
+/**
+ * @brief This function is used to parse a line.
+ * 
+ * This function will parse a line and updates an array with the parsed output.
+ * 
+ * @param line - a string containing the line to parse.
+ * @param parsedOutput - an array to update with the parsed output.
+ */
+void parseLine(char *line, char *parsedOutput[]);
+
 #endif

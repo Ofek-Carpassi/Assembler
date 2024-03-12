@@ -4,9 +4,72 @@
 #include "../Headers/firstPass.h"
 #include "../Headers/errors.h"
 #include "../Headers/globalVariables.h"
-#include "../Headers/secondPass.h"
+#include "../Headers/utilities.h"
 
 int IC = 0, DC = 0; // Initialize the instruction counter and the data counter
+
+const char *instructionNames[] = {"mov", "cmp", "add", "sub", "not", "clr", "lea", "inc", "dec", "jmp", "bne", "red", "prn", "jsr", "rts", "stop"}; // Array of the instruction names
+
+int isInstruction(char *word)
+{
+    for (int i = 0; i < 16; i++)
+    {
+        if (strcmp(word, instructionNames[i]) == 0)
+        {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int checkLineType(char *line)
+{
+    if (line[0] == ';' || line[0] == '\n') // If the line is a comment
+    {
+        return COMMENT;
+    }
+    char *parsedLine[4] = {"", "", "", ""}; // Create an array to store the parsed line
+    parseLine(line, parsedLine);
+    if(strcmp(parsedLine[0], ".define") == 0)
+    {
+        printf("Return constant\n");
+        return CONSTANT;
+    }
+    else if(strcmp(parsedLine[0], ".data") == 0)
+    {
+        printf("Return data\n");
+        return DATA;
+    }
+    else if(strcmp(parsedLine[0], ".string") == 0)
+    {
+        printf("Return string\n");
+        return STRING;
+    }
+    else if(strcmp(parsedLine[0], ".entry") == 0)
+    {
+        printf("Return entry\n");
+        return ENTRY;
+    }
+    else if(strcmp(parsedLine[0], ".extern") == 0)
+    {
+        printf("Return extern\n");
+        return EXTERN;
+    }
+    else if(parsedLine[0][strlen(parsedLine[0]) - 1] == ':')
+    {
+        printf("Return label\n");
+        return LABEL;
+    }
+    else if (isInstruction(parsedLine[0]))
+    {
+        printf("Return instruction\n");
+        return INSTRUCTION;
+    }
+    else
+    {
+        return ERROR;
+    }
+}
 
 void executeFirstPass(char *file, char **outputFileName)
 {
@@ -18,7 +81,7 @@ void executeFirstPass(char *file, char **outputFileName)
     }
 
     /* Create the output file name */
-    char outputName[strlen(file) + 1];
+    char outputName[strlen(file) + 2];
     /* Copy the input file name to the output file name and change the ending to .am */
     strcpy(outputName, file);
 
@@ -31,8 +94,9 @@ void executeFirstPass(char *file, char **outputFileName)
 
     /* Change the ending to .am (after the dot there is .txt, so we need to replace it with .am) */
     outputName[dotIndex++] = '.';
-    outputName[dotIndex++] = 'a';
-    outputName[dotIndex++] = 'm';
+    outputName[dotIndex++] = 'o';
+    outputName[dotIndex++] = 'b';
+    outputName[dotIndex++] = 'j';
     outputName[dotIndex++] = '\0';
 
     /* Allocate memory for the output file name and copy the output name to it */
@@ -51,9 +115,9 @@ void executeFirstPass(char *file, char **outputFileName)
 
     while(fgets(line, MAX_LINE_LENGTH, inputFile) != NULL) // Loop through the input file
     {
-        char *cleanedLine = cleanLine(line); // Clean the line
-        fprintf(outputFile, "%s\n", cleanedLine); // Print the cleaned line to the output file
-        free(cleanedLine); // Free the memory of the cleaned line
-        
+        printf("Didn't crash\n");
+        int lineType = checkLineType(line); // Check the type of the line
+        printf("Line type: %d\n", lineType);
+        // Print the cleaned line to the output file
     }
 }
