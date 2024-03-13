@@ -67,10 +67,10 @@ int calcLength(char *line);
  * @param symbolTableHead A pointer to the head of the linked list.
  * @return 1 if the label was added to the symbol table, 0 otherwise.
  */
-int handleCodeDeclaration(char *line, Node **symbolTableHead);
+int handleCode(char *line, Node **symbolTableHead);
 
 /**
- * @brief This function handles a string declaration.
+ * @brief This function handles a string .
  * 
  * This function adds the label to the symbol table with data as its type and its value as DC.
  * The function receives the line to handle and the symbol table (a pointer to the head of the linked list).
@@ -80,10 +80,10 @@ int handleCodeDeclaration(char *line, Node **symbolTableHead);
  * @param symbolTableHead A pointer to the head of the linked list.
  * @return 1 if the label was added to the symbol table, 0 otherwise.
  */
-int handleStringDeclaration(char *line, Node **symbolTableHead);
+int handleString(char *line, Node **symbolTableHead);
 
 /**
- * @brief This function handles a string declaration.
+ * @brief This function handles a string .
  * 
  * This function adds the label to the symbol table with data as its type and its value as DC.
  * The function receives the line to handle and the symbol table (a pointer to the head of the linked list).
@@ -93,10 +93,10 @@ int handleStringDeclaration(char *line, Node **symbolTableHead);
  * @param symbolTableHead A pointer to the head of the linked list.
  * @return 1 if the label was added to the symbol table, 0 otherwise.
  */
-int handleStringDeclaration(char *line, Node **symbolTableHead);
+int handleString(char *line, Node **symbolTableHead);
 
 /**
- * @brief This function handles a data declaration.
+ * @brief This function handles a data .
  * 
  * This function adds the label to the symbol table with data as its type and its value as DC.
  * The function receives the line to handle and the symbol table (a pointer to the head of the linked list).
@@ -106,10 +106,10 @@ int handleStringDeclaration(char *line, Node **symbolTableHead);
  * @param symbolTableHead A pointer to the head of the linked list.
  * @return 1 if the label was added to the symbol table, 0 otherwise.
  */
-int handleDataDeclaration(char *line, Node **symbolTableHead);
+int handleData(char *line, Node **symbolTableHead);
 
 /**
- * @brief This function handles a label declaration.
+ * @brief This function handles a label .
  * 
  * This function adds the label to the symbol table with code as its type and its value as IC+100.
  * The function receives the line to handle and the symbol table (a pointer to the head of the linked list).
@@ -119,10 +119,10 @@ int handleDataDeclaration(char *line, Node **symbolTableHead);
  * @param symbolTableHead A pointer to the head of the linked list.
  * @return 1 if the label was added to the symbol table, 0 otherwise.
  */
-int handleLabelDeclaration(char *line, Node **symbolTableHead);
+char *handleLabel(char *line, Node **symbolTableHead);
 
 /**
- * @brief This function handles a constant declaration.
+ * @brief This function handles a constant .
  * 
  * This function adds the constant to the symbol table with mdefine as its type and its value as its value.
  * The function receives the line to handle and the symbol table (a pointer to the head of the linked list).
@@ -132,7 +132,7 @@ int handleLabelDeclaration(char *line, Node **symbolTableHead);
  * @param symbolTableHead A pointer to the head of the linked list.
  * @return 1 if the constant was added to the symbol table, 0 otherwise.
  */
-int handleConstantDeclaration(char *line, Node **symbolTableHead);
+void handleConstant(char *line, Node **symbolTableHead);
 
 /**
  * @brief This function checks the type of the line and returns it.

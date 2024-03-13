@@ -5,7 +5,7 @@
 typedef struct node {
     char *name;         /* The name associated with the node. */
     char *data;         /* The data stored in the node. */
-    int line;           /* The line number of the data. */
+    float line;           /* The line number of the data. */
     struct node *next;  /* The next node in the list. */
 } Node;
 

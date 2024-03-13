@@ -5,10 +5,12 @@
 #include "../Headers/errors.h"
 #include "../Headers/globalVariables.h"
 #include "../Headers/utilities.h"
+#include "../Headers/dataStructers.h"
 
 int IC = 0, DC = 0; // Initialize the instruction counter and the data counter
-
+int isLabel = 0; // Initialize the isLabel flag
 const char *instructionNames[] = {"mov", "cmp", "add", "sub", "not", "clr", "lea", "inc", "dec", "jmp", "bne", "red", "prn", "jsr", "rts", "stop"}; // Array of the instruction names
+Node *symbolTable = NULL; // Create the symbol table
 
 int isInstruction(char *word)
 {
@@ -64,6 +66,70 @@ int checkLineType(char *line)
     }
 }
 
+char *handleLabel(char *line, Node **symbolTableHead)
+{
+    char *parsedLine[5] = {"", "", "", "", ""}; // Create an array to store the parsed line
+    parseLine(line, parsedLine);
+    /*
+    parsedLine[0] = <label>:
+    parsedLine[1] = <instruction or declaration>
+    parsedLine[2] = <operand 1>
+    parsedLine[3] = <operand 2>
+    parsedLine[4] = <operand 3>
+	*/
+	char type = checkLineType(parsedLine[1]);
+    switch (type)
+    {
+    case INSTRUCTION:
+        addNode(symbolTableHead, parsedLine[0], "code", 100+IC);
+		printf("IC + 100: %d\n", 100+IC);
+        break;
+    case DATA:
+    case STRING:
+        addNode(symbolTableHead, parsedLine[0], "data", IC+100);
+        break;
+    }
+    /*
+    Now we need to handle the things that come after the label
+    (instruction, data or string)
+	The new line will be the same as the old line but without the label
+	*/
+	char newLine[strlen(line) - strlen(parsedLine[0])];
+	for (int i = strlen(parsedLine[0]) + 1; i < strlen(line); i++)
+	{
+		newLine[i - strlen(parsedLine[0]) - 1] = line[i];
+	}
+	newLine[strlen(line) - strlen(parsedLine[0]) - 1] = '\0';
+	
+	Node *newNode = searchNodeInList(symbolTable, parsedLine[0], &isLabel);
+	printf("Node name: %s\n", newNode->name);
+	printf("Node data: %s\n", newNode->data);
+	printf("Node line: %d\n", newNode->line);
+
+	return "david";
+}
+
+void handleConstant(char *line, Node **symbolTableHead)
+{
+    /* 
+    Parse the line:
+    parsedLine[0] = .define
+    parsedLine[1] = <name>
+    parsedLine[2] = "="
+     parsedLine[3] = <value>
+    */
+    char *parsedLine[4] = {"", "", "", ""}; // Create an array to store the parsed line
+    parseLine(line, parsedLine);
+
+    /* 
+    Create a new node for the symbol table:
+    name = parsedLine[1]
+    data = atof(parsedLine[3])
+    line = mdefine (the type of the line)
+    */
+    addNode(symbolTableHead, parsedLine[1], "mdefine", atof(parsedLine[3]));
+}
+
 void executeFirstPass(char *file, char **outputFileName)
 {
     FILE *inputFile = fopen(file, "r"); // Open the input file
@@ -111,6 +177,26 @@ void executeFirstPass(char *file, char **outputFileName)
         printf("Didn't crash\n");
         int lineType = checkLineType(line); // Check the type of the line
         printf("Line type: %d\n", lineType);
+
+        switch (lineType)
+        {
+            case COMMENT: // If the line is a comment
+                break;
+            case CONSTANT: // If the line is a constant, add it to the symbol table
+                handleConstant(line, &symbolTable);
+                break;
+            case LABEL:
+                isLabel = 1;
+                handleLabel(line, &symbolTable);
+                break;
+        }
+
+        // make sure the constant was added to the symbol table
+        int found = 0;
+        Node node = *searchNodeInList(symbolTable, "sz", &found);
+        printf("Node name: %s\n", node.name);
+        printf("Node data: %s\n", node.data);
+        printf("Node line: %d\n", node.line);
         // Print the cleaned line to the output file
     }
 }

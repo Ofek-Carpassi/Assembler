@@ -1,1 +1,1 @@
-.extern david 3
+MAIN: mov r3, LIST[sz]

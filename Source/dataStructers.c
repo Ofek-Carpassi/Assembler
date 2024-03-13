@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include "../Headers/dataStructers.h"
+#include "../Headers/errors.h"
 
 /**
  * @brief A function to create a new node
@@ -18,6 +19,7 @@
  */
 Node *createNode(char *name, char *data, int line)
 {
+    printf("Line: %d\n", line);
     Node *node = (Node *)malloc(sizeof(Node));
     if (node == NULL)
     {
@@ -27,7 +29,6 @@ Node *createNode(char *name, char *data, int line)
     if (node->name == NULL)
     {
         free(node);
-
         return NULL;
     }
     strcpy(node->name, name);
@@ -39,7 +40,10 @@ Node *createNode(char *name, char *data, int line)
         return NULL;
     }
     strcpy(node->data, data);
+    printf("Line: %d\n", line);
     node->line = line;
+    printf("Node -> Line: %d\n", node->line);
+    printf("Line: %d\n", line);
     node->next = NULL;
     return node;
 }
@@ -89,6 +93,7 @@ void addNode(Node **head, char *name, char *data, int line)
     Node *newNode = createNode(name, data, line);
     if (newNode == NULL)
     {
+        printIntError(ERROR_CODE_10);
         return;
     }
     newNode->next = *head;

@@ -66,7 +66,6 @@ char *cleanLine(char *line)
 /* Explained in the header file */
 void parseLine(char *line, char *parsedOutput[])
 {
-    printf("line: %s\n", line);
     // print the array
     int c = 0; /* Index for the parsed output */
     int startIndex = 0;
