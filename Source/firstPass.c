@@ -32,37 +32,30 @@ int checkLineType(char *line)
     parseLine(line, parsedLine);
     if(strcmp(parsedLine[0], ".define") == 0)
     {
-        printf("Return constant\n");
         return CONSTANT;
     }
     else if(strcmp(parsedLine[0], ".data") == 0)
     {
-        printf("Return data\n");
         return DATA;
     }
     else if(strcmp(parsedLine[0], ".string") == 0)
     {
-        printf("Return string\n");
         return STRING;
     }
     else if(strcmp(parsedLine[0], ".entry") == 0)
     {
-        printf("Return entry\n");
         return ENTRY;
     }
     else if(strcmp(parsedLine[0], ".extern") == 0)
     {
-        printf("Return extern\n");
         return EXTERN;
     }
     else if(parsedLine[0][strlen(parsedLine[0]) - 1] == ':')
     {
-        printf("Return label\n");
         return LABEL;
     }
     else if (isInstruction(parsedLine[0]))
     {
-        printf("Return instruction\n");
         return INSTRUCTION;
     }
     else
