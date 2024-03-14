@@ -2,11 +2,11 @@
 #define DATASTRUCTERS_H
 
 /* A node in the linked list. */
-typedef struct node {
+typedef struct Node {
     char *name;         /* The name associated with the node. */
     char *data;         /* The data stored in the node. */
-    float line;           /* The line number of the data. */
-    struct node *next;  /* The next node in the list. */
+    int line;           /* The line number of the data. */
+    struct Node *next;  /* The next node in the list. */
 } Node;
 
 /**

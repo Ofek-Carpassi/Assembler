@@ -26,44 +26,52 @@ int isInstruction(char *word)
 
 int checkLineType(char *line)
 {
+    int lineType = 0;
     if (line[0] == ';' || line[0] == '\n') // If the line is a comment
     {
-        return COMMENT;
+        lineType = COMMENT;
     }
     char *parsedLine[4] = {"", "", "", ""}; // Create an array to store the parsed line
     parseLine(line, parsedLine);
     if(strcmp(parsedLine[0], ".define") == 0)
     {
-        return CONSTANT;
+        handleConstant(line, &symbolTable);
     }
     else if(strcmp(parsedLine[0], ".data") == 0)
     {
-        return DATA;
+        lineType = DATA;
     }
     else if(strcmp(parsedLine[0], ".string") == 0)
     {
-        return STRING;
+        lineType = STRING;
     }
     else if(strcmp(parsedLine[0], ".entry") == 0)
     {
-        return ENTRY;
+        lineType = ENTRY;
     }
     else if(strcmp(parsedLine[0], ".extern") == 0)
     {
-        return EXTERN;
+        lineType = EXTERN;
     }
     else if(parsedLine[0][strlen(parsedLine[0]) - 1] == ':')
     {
-        return LABEL;
+        lineType = LABEL;
+        char *newLine = handleLabel(line, &symbolTable);
+        printf("New line: %s\n", newLine);
+        int secondaryLineType = checkLineType(newLine);
+        printf("Line type: %d\n", secondaryLineType);
+        printf("Secondary line type: %d\n", secondaryLineType);
     }
     else if (isInstruction(parsedLine[0]))
     {
-        return INSTRUCTION;
+        lineType = INSTRUCTION;
     }
     else
     {
-        return ERROR;
+        lineType = ERROR;
     }
+    printf("Line type: %d\n", lineType);
+    return lineType;
 }
 
 char *handleLabel(char *line, Node **symbolTableHead)
@@ -77,12 +85,11 @@ char *handleLabel(char *line, Node **symbolTableHead)
     parsedLine[3] = <operand 2>
     parsedLine[4] = <operand 3>
 	*/
-	char type = checkLineType(parsedLine[1]);
+    int type = checkLineType(parsedLine[1]);
     switch (type)
     {
     case INSTRUCTION:
-        addNode(symbolTableHead, parsedLine[0], "code", 100+IC);
-		printf("IC + 100: %d\n", 100+IC);
+        addNode(symbolTableHead, parsedLine[0], "code", IC + 100);
         break;
     case DATA:
     case STRING:
@@ -94,19 +101,18 @@ char *handleLabel(char *line, Node **symbolTableHead)
     (instruction, data or string)
 	The new line will be the same as the old line but without the label
 	*/
-	char newLine[strlen(line) - strlen(parsedLine[0])];
-	for (int i = strlen(parsedLine[0]) + 1; i < strlen(line); i++)
-	{
-		newLine[i - strlen(parsedLine[0]) - 1] = line[i];
-	}
-	newLine[strlen(line) - strlen(parsedLine[0]) - 1] = '\0';
-	
-	Node *newNode = searchNodeInList(symbolTable, parsedLine[0], &isLabel);
-	printf("Node name: %s\n", newNode->name);
-	printf("Node data: %s\n", newNode->data);
-	printf("Node line: %d\n", newNode->line);
+	char *newLine = malloc(strlen(line) - strlen(parsedLine[0]) + 1);
+    if (newLine == NULL) {
+        printIntError(ERROR_CODE_10);
+    }
 
-	return "david";
+    for (int i = strlen(parsedLine[0]) + 1; i < strlen(line); i++)
+    {
+        newLine[i - strlen(parsedLine[0]) - 1] = line[i];
+    }
+    newLine[strlen(line) - strlen(parsedLine[0]) - 1] = '\0';
+
+	return newLine;
 }
 
 void handleConstant(char *line, Node **symbolTableHead)
@@ -177,19 +183,6 @@ void executeFirstPass(char *file, char **outputFileName)
         printf("Didn't crash\n");
         int lineType = checkLineType(line); // Check the type of the line
         printf("Line type: %d\n", lineType);
-
-        switch (lineType)
-        {
-            case COMMENT: // If the line is a comment
-                break;
-            case CONSTANT: // If the line is a constant, add it to the symbol table
-                handleConstant(line, &symbolTable);
-                break;
-            case LABEL:
-                isLabel = 1;
-                handleLabel(line, &symbolTable);
-                break;
-        }
 
         // make sure the constant was added to the symbol table
         int found = 0;

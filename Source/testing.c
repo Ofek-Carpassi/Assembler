@@ -5,6 +5,7 @@
 #include "../Headers/errors.h"
 #include "../Headers/preAssembler.h"
 #include "../Headers/firstPass.h"
+#include "../Headers/dataStructers.h"
 
 int main()
 {
@@ -12,7 +13,7 @@ int main()
     executePreAssembler("test.txt", &outputFileName);
     executeFirstPass("test.txt", &outputFileName);
     printf("%s\n", outputFileName);
-    
+
     return 0;
 }
 

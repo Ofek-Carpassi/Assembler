@@ -17,10 +17,10 @@
  * @param line The line number of the new node
  * @return Node* A pointer to the new nodes
  */
-Node *createNode(char *name, char *data, int line)
+Node *createNode(char *name, char *data, int value)
 {
-    printf("Line: %d\n", line);
-    Node *node = (Node *)malloc(sizeof(Node));
+    printf("Line: %d\n", value);
+    Node* node = (Node *)malloc(sizeof(Node));
     if (node == NULL)
     {
         return NULL;
@@ -40,10 +40,11 @@ Node *createNode(char *name, char *data, int line)
         return NULL;
     }
     strcpy(node->data, data);
-    printf("Line: %d\n", line);
-    node->line = line;
+    printf("Line: %d\n", value);
+    // assign value to line - node->line = value does not work
+    node->line = value;
     printf("Node -> Line: %d\n", node->line);
-    printf("Line: %d\n", line);
+    printf("Line: %d\n", value);
     node->next = NULL;
     return node;
 }
