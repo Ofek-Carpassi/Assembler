@@ -1,6 +1,7 @@
 #include "../Headers/utilities.h" // Include the header file with the function declarations
 #include <stdlib.h> // Used for malloc
 #include <string.h> // Used for strlen
+#include <ctype.h> // Used for isdigit
 
 /* Explained in the header file */
 char *cleanLine(char *line)
@@ -120,20 +121,16 @@ int findCount(int n)
     return count;
 }
 
-int isNumber(char *string)
+int isNumber(const char *str)
 {
-    int i = 0;
-    if(string[0] == '-' || string[0] == '+')
-    {
-        i++;
+    if (*str == '-') { // handle negative numbers
+        str++;
     }
-    while(string[i] != '\0')
-    {
-        if(string[i] < '0' || string[i] > '9')
-        {
+    while (*str) {
+        if (!isdigit(*str)) {
             return 0;
         }
-        i++;
+        str++;
     }
     return 1;
 }

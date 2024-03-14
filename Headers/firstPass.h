@@ -83,19 +83,6 @@ int handleCode(char *line, Node **symbolTableHead);
 int handleString(char *line, Node **symbolTableHead);
 
 /**
- * @brief This function handles a string .
- * 
- * This function adds the label to the symbol table with data as its type and its value as DC.
- * The function receives the line to handle and the symbol table (a pointer to the head of the linked list).
- * The function returns 1 if the label was added to the symbol table, 0 otherwise.
- * 
- * @param line The line to handle.
- * @param symbolTableHead A pointer to the head of the linked list.
- * @return 1 if the label was added to the symbol table, 0 otherwise.
- */
-int handleString(char *line, Node **symbolTableHead);
-
-/**
  * @brief This function handles a data .
  * 
  * This function adds the label to the symbol table with data as its type and its value as DC.

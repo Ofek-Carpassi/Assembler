@@ -41,7 +41,6 @@ int checkLineType(char *line)
     {
         lineType = DATA;
         char *binaryLine = handleData(line, &symbolTable);
-        printf("Binary line: %s\n", binaryLine);
     }
     else if(strcmp(parsedLine[0], ".string") == 0)
     {
@@ -69,7 +68,6 @@ int checkLineType(char *line)
     {
         lineType = ERROR;
     }
-    printf("Line type: %d\n", lineType);
     return lineType;
 }
 
@@ -82,27 +80,25 @@ char *handleData(char *line, Node **symbolTableHead)
     }
     char *parsedLine[wordAmount];
     parseLine(line, parsedLine);
-    int length = (sizeof(parsedLine) / sizeof(parsedLine[0])) + 1;
-    char *binaryLine = malloc(sizeof(char) * 1);
+    int length = wordAmount; // Use wordAmount as the length of parsedLine
+    char *binaryLine = calloc(1, sizeof(char) * 1); // Create a string to store the binary line
 
-    for (int i = 1; i < length; i++)
+    for (int i = 1; i <= length; i++)
     {
-        printf("isNumber: %d\n", isNumber(parsedLine[i]));
         if(isNumber(parsedLine[i]) == 1)
         {
-            printf("Number: %s\n", parsedLine[i]);
             int number = atoi(parsedLine[i]);
             char *binaryNumber;
             intToBinary(number, &binaryNumber);
-            printf("Binary number: %s\n", binaryNumber);
             binaryLine = realloc(binaryLine, sizeof(char) * (strlen(binaryLine) + strlen(binaryNumber) + 1));
             if (binaryLine == NULL)
             {
                 printIntError(ERROR_CODE_10);
             }
             strcat(binaryLine, binaryNumber);
+            free(binaryNumber); // Free the memory allocated by intToBinary
             // add \n to the end of the line
-            binaryLine = realloc(binaryLine, sizeof(char) * (strlen(binaryLine) + 1));
+            binaryLine = realloc(binaryLine, sizeof(char) * (strlen(binaryLine) + 2)); // +2 to accommodate for the newline and null terminator
             if (binaryLine == NULL)
             {
                 printIntError(ERROR_CODE_10);
@@ -116,14 +112,17 @@ char *handleData(char *line, Node **symbolTableHead)
             Node *node = searchNodeInList(*symbolTableHead, parsedLine[i], &found);
             if (found == 1)
             {
-                binaryLine = realloc(binaryLine, sizeof(char) * (strlen(binaryLine) + findCount(node->line) + 1));
+                char *binaryNumber;
+                intToBinary(node->line, &binaryNumber);
+                binaryLine = realloc(binaryLine, sizeof(char) * (strlen(binaryLine) + strlen(binaryNumber) + 1));
                 if (binaryLine == NULL)
                 {
                     printIntError(ERROR_CODE_10);
                 }
-                sprintf(binaryLine, "%d", node->line);
+                strcat(binaryLine, binaryNumber);
+                free(binaryNumber); // Free the memory allocated by intToBinary
                 // add \n to the end of the line
-                binaryLine = realloc(binaryLine, sizeof(char) * (strlen(binaryLine) + 1));
+                binaryLine = realloc(binaryLine, sizeof(char) * (strlen(binaryLine) + 2)); // +2 to accommodate for the newline and null terminator
                 if (binaryLine == NULL)
                 {
                     printIntError(ERROR_CODE_10);
@@ -136,6 +135,7 @@ char *handleData(char *line, Node **symbolTableHead)
             }
         }
     }
+    printf("%s\n", binaryLine);
     return binaryLine;
 }
 
@@ -246,7 +246,6 @@ void executeFirstPass(char *file, char **outputFileName)
     while(fgets(line, MAX_LINE_LENGTH, inputFile) != NULL) // Loop through the input file
     {
         int lineType = checkLineType(line); // Check the type of the line
-        printf("Line type: %d\n", lineType);
 
         // make sure the constant was added to the symbol table
         int found = 0;

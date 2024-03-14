@@ -26,7 +26,7 @@ void parseLine(char *line, char *parsedOutput[]);
 
 int findCount(int n);
 
-int isNumber(char *str);
+int isNumber(const char *str);
 
 int countWords(char *line);
 
