@@ -1,1 +1,1 @@
-LIST: .data 6 -9
+.data 6 -9

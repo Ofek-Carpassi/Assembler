@@ -40,6 +40,8 @@ int checkLineType(char *line)
     else if(strcmp(parsedLine[0], ".data") == 0)
     {
         lineType = DATA;
+        char *binaryLine = handleData(line, &symbolTable);
+        printf("Binary line: %s\n", binaryLine);
     }
     else if(strcmp(parsedLine[0], ".string") == 0)
     {
@@ -57,10 +59,7 @@ int checkLineType(char *line)
     {
         lineType = LABEL;
         char *newLine = handleLabel(line, &symbolTable);
-        printf("New line: %s\n", newLine);
         int secondaryLineType = checkLineType(newLine);
-        printf("Line type: %d\n", secondaryLineType);
-        printf("Secondary line type: %d\n", secondaryLineType);
     }
     else if (isInstruction(parsedLine[0]))
     {
@@ -72,6 +71,78 @@ int checkLineType(char *line)
     }
     printf("Line type: %d\n", lineType);
     return lineType;
+}
+
+char *handleData(char *line, Node **symbolTableHead)
+{
+    int wordAmount = countWords(line);
+    if (wordAmount == 0)
+    {
+        printIntError(ERROR_CODE_31);
+    }
+    char *parsedLine[wordAmount];
+    parseLine(line, parsedLine);
+    printf("Parsed line: %s\n", parsedLine[0]);
+    printf("Parsed line: %s\n", parsedLine[1]);
+    printf("Parsed line: %s\n", parsedLine[2]);
+    int length = (sizeof(parsedLine) / sizeof(parsedLine[0])) + 1;
+    printf("Length: %d\n", length);
+    char *binaryLine = malloc(sizeof(char) * 1);
+
+    for (int i = 1; i < length; i++)
+    {
+        printf("isNumber: %d\n", isNumber(parsedLine[i]));
+        if (parsedLine[i] != NULL)
+        {
+            if(isNumber(parsedLine[i]) == 1)
+            {
+                printf("Number: %s\n", parsedLine[i]);
+                int number = atoi(parsedLine[i]);
+                printf("Binary number: %d\n", intToBinary(number));
+                binaryLine = realloc(binaryLine, sizeof(char) * (strlen(binaryLine) + findCount(number) + 1));
+                if (binaryLine == NULL)
+                {
+                    printIntError(ERROR_CODE_10);
+                }
+                strcat(binaryLine, intToBinary(number));
+                // add \n to the end of the line
+                binaryLine = realloc(binaryLine, sizeof(char) * (strlen(binaryLine) + 1));
+                if (binaryLine == NULL)
+                {
+                    printIntError(ERROR_CODE_10);
+                }
+                strcat(binaryLine, "\n");
+                printf("Binary line: %s\n", binaryLine);
+            }
+            else
+            {
+                /* Check if the string is a constant in the symbol table */
+                int found = 0;
+                Node *node = searchNodeInList(*symbolTableHead, parsedLine[i], &found);
+                if (found == 1)
+                {
+                    binaryLine = realloc(binaryLine, sizeof(char) * (strlen(binaryLine) + findCount(node->line) + 1));
+                    if (binaryLine == NULL)
+                    {
+                        printIntError(ERROR_CODE_10);
+                    }
+                    sprintf(binaryLine, "%d", node->line);
+                    // add \n to the end of the line
+                    binaryLine = realloc(binaryLine, sizeof(char) * (strlen(binaryLine) + 1));
+                    if (binaryLine == NULL)
+                    {
+                        printIntError(ERROR_CODE_10);
+                    }
+                    strcat(binaryLine, "\n");
+                }
+                else
+                {
+                    printIntError(ERROR_CODE_33);
+                }
+            }
+        }
+    }
+    return binaryLine;
 }
 
 char *handleLabel(char *line, Node **symbolTableHead)
@@ -133,7 +204,7 @@ void handleConstant(char *line, Node **symbolTableHead)
     data = atof(parsedLine[3])
     line = mdefine (the type of the line)
     */
-    addNode(symbolTableHead, parsedLine[1], "mdefine", atof(parsedLine[3]));
+    addNode(symbolTableHead, parsedLine[1], "mdefine", atoi(parsedLine[3]));
 }
 
 void executeFirstPass(char *file, char **outputFileName)
@@ -142,7 +213,7 @@ void executeFirstPass(char *file, char **outputFileName)
 
     if (inputFile == NULL) // If the file doesn't exist
     {
-        printIntError(ERROR_CODE_11);
+        printIntError(ERROR_CODE_11); // Print an error and return
     }
 
     /* Create the output file name */
@@ -180,7 +251,6 @@ void executeFirstPass(char *file, char **outputFileName)
 
     while(fgets(line, MAX_LINE_LENGTH, inputFile) != NULL) // Loop through the input file
     {
-        printf("Didn't crash\n");
         int lineType = checkLineType(line); // Check the type of the line
         printf("Line type: %d\n", lineType);
 

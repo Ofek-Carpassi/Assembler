@@ -102,3 +102,63 @@ void parseLine(char *line, char *parsedOutput[])
     parsedOutput[arrayIndex][lineIndex - startIndex] = '\0';
     arrayIndex++;
 }
+
+int findCount(int n)
+{
+    int count = 0;
+ 
+    // Remove last digit from number
+    // till number is 0
+    while (n != 0) {
+ 
+        // Increment count
+        count++;
+        n /= 10;
+    }
+ 
+    // return the count of digit
+    return count;
+}
+
+int isNumber(char *string)
+{
+    int i = 0;
+    while(string[i] != '\0')
+    {
+        if(string[i] < '0' || string[i] > '9')
+        {
+            return 0;
+        }
+        i++;
+    }
+    return 1;
+}
+
+int countWords(char *line)
+{
+    int count = 0;
+    int i = 0;
+    while(line[i] != '\0')
+    {
+        if(line[i] == ' ')
+        {
+            count++;
+        }
+        i++;
+    }
+    return count;
+}
+
+char *intToBinary(int num) 
+{
+    int bits = sizeof(num) * 8;
+    char *res = (char *)malloc(sizeof(char) * bits);
+    for (int i = bits - 1; i >= 0; i--) 
+    {
+        int bit = (num >> i) & 1;
+        printf("%d", bit);
+        // save the bit in the result string
+        res[bits - 1 - i] = bit + '0';
+    }
+    return res;
+}

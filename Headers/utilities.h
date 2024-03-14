@@ -24,4 +24,12 @@ char *cleanLine(char *line);
  */
 void parseLine(char *line, char *parsedOutput[]);
 
+int findCount(int n);
+
+int isNumber(char *str);
+
+int countWords(char *line);
+
+char *intToBinary(int num);
+
 #endif

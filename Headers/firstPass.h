@@ -106,7 +106,7 @@ int handleString(char *line, Node **symbolTableHead);
  * @param symbolTableHead A pointer to the head of the linked list.
  * @return 1 if the label was added to the symbol table, 0 otherwise.
  */
-int handleData(char *line, Node **symbolTableHead);
+char *handleData(char *line, Node **symbolTableHead);
 
 /**
  * @brief This function handles a label .

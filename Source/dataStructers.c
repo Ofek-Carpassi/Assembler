@@ -19,7 +19,6 @@
  */
 Node *createNode(char *name, char *data, int value)
 {
-    printf("Line: %d\n", value);
     Node* node = (Node *)malloc(sizeof(Node));
     if (node == NULL)
     {
@@ -40,11 +39,7 @@ Node *createNode(char *name, char *data, int value)
         return NULL;
     }
     strcpy(node->data, data);
-    printf("Line: %d\n", value);
-    // assign value to line - node->line = value does not work
     node->line = value;
-    printf("Node -> Line: %d\n", node->line);
-    printf("Line: %d\n", value);
     node->next = NULL;
     return node;
 }
