@@ -256,3 +256,32 @@ void executeFirstPass(char *file, char **outputFileName)
         // Print the cleaned line to the output file
     }
 }
+
+char* handleString(char *line, Node **symbolTableHead) {
+    int index = 0;  /* Index to keep track of the position in the binary line */
+    char *binaryLine = (char *)malloc(sizeof(char) * (strlen(line) * 8)); /* Each character takes 8 bits in ASCII */
+    if (binaryLine == NULL) {
+         printIntError(ERROR_CODE_10);   /* Handle memory allocation failure */
+    }
+
+    for (int i = 0; line[i] != '\0'; i++) {      /* Iterate through each character in the string */
+        int asciiCode = (int)line[i];
+        char binaryChar[9];                      /* Binary representation of the character (8 bits + null terminator)*/
+        itoa(asciiCode, binaryChar, 2);          
+
+          
+        int binaryLength = strlen(binaryChar);
+        for (int j = 0; j < 8 - binaryLength; j++) {    /* Pad binary representation with leading zeros if necessary*/
+            binaryLine[index++] = '0';
+        }
+        strcat(binaryLine, binaryChar);                 /* Append the binary representation to the binary line*/
+        index += binaryLength;                          /* Increase the index by the length of the binary representation*/
+    }
+
+    
+    printf("Binary representation: %s\n", binaryLine);      /* Print the binary line for debugging, later on it will be removed*/
+
+    return binaryLine;  /* Return the binary representation of the string */
+}
+
+
