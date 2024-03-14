@@ -123,6 +123,10 @@ int findCount(int n)
 int isNumber(char *string)
 {
     int i = 0;
+    if(string[0] == '-' || string[0] == '+')
+    {
+        i++;
+    }
     while(string[i] != '\0')
     {
         if(string[i] < '0' || string[i] > '9')
@@ -149,16 +153,18 @@ int countWords(char *line)
     return count;
 }
 
-char *intToBinary(int num) 
+void intToBinary(int num, char **res) 
 {
-    int bits = sizeof(num) * 8;
-    char *res = (char *)malloc(sizeof(char) * bits);
-    for (int i = bits - 1; i >= 0; i--) 
-    {
-        int bit = (num >> i) & 1;
-        printf("%d", bit);
-        // save the bit in the result string
-        res[bits - 1 - i] = bit + '0';
+    int bits = sizeof(num) * 8; // number of bits in an integer
+    *res = (char *)malloc(bits + 1); // +1 for the null terminator
+    if (*res == NULL) {
+        // Handle error
+        return;
     }
-    return res;
+
+    for (int i = 0; i < bits; i++) 
+    {
+        (*res)[bits - 1 - i] = (num & (1 << i)) ? '1' : '0';
+    }
+    (*res)[bits] = '\0'; // null terminator
 }

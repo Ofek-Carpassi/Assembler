@@ -82,29 +82,46 @@ char *handleData(char *line, Node **symbolTableHead)
     }
     char *parsedLine[wordAmount];
     parseLine(line, parsedLine);
-    printf("Parsed line: %s\n", parsedLine[0]);
-    printf("Parsed line: %s\n", parsedLine[1]);
-    printf("Parsed line: %s\n", parsedLine[2]);
     int length = (sizeof(parsedLine) / sizeof(parsedLine[0])) + 1;
-    printf("Length: %d\n", length);
     char *binaryLine = malloc(sizeof(char) * 1);
 
     for (int i = 1; i < length; i++)
     {
         printf("isNumber: %d\n", isNumber(parsedLine[i]));
-        if (parsedLine[i] != NULL)
+        if(isNumber(parsedLine[i]) == 1)
         {
-            if(isNumber(parsedLine[i]) == 1)
+            printf("Number: %s\n", parsedLine[i]);
+            int number = atoi(parsedLine[i]);
+            char *binaryNumber;
+            intToBinary(number, &binaryNumber);
+            printf("Binary number: %s\n", binaryNumber);
+            binaryLine = realloc(binaryLine, sizeof(char) * (strlen(binaryLine) + strlen(binaryNumber) + 1));
+            if (binaryLine == NULL)
             {
-                printf("Number: %s\n", parsedLine[i]);
-                int number = atoi(parsedLine[i]);
-                printf("Binary number: %d\n", intToBinary(number));
-                binaryLine = realloc(binaryLine, sizeof(char) * (strlen(binaryLine) + findCount(number) + 1));
+                printIntError(ERROR_CODE_10);
+            }
+            strcat(binaryLine, binaryNumber);
+            // add \n to the end of the line
+            binaryLine = realloc(binaryLine, sizeof(char) * (strlen(binaryLine) + 1));
+            if (binaryLine == NULL)
+            {
+                printIntError(ERROR_CODE_10);
+            }
+            strcat(binaryLine, "\n");
+        }
+        else
+        {
+            /* Check if the string is a constant in the symbol table */
+            int found = 0;
+            Node *node = searchNodeInList(*symbolTableHead, parsedLine[i], &found);
+            if (found == 1)
+            {
+                binaryLine = realloc(binaryLine, sizeof(char) * (strlen(binaryLine) + findCount(node->line) + 1));
                 if (binaryLine == NULL)
                 {
                     printIntError(ERROR_CODE_10);
                 }
-                strcat(binaryLine, intToBinary(number));
+                sprintf(binaryLine, "%d", node->line);
                 // add \n to the end of the line
                 binaryLine = realloc(binaryLine, sizeof(char) * (strlen(binaryLine) + 1));
                 if (binaryLine == NULL)
@@ -112,33 +129,10 @@ char *handleData(char *line, Node **symbolTableHead)
                     printIntError(ERROR_CODE_10);
                 }
                 strcat(binaryLine, "\n");
-                printf("Binary line: %s\n", binaryLine);
             }
             else
             {
-                /* Check if the string is a constant in the symbol table */
-                int found = 0;
-                Node *node = searchNodeInList(*symbolTableHead, parsedLine[i], &found);
-                if (found == 1)
-                {
-                    binaryLine = realloc(binaryLine, sizeof(char) * (strlen(binaryLine) + findCount(node->line) + 1));
-                    if (binaryLine == NULL)
-                    {
-                        printIntError(ERROR_CODE_10);
-                    }
-                    sprintf(binaryLine, "%d", node->line);
-                    // add \n to the end of the line
-                    binaryLine = realloc(binaryLine, sizeof(char) * (strlen(binaryLine) + 1));
-                    if (binaryLine == NULL)
-                    {
-                        printIntError(ERROR_CODE_10);
-                    }
-                    strcat(binaryLine, "\n");
-                }
-                else
-                {
-                    printIntError(ERROR_CODE_33);
-                }
+                printIntError(ERROR_CODE_33);
             }
         }
     }
