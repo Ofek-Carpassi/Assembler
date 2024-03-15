@@ -49,16 +49,18 @@ Marvel as it effortlessly generates machine code from the provided assembly file
 
 ## Testing
 
-Dive into the realm of assembly with confidence, armed with several provided assembly language input files. These files not only showcase various operations and data types but also serve as a litmus test for the assembler's robust error handling.
+Explore the world of assembly with confidence, armed with several provided assembly language input files. These files not only demonstrate various operations and data types but also serve as a practical test for the assembler's robust error handling.
 
 ## Documentation
 
-Embark on a journey of understanding with comprehensive documentation accompanying each function in the source code. Delve into the intricacies of the program's functionality through concise header comments, elucidating their purpose and usage. Detailed code comments further enrich your comprehension, ensuring a seamless exploration.
+Embark on a journey of understanding with comprehensive documentation accompanying each function in the source code. Dive into the details of the program's functionality through clear header comments, explaining their purpose and usage. Detailed code comments further enhance your understanding, ensuring a smooth exploration.
 
 ## Contributions
 
-In the realm of this project, contributions are akin to an ancient artifact—cherished but not actively sought.
+In the context of this project, contributions are like cherished treasures—while not actively solicited, they are warmly welcomed and greatly valued.
 
 ## Written by
 
-Authored with dedication by Ofek Carpassi and Natanel Sorokin. All rights reserved.
+Crafted with dedication by [Ofek Carpassi](https://github.com/Ofek-Carpassi) and [Natanel Sorokin](https://github.com/NatanelSorokin). All rights reserved.
+
+[MIT License](https://github.com/Ofek-Carpassi/Assembler?tab=MIT-1-ov-file#)
