@@ -70,33 +70,32 @@ int calcLength(char *line);
 int handleCode(char *line, Node **symbolTableHead);
 
 /**
- * @brief This function handles a string .
+ * @brief This function handles a string.
  * 
- * This function adds the label to the symbol table with data as its type and its value as DC.
- * The function receives the line to handle and the symbol table (a pointer to the head of the linked list).
- * The function returns 1 if the label was added to the symbol table, 0 otherwise.
+ * This function gets a line with string declaration and translates the string to binary and writes it to the output file.
+ * This function recieves the line to handle.
+ * The function returns the string in binary.
  * 
  * @param line The line to handle.
- * @param symbolTableHead A pointer to the head of the linked list.
- * @return 1 if the label was added to the symbol table, 0 otherwise.
+ * @return The string in binary.
  */
-char *handleString(char *line, Node **symbolTableHead);
+char *handleString(char *line);
 
 /**
- * @brief This function handles a data .
+ * @brief This function handles a data.
  * 
- * This function adds the label to the symbol table with data as its type and its value as DC.
+ * This function gets a line with data declaration and translates the data to binary and writes it to the output file.
  * The function receives the line to handle and the symbol table (a pointer to the head of the linked list).
- * The function returns 1 if the label was added to the symbol table, 0 otherwise.
+ * The function returns the data in binary.
  * 
  * @param line The line to handle.
  * @param symbolTableHead A pointer to the head of the linked list.
- * @return 1 if the label was added to the symbol table, 0 otherwise.
+ * @return The data in binary.
  */
 char *handleData(char *line, Node **symbolTableHead);
 
 /**
- * @brief This function handles a label .
+ * @brief This function handles a label.
  * 
  * This function adds the label to the symbol table with code as its type and its value as IC+100.
  * The function receives the line to handle and the symbol table (a pointer to the head of the linked list).
@@ -109,7 +108,7 @@ char *handleData(char *line, Node **symbolTableHead);
 char *handleLabel(char *line, Node **symbolTableHead);
 
 /**
- * @brief This function handles a constant .
+ * @brief This function handles a constant.
  * 
  * This function adds the constant to the symbol table with mdefine as its type and its value as its value.
  * The function receives the line to handle and the symbol table (a pointer to the head of the linked list).
@@ -128,6 +127,7 @@ void handleConstant(char *line, Node **symbolTableHead);
  * a label declaration, a data declaration, a string declaration, 
  * an entry declaration, an extern declaration, or an instruction.
  * The function returns a string with the type of the line.
+ * The function also writes the line to the output file.
  * 
  * @param line The line to check.
  * @return 
@@ -139,7 +139,7 @@ void handleConstant(char *line, Node **symbolTableHead);
  *          6 if the line is an entry declaration
  *          7 if the line is an extern declaration
  *          8 if the line is an instruction
- *          0 if the line is none of the above
+ *          0 if the line is illegal - an error
  */
 int checkLineType(char *line);
 

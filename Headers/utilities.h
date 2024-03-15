@@ -24,14 +24,44 @@ char *cleanLine(char *line);
  */
 void parseLine(char *line, char *parsedOutput[]);
 
-int findCount(int n);
-
+/**
+ * @brief This function is used to check if a string is a number.
+ * 
+ * This function will check if a string is a number and return 1 if it is, 0 otherwise.
+ * 
+ * @param str - a string to check if it is a number.
+ * @return - 1 if the string is a number, 0 otherwise.
+ */
 int isNumber(const char *str);
 
+/**
+ * @brief This function is used to count the number of words in a line.
+ * 
+ * This function will count the number of words in a line and return the count.
+ * 
+ * @param line - a string containing the line to count the words in.
+ * @return - the number of words in the line.
+ */
 int countWords(char *line);
 
+/**
+ * @brief This function is used to convert an integer to binary.
+ * 
+ * This function will convert an integer to binary and update the binary array with the binary representation.
+ * 
+ * @param num - an integer to convert to binary.
+ * @param binary - an array to update with the binary representation.
+ */
 void intToBinary(int num, char **binary);
 
+/**
+ * @brief This function is used to convert an integer to a binary string.
+ * 
+ * This function will convert an integer to a binary string and return the binary string.
+ * 
+ * @param num - an integer to convert to a binary string.
+ * @return - a string containing the binary representation of the integer.
+ */
 char *intToBinaryString(int num);
 
 #endif

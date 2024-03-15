@@ -106,79 +106,68 @@ void parseLine(char *line, char *parsedOutput[])
     arrayIndex++;
 }
 
-int findCount(int n)
-{
-    int count = 0;
- 
-    // Remove last digit from number
-    // till number is 0
-    while (n != 0) {
- 
-        // Increment count
-        count++;
-        n /= 10;
-    }
- 
-    // return the count of digit
-    return count;
-}
-
+/* Explained in the header file */
 int isNumber(const char *str)
 {
     if (*str == '-') { // handle negative numbers
         str++;
     }
+    /* Loop through the string */
     while (*str) {
-        if (!isdigit(*str)) {
+        /* If the current character is not a digit, return 0 */
+        if (!isdigit(*str++)) {
             return 0;
         }
-        str++;
     }
+    /* If all characters are digits, return 1 */
     return 1;
 }
 
+/* Explained in the header file */
 int countWords(char *line)
 {
+    /* Initialize the count to 0 */
     int count = 0;
     int i = 0;
+    /* Loop through the line */
     while(line[i] != '\0')
     {
-        if(line[i] == ' ')
+        /* If the current character is a space, increment the count */
+        if(line[i++] == ' ')
         {
             count++;
         }
-        i++;
     }
-    return count;
+    /* Return the count (add 1 because the last word doesn't have a space after it) */
+    return count+1;
 }
 
+/* Explained in the header file */
 void intToBinary(int num, char **res) 
 {
+    /* loop through the bits of the number */
     for (int i = 0; i < BITS_AMOUNT; i++) 
     {
+        /* if the bit is 1, set the corresponding bit in the result to 1, otherwise set it to 0 */
         (*res)[BITS_AMOUNT - 1 - i] = (num & (1 << i)) ? '1' : '0';
     }
-    (*res)[BITS_AMOUNT] = '\0'; // null terminator
+    /* add the null terminator to the end of the result */
+    (*res)[BITS_AMOUNT] = '\0';
 }
 
+/* Explained in the header file */
 char *intToBinaryString(int num) 
 {
-    char *res = calloc(1, sizeof(char) * 1);
-    char *binaryNumber = (char *)malloc(sizeof(char) * BITS_AMOUNT);
-    intToBinary(num, &binaryNumber);
-    res = realloc(res, sizeof(char) * (strlen(res) + strlen(binaryNumber) + 1));
+    /* Allocate memory for the result */
+    char *res = (char *)malloc(sizeof(char) * (BITS_AMOUNT + 1)); // +1 for the null terminator
     if (res == NULL)
     {
         printIntError(ERROR_CODE_10);
     }
-    strcat(res, binaryNumber);
-    free(binaryNumber); // Free the memory allocated by intToBinary
-    // add \n to the end of the line
-    res = realloc(res, sizeof(char) * (strlen(res) + 2)); // +2 to accommodate for the newline and null terminator
-    if (res == NULL)
-    {
-        printIntError(ERROR_CODE_10);
-    }
+    /* Convert the number to binary */
+    intToBinary(num, &res);
+    /* add a new line character to the end of the result */
     strcat(res, "\n");
+    /* return the result */
     return res;
 }
