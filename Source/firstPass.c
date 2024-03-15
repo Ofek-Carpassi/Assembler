@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "../Headers/firstPass.h"
 #include "../Headers/errors.h"
 #include "../Headers/globalVariables.h"
@@ -283,5 +284,48 @@ char* handleString(char *line, Node **symbolTableHead) {
 
     return binaryLine;  /* Return the binary representation of the string */
 }
+
+int calcLength(char *line) {
+    int length = 0;         /* Initialize the word count */
+    int inWord = 0;         /* Flag to track whether currently inside a word */
+    int isCommand = 0;      /* Flag to track whether a command is encountered */
+    int isLabel = 0;        /* Flag to track whether a label is encountered */
+    int isRegister = 0;     /* Flag to track whether a register is encountered */
+
+    char *ptr = line;       /* Pointer to iterate through the line */
+
+    while (*ptr != '\0') {
+        if (isspace(*ptr) || *ptr == ',' || *ptr == '[' || *ptr == ']') {
+            if (inWord) {
+                length++;
+                inWord = 0;
+            }
+            if (isCommand || isLabel) {
+                length--;
+            }
+            isCommand = 0;
+            isLabel = 0;
+        } else {
+            inWord = 1;
+            if (*ptr == ':') {
+                isLabel = 1;
+            } else if (*ptr == 'r' && isdigit(*(ptr + 1)) && *(ptr + 2) == ',' && (isspace(*(ptr + 3)) || *(ptr + 3) == '[')) {
+                isRegister = 1;
+            } else if (isRegister && (isspace(*ptr) || *ptr == ',' || *ptr == '[' || *ptr == ']')) {
+                isRegister = 0;
+            } else if (!isdigit(*ptr) && *ptr != '[' && *ptr != ']') {
+                isCommand = 1;
+            }
+        }
+        ptr++;
+    }
+    if (inWord) {
+        length++;
+    }
+
+    return length;
+}
+
+
 
 
