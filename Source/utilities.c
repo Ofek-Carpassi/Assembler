@@ -2,6 +2,8 @@
 #include <stdlib.h> // Used for malloc
 #include <string.h> // Used for strlen
 #include <ctype.h> // Used for isdigit
+#include "../Headers/globalVariables.h" // Include the header file with the global variables
+#include "../Headers/errors.h" // Include the header file with the error codes
 
 /* Explained in the header file */
 char *cleanLine(char *line)
@@ -152,16 +154,31 @@ int countWords(char *line)
 
 void intToBinary(int num, char **res) 
 {
-    int bits = sizeof(num) * 8; // number of bits in an integer
-    *res = (char *)malloc(bits + 1); // +1 for the null terminator
-    if (*res == NULL) {
-        // Handle error
-        return;
-    }
-
-    for (int i = 0; i < bits; i++) 
+    for (int i = 0; i < BITS_AMOUNT; i++) 
     {
-        (*res)[bits - 1 - i] = (num & (1 << i)) ? '1' : '0';
+        (*res)[BITS_AMOUNT - 1 - i] = (num & (1 << i)) ? '1' : '0';
     }
-    (*res)[bits] = '\0'; // null terminator
+    (*res)[BITS_AMOUNT] = '\0'; // null terminator
+}
+
+char *intToBinaryString(int num) 
+{
+    char *res = calloc(1, sizeof(char) * 1);
+    char *binaryNumber = (char *)malloc(sizeof(char) * BITS_AMOUNT);
+    intToBinary(num, &binaryNumber);
+    res = realloc(res, sizeof(char) * (strlen(res) + strlen(binaryNumber) + 1));
+    if (res == NULL)
+    {
+        printIntError(ERROR_CODE_10);
+    }
+    strcat(res, binaryNumber);
+    free(binaryNumber); // Free the memory allocated by intToBinary
+    // add \n to the end of the line
+    res = realloc(res, sizeof(char) * (strlen(res) + 2)); // +2 to accommodate for the newline and null terminator
+    if (res == NULL)
+    {
+        printIntError(ERROR_CODE_10);
+    }
+    strcat(res, "\n");
+    return res;
 }

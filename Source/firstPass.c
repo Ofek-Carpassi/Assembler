@@ -46,6 +46,7 @@ int checkLineType(char *line)
     else if(strcmp(parsedLine[0], ".string") == 0)
     {
         lineType = STRING;
+        char *binaryLine = handleString(line, &symbolTable);
     }
     else if(strcmp(parsedLine[0], ".entry") == 0)
     {
@@ -72,6 +73,40 @@ int checkLineType(char *line)
     return lineType;
 }
 
+char* handleString(char *line, Node **symbolTableHead) {
+    int index = 0;
+    char *parsedLine[2];
+    parseLine(line, parsedLine);
+    char *binaryLine = calloc(1, sizeof(char) * 1);
+
+    for (int i = 0; parsedLine[1][i] != '\0'; i++) {
+        if(parsedLine[1][i] == '"') { 
+            continue;
+        }
+
+        int currentChar = parsedLine[1][i];
+        
+        char *binaryNumber = (char *)malloc(sizeof(char) * BITS_AMOUNT);
+        intToBinary(currentChar, &binaryNumber);
+        binaryLine = realloc(binaryLine, sizeof(char) * (strlen(binaryLine) + strlen(binaryNumber) + 1));
+        if (binaryLine == NULL)
+        {
+            printIntError(ERROR_CODE_10);
+        }
+        strcat(binaryLine, binaryNumber);
+        free(binaryNumber); // Free the memory allocated by intToBinary
+        // add \n to the end of the line
+        binaryLine = realloc(binaryLine, sizeof(char) * (strlen(binaryLine) + 2)); // +2 to accommodate for the newline and null terminator
+        if (binaryLine == NULL)
+        {
+            printIntError(ERROR_CODE_10);
+        }
+        strcat(binaryLine, "\n");
+    }
+    printf("%s\n", binaryLine);
+    return binaryLine;
+}
+
 char *handleData(char *line, Node **symbolTableHead)
 {
     int wordAmount = countWords(line);
@@ -81,30 +116,29 @@ char *handleData(char *line, Node **symbolTableHead)
     }
     char *parsedLine[wordAmount];
     parseLine(line, parsedLine);
-    int length = wordAmount; // Use wordAmount as the length of parsedLine
+    int length = wordAmount+1; // Use wordAmount as the length of parsedLine
     char *binaryLine = calloc(1, sizeof(char) * 1); // Create a string to store the binary line
 
-    for (int i = 1; i <= length; i++)
+    printf("Length: %d\n", length);
+    printf("Parsed line: ");
+    for (int i = 0; i < length; i++)
     {
+        printf("%s ", parsedLine[i]);
+    }
+    printf("\n");
+
+    for (int i = 1; i < length; i++)
+    {
+        printf("Parsed line[%d]: %s\n", i, parsedLine[i]);
+        printf("Is number: %d\n", isNumber(parsedLine[i]));
         if(isNumber(parsedLine[i]) == 1)
         {
             int number = atoi(parsedLine[i]);
-            char *binaryNumber;
-            intToBinary(number, &binaryNumber);
-            binaryLine = realloc(binaryLine, sizeof(char) * (strlen(binaryLine) + strlen(binaryNumber) + 1));
-            if (binaryLine == NULL)
-            {
-                printIntError(ERROR_CODE_10);
-            }
+            printf("%d from loop\n", number);
+            char *binaryNumber = intToBinaryString(number);
+            printf("%s from loop\n", binaryNumber);
             strcat(binaryLine, binaryNumber);
-            free(binaryNumber); // Free the memory allocated by intToBinary
-            // add \n to the end of the line
-            binaryLine = realloc(binaryLine, sizeof(char) * (strlen(binaryLine) + 2)); // +2 to accommodate for the newline and null terminator
-            if (binaryLine == NULL)
-            {
-                printIntError(ERROR_CODE_10);
-            }
-            strcat(binaryLine, "\n");
+            printf("%s from loop\n", binaryLine);
         }
         else
         {
@@ -113,22 +147,8 @@ char *handleData(char *line, Node **symbolTableHead)
             Node *node = searchNodeInList(*symbolTableHead, parsedLine[i], &found);
             if (found == 1)
             {
-                char *binaryNumber;
-                intToBinary(node->line, &binaryNumber);
-                binaryLine = realloc(binaryLine, sizeof(char) * (strlen(binaryLine) + strlen(binaryNumber) + 1));
-                if (binaryLine == NULL)
-                {
-                    printIntError(ERROR_CODE_10);
-                }
+                char *binaryNumber = intToBinaryString(node->line);
                 strcat(binaryLine, binaryNumber);
-                free(binaryNumber); // Free the memory allocated by intToBinary
-                // add \n to the end of the line
-                binaryLine = realloc(binaryLine, sizeof(char) * (strlen(binaryLine) + 2)); // +2 to accommodate for the newline and null terminator
-                if (binaryLine == NULL)
-                {
-                    printIntError(ERROR_CODE_10);
-                }
-                strcat(binaryLine, "\n");
             }
             else
             {
@@ -202,6 +222,47 @@ void handleConstant(char *line, Node **symbolTableHead)
     addNode(symbolTableHead, parsedLine[1], "mdefine", atoi(parsedLine[3]));
 }
 
+int calcLength(char *line) {
+    int length = 0;         /* Initialize the word count */
+    int inWord = 0;         /* Flag to track whether currently inside a word */
+    int isCommand = 0;      /* Flag to track whether a command is encountered */
+    int isLabel = 0;        /* Flag to track whether a label is encountered */
+    int isRegister = 0;     /* Flag to track whether a register is encountered */
+
+    char *ptr = line;       /* Pointer to iterate through the line */
+
+    while (*ptr != '\0') {
+        if (isspace(*ptr) || *ptr == ',' || *ptr == '[' || *ptr == ']') {
+            if (inWord) {
+                length++;
+                inWord = 0;
+            }
+            if (isCommand || isLabel) {
+                length--;
+            }
+            isCommand = 0;
+            isLabel = 0;
+        } else {
+            inWord = 1;
+            if (*ptr == ':') {
+                isLabel = 1;
+            } else if (*ptr == 'r' && isdigit(*(ptr + 1)) && *(ptr + 2) == ',' && (isspace(*(ptr + 3)) || *(ptr + 3) == '[')) {
+                isRegister = 1;
+            } else if (isRegister && (isspace(*ptr) || *ptr == ',' || *ptr == '[' || *ptr == ']')) {
+                isRegister = 0;
+            } else if (!isdigit(*ptr) && *ptr != '[' && *ptr != ']') {
+                isCommand = 1;
+            }
+        }
+        ptr++;
+    }
+    if (inWord) {
+        length++;
+    }
+
+    return length;
+}
+
 void executeFirstPass(char *file, char **outputFileName)
 {
     FILE *inputFile = fopen(file, "r"); // Open the input file
@@ -249,83 +310,6 @@ void executeFirstPass(char *file, char **outputFileName)
         int lineType = checkLineType(line); // Check the type of the line
 
         // make sure the constant was added to the symbol table
-        int found = 0;
-        Node node = *searchNodeInList(symbolTable, "sz", &found);
-        printf("Node name: %s\n", node.name);
-        printf("Node data: %s\n", node.data);
-        printf("Node line: %d\n", node.line);
         // Print the cleaned line to the output file
     }
 }
-
-char* handleString(char *line, Node **symbolTableHead) {
-    int index = 0;  /* Index to keep track of the position in the binary line */
-    char *binaryLine = (char *)malloc(sizeof(char) * (strlen(line) * 8)); /* Each character takes 8 bits in ASCII */
-    if (binaryLine == NULL) {
-         printIntError(ERROR_CODE_10);   /* Handle memory allocation failure */
-    }
-
-    for (int i = 0; line[i] != '\0'; i++) {      /* Iterate through each character in the string */
-        int asciiCode = (int)line[i];
-        char binaryChar[9];                      /* Binary representation of the character (8 bits + null terminator)*/
-        itoa(asciiCode, binaryChar, 2);          
-
-          
-        int binaryLength = strlen(binaryChar);
-        for (int j = 0; j < 8 - binaryLength; j++) {    /* Pad binary representation with leading zeros if necessary*/
-            binaryLine[index++] = '0';
-        }
-        strcat(binaryLine, binaryChar);                 /* Append the binary representation to the binary line*/
-        index += binaryLength;                          /* Increase the index by the length of the binary representation*/
-    }
-
-    
-    printf("Binary representation: %s\n", binaryLine);      /* Print the binary line for debugging, later on it will be removed*/
-
-    return binaryLine;  /* Return the binary representation of the string */
-}
-
-int calcLength(char *line) {
-    int length = 0;         /* Initialize the word count */
-    int inWord = 0;         /* Flag to track whether currently inside a word */
-    int isCommand = 0;      /* Flag to track whether a command is encountered */
-    int isLabel = 0;        /* Flag to track whether a label is encountered */
-    int isRegister = 0;     /* Flag to track whether a register is encountered */
-
-    char *ptr = line;       /* Pointer to iterate through the line */
-
-    while (*ptr != '\0') {
-        if (isspace(*ptr) || *ptr == ',' || *ptr == '[' || *ptr == ']') {
-            if (inWord) {
-                length++;
-                inWord = 0;
-            }
-            if (isCommand || isLabel) {
-                length--;
-            }
-            isCommand = 0;
-            isLabel = 0;
-        } else {
-            inWord = 1;
-            if (*ptr == ':') {
-                isLabel = 1;
-            } else if (*ptr == 'r' && isdigit(*(ptr + 1)) && *(ptr + 2) == ',' && (isspace(*(ptr + 3)) || *(ptr + 3) == '[')) {
-                isRegister = 1;
-            } else if (isRegister && (isspace(*ptr) || *ptr == ',' || *ptr == '[' || *ptr == ']')) {
-                isRegister = 0;
-            } else if (!isdigit(*ptr) && *ptr != '[' && *ptr != ']') {
-                isCommand = 1;
-            }
-        }
-        ptr++;
-    }
-    if (inWord) {
-        length++;
-    }
-
-    return length;
-}
-
-
-
-

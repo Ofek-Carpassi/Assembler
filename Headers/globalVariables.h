@@ -33,6 +33,8 @@
 
 #define MIN_NUM (-(1 << (WORD_LENGTH - 1)))
 
+#define BITS_AMOUNT 13
+
 enum lineType {
     ERROR,
     COMMENT,

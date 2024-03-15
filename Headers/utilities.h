@@ -32,4 +32,6 @@ int countWords(char *line);
 
 void intToBinary(int num, char **binary);
 
+char *intToBinaryString(int num);
+
 #endif
