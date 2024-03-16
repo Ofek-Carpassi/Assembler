@@ -38,7 +38,7 @@ Algorithm - written codly so we know which functions we need to write:
 5. Is the line a constant declaration? if so call handleConstantDeclaration. (handleConstantDeclaration)
 6. Is the line a label declaration? if so call handleLabelDeclaration. (handleLabelDeclaration)
 7. Is it an instruction to save data? if so call handleDataDeclaration. (handleDataDeclaration)
-8. Is it an instruction to save code? if so call handleCodeDeclaration. (handleCodeDeclaration)
+8. Is it an instruction to save code? if so call handleCodeDeclaration. (handleInstruction)
 9. Calculate L (amount of words the instruction takes). (calcLength)
 10. Update IC by L. Go to step 2. (continue the loop)
 11. The input file was read, if there were any errors on the first pass, stop here.
@@ -67,7 +67,7 @@ int calcLength(char *line);
  * @param symbolTableHead A pointer to the head of the linked list.
  * @return 1 if the label was added to the symbol table, 0 otherwise.
  */
-int handleCode(char *line, Node **symbolTableHead);
+int handleInstruction(char *line, Node **symbolTableHead);
 
 /**
  * @brief This function handles a string.

@@ -102,6 +102,63 @@ int checkLineType(char *line)
     }
 }
 
+
+int handleInstruction(char *line, Node **symbolTableHead)
+{
+    int wordAmount = countWords(line); /* Count the words in the line */
+    if (wordAmount == 0) /* If the are no words in the line */
+    {
+        printIntError(ERROR_CODE_31); /* Print an error and return */
+    }
+    char *parsedLine[wordAmount]; /* Create an array to store the parsed line */
+    parseLine(line, parsedLine); /* Parse the line */
+
+    /* Find the instruction in the instruction names array */
+    int instructionIndex = 0;
+    for (int i = 0; i < OPCODES_COUNT; i++)
+    {
+        if (strcmp(parsedLine[0], instructionNames[i]) == 0)
+        {
+            instructionIndex = i;
+            break;
+        }
+    }
+
+    if((instructionIndex >= 0 && instructionIndex <= 3) || instructionIndex == 6)
+    {
+        if(wordAmount > 3)
+        {
+            printIntError(ERROR_CODE_31);
+        }
+        else if(wordAmount < 3)
+        {
+            printIntError(ERROR_CODE_32);
+        }
+    }
+
+    if(instructionIndex == 4 || instructionIndex == 5 || (instructionIndex >= 7 && instructionIndex <= 13))
+    {
+        if(wordAmount > 2)
+        {
+            printIntError(ERROR_CODE_31);
+        }
+        else if(wordAmount < 2)
+        {
+            printIntError(ERROR_CODE_32);
+        }
+    }
+
+    if(instructionIndex == 14 || instructionIndex == 15)
+    {
+        if(wordAmount > 1)
+        {
+            printIntError(ERROR_CODE_31);
+        }
+    }
+
+    
+}
+
 /* Purpose is explained in the header file */
 char* handleString(char *line) {
     /* Create an array to store the parsed line */
