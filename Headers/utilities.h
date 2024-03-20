@@ -64,4 +64,15 @@ void intToBinary(int num, char **binary);
  */
 char *intToBinaryString(int num);
 
+/**
+ * @brief This function is used to check the addressing method of an operand.
+ * 
+ * This function will check the addressing method of an operand.
+ * The function returns the binary representation of the addressing method.
+ * 
+ * @param operand - a string containing the operand to check the addressing method of.
+ * @return - a binary representation of the addressing method.
+ */
+char *addressingMethod(char* operand);
+
 #endif

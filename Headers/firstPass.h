@@ -67,7 +67,7 @@ int calcLength(char *line);
  * @param symbolTableHead A pointer to the head of the linked list.
  * @return 1 if the label was added to the symbol table, 0 otherwise.
  */
-int handleInstruction(char *line, Node **symbolTableHead);
+char *handleInstruction(char *line, Node **symbolTableHead);
 
 /**
  * @brief This function handles a string.
@@ -142,6 +142,35 @@ void handleConstant(char *line, Node **symbolTableHead);
  *          0 if the line is illegal - an error
  */
 int checkLineType(char *line);
+
+/**
+ * @brief This function handles an instruction with two operands.
+ * 
+ * This function receives the two operands and a pointer to the head of the symbol table.
+ * The function writes the binary code of the addressing method of the operands to the binary line.
+ * The function returns 1 if the operation was successful, 0 otherwise.
+ * 
+ * @param operandOne The first operand.
+ * @param operandTwo The second operand.
+ * @param symbolTableHead A pointer to the head of the symbol table.
+ * @param binaryLine A pointer to the binary line.
+ * @return 1 if the operation was successful, 0 otherwise.
+ */
+int handleTwoOperands(char *operandOne, char *operandTwo, Node **symbolTableHead, char **binaryLine);
+
+/**
+ * @brief This function handles an instruction with one operand.
+ * 
+ * This function receives the operand and a pointer to the head of the symbol table.
+ * The function writes the binary code of the addressing method of the operand to the binary line.
+ * The function returns 1 if the operation was successful, 0 otherwise.
+ * 
+ * @param operand The operand.
+ * @param symbolTableHead A pointer to the head of the symbol table.
+ * @param binaryLine A pointer to the binary line.
+ * @return 1 if the operation was successful, 0 otherwise.
+ */
+int handleOneOpernad(char *operand, Node **symbolTableHead, char **binaryLine);
 
 /**
  * @brief This function executes the first pass algorithm

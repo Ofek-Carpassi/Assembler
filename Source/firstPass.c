@@ -10,7 +10,8 @@
 
 int IC = 0, DC = 0; /* Initialize the instruction counter and the data counter */
 int isLabel = 0; /* Initialize the isLabel flag */
-const char *instructionNames[] = {"mov", "cmp", "add", "sub", "not", "clr", "lea", "inc", "dec", "jmp", "bne", "red", "prn", "jsr", "rts", "stop"}; // Array of the instruction names
+const char *instructionNames[] = {"mov", "cmp", "add", "sub", "not", "clr", "lea", "inc", "dec", "jmp", "bne", "red", "prn", "jsr", "rts", "hlt"}; /* Array of the instruction names */
+const char *instructionsInBinary[] = {"0000", "0001", "0010", "0011", "0100", "0101", "0110", "0111", "1000", "1001", "1010", "1011", "1100", "1101", "1110", "1111"}; /* Array of the instruction names in binary */
 Node *symbolTable = NULL; /* Create the symbol table */
 
 /* Purpose is explained in the header file */
@@ -102,8 +103,8 @@ int checkLineType(char *line)
     }
 }
 
-
-int handleInstruction(char *line, Node **symbolTableHead)
+/* Purpose is explained in the header file */
+char *handleInstruction(char *line, Node **symbolTableHead)
 {
     int wordAmount = countWords(line); /* Count the words in the line */
     if (wordAmount == 0) /* If the are no words in the line */
@@ -155,8 +156,6 @@ int handleInstruction(char *line, Node **symbolTableHead)
             printIntError(ERROR_CODE_31);
         }
     }
-
-    
 }
 
 /* Purpose is explained in the header file */
