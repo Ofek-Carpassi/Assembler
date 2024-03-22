@@ -170,7 +170,7 @@ int handleTwoOperands(char *operandOne, char *operandTwo, Node **symbolTableHead
  * @param binaryLine A pointer to the binary line.
  * @return 1 if the operation was successful, 0 otherwise.
  */
-int handleOneOpernad(char *operand, Node **symbolTableHead, char **binaryLine);
+int handleOneOperand(char *operand, Node **symbolTableHead, char **binaryLine);
 
 /**
  * @brief This function executes the first pass algorithm
