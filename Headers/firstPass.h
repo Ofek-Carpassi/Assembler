@@ -57,6 +57,35 @@ Algorithm - written codly so we know which functions we need to write:
 int calcLength(char *line);
 
 /**
+ * @brief This function handles an instruction with two operands.
+ * 
+ * This function receives the two operands and a pointer to the head of the symbol table.
+ * The function writes the binary code of the addressing method of the operands to the binary line.
+ * The function returns 1 if the operation was successful, 0 otherwise.
+ * 
+ * @param operandOne The first operand.
+ * @param operandTwo The second operand.
+ * @param symbolTableHead A pointer to the head of the symbol table.
+ * @param binaryLine A pointer to the binary line.
+ * @return 1 if the operation was successful, 0 otherwise.
+ */
+int handleTwoOperands(char *operandOne, char *operandTwo, Node **symbolTableHead, char **binaryLine);
+
+/**
+ * @brief This function handles an instruction with one operand.
+ * 
+ * This function receives the operand and a pointer to the head of the symbol table.
+ * The function writes the binary code of the addressing method of the operand to the binary line.
+ * The function returns 1 if the operation was successful, 0 otherwise.
+ * 
+ * @param operand The operand.
+ * @param symbolTableHead A pointer to the head of the symbol table.
+ * @param binaryLine A pointer to the binary line.
+ * @return 1 if the operation was successful, 0 otherwise.
+ */
+int handleOneOperand(char *operand, Node **symbolTableHead, char **binaryLine);
+
+/**
  * @brief This function handles a code declaration.
  * 
  * This function adds the label to the symbol table with code as its type and its value as IC+100.
@@ -142,35 +171,6 @@ void handleConstant(char *line, Node **symbolTableHead);
  *          0 if the line is illegal - an error
  */
 int checkLineType(char *line);
-
-/**
- * @brief This function handles an instruction with two operands.
- * 
- * This function receives the two operands and a pointer to the head of the symbol table.
- * The function writes the binary code of the addressing method of the operands to the binary line.
- * The function returns 1 if the operation was successful, 0 otherwise.
- * 
- * @param operandOne The first operand.
- * @param operandTwo The second operand.
- * @param symbolTableHead A pointer to the head of the symbol table.
- * @param binaryLine A pointer to the binary line.
- * @return 1 if the operation was successful, 0 otherwise.
- */
-int handleTwoOperands(char *operandOne, char *operandTwo, Node **symbolTableHead, char **binaryLine);
-
-/**
- * @brief This function handles an instruction with one operand.
- * 
- * This function receives the operand and a pointer to the head of the symbol table.
- * The function writes the binary code of the addressing method of the operand to the binary line.
- * The function returns 1 if the operation was successful, 0 otherwise.
- * 
- * @param operand The operand.
- * @param symbolTableHead A pointer to the head of the symbol table.
- * @param binaryLine A pointer to the binary line.
- * @return 1 if the operation was successful, 0 otherwise.
- */
-int handleOneOperand(char *operand, Node **symbolTableHead, char **binaryLine);
 
 /**
  * @brief This function executes the first pass algorithm
