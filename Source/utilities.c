@@ -1,9 +1,10 @@
-#include "../Headers/utilities.h" // Include the header file with the function declarations
 #include <stdlib.h> // Used for malloc
 #include <string.h> // Used for strlen
 #include <ctype.h> // Used for isdigit
 #include "../Headers/globalVariables.h" // Include the header file with the global variables
 #include "../Headers/errors.h" // Include the header file with the error codes
+#include "../Headers/dataStructers.h" // Include the header file with the data structures
+#include "../Headers/utilities.h" // Include the header file with the function declarations
 
 /* Explained in the header file */
 char *cleanLine(char *line)
@@ -170,4 +171,38 @@ char *intToBinaryString(int num)
     strcat(res, "\n");
     /* return the result */
     return res;
+}
+
+/* Explained in the header file */
+char *addressingMethod(char *operand, Node *symbolTable)
+{
+    /* If the operand is a register, return the register addressing method */
+    if(operand[0] == '#')
+        return "00";
+    else if(operand[0] == 'r')
+    {
+        if(strlen(operand) > 2)
+        {
+            printIntError(ERROR_CODE_32);
+            return "11";
+        }
+        if(operand[1] < '0' || operand[1] > '7')
+        {
+            printIntError(ERROR_CODE_32);
+            return "11";
+        }
+        return "11";
+    }
+
+    /* Check if constantIndex addressing or direct addressing */
+    int found = 0;
+    Node *node = searchNodeInList(symbolTable, operand, &found);
+    if(found)
+    {
+        return "01";
+    }
+    else
+    {
+        return "10";
+    }
 }

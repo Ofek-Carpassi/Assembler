@@ -73,6 +73,6 @@ char *intToBinaryString(int num);
  * @param operand - a string containing the operand to check the addressing method of.
  * @return - a binary representation of the addressing method.
  */
-char *addressingMethod(char* operand);
+char *addressingMethod(char *operand, Node *symbolTable);
 
 #endif

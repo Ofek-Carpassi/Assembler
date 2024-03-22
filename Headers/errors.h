@@ -33,10 +33,19 @@ typedef enum ERROR_CODES {
     ERROR_CODE_15,
     ERROR_CODE_16,
     ERROR_CODE_17,
-    /* Enumeration skip for future macro related errors */
-
-    /* The following errors are related to reading command assembly lines */
-    ERROR_CODE_30 = 30,
+    ERROR_CODE_18,
+    ERROR_CODE_19,
+    ERROR_CODE_20,
+    ERROR_CODE_21,
+    ERROR_CODE_22,
+    ERROR_CODE_23,
+    ERROR_CODE_24,
+    ERROR_CODE_25,
+    ERROR_CODE_26,
+    ERROR_CODE_27,
+    ERROR_CODE_28,
+    ERROR_CODE_29,
+    ERROR_CODE_30,
     ERROR_CODE_31,
     ERROR_CODE_32,
     ERROR_CODE_33,
@@ -53,22 +62,7 @@ typedef enum ERROR_CODES {
     ERROR_CODE_44,
     ERROR_CODE_45,
     ERROR_CODE_46,
-    ERROR_CODE_47,
-    ERROR_CODE_48,
-    ERROR_CODE_49,
-    /* Enumeration skip for future command reading related errors */
-
-    /* The following errors are related to reading instruction .data or .string lines related errors */
-    ERROR_CODE_50 = 50,
-    ERROR_CODE_51,
-    ERROR_CODE_52,
-    ERROR_CODE_53,
-    ERROR_CODE_54,
-    ERROR_CODE_55,
-    ERROR_CODE_56,
-    ERROR_CODE_57,
-    ERROR_CODE_58,
-    ERROR_CODE_59
+    ERROR_CODE_47
 } ERROR_CODES;
 
 /**
