@@ -16,9 +16,12 @@ int main()
     executeFirstPass("test.txt", &outputFileName);
     printf("%s\n", outputFileName);
     */
-   Node *head = NULL;
-   printf("Addresing method of #1: %s\n", addressingMethod("r100", head));
-
+    Node *head = NULL;
+    char *bL = "00000001";
+    // mov r1, r4
+    char *res = handleTwoOperands("r3", "#2", &head, bL);
+    printf("%s\n", res);
+   
     return 0;
 }
 

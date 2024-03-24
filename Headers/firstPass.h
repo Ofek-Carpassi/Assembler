@@ -22,7 +22,7 @@ Algorithm:
 14. Find the operation name in the operation table and code it to the memory.
 15. Analyze the operands structure and calculate L (amount of words the instruction takes). 
     Build the binary code of the first word of the instruction and code it to the memory. 
-    If there's a second word, code it to the memory. Update IC by L.
+    If there's a second word, code it to the memory.
 16. Update IC by L. Go to step 2.
 17. The input file was read, if there were any errors on the first pass, stop here.
 18. Update the symbol table of each data type with the value of IC + 100.
@@ -69,7 +69,7 @@ int calcLength(char *line);
  * @param binaryLine A pointer to the binary line.
  * @return 1 if the operation was successful, 0 otherwise.
  */
-int handleTwoOperands(char *operandOne, char *operandTwo, Node **symbolTableHead, char **binaryLine);
+char *handleTwoOperands(char *operandOne, char *operandTwo, Node **symbolTableHead, char *binaryLine);
 
 /**
  * @brief This function handles an instruction with one operand.

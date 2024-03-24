@@ -103,6 +103,40 @@ int checkLineType(char *line)
     }
 }
 
+char *handleTwoOperands(char *operandOne, char *operandTwo, Node **symbolTableHead, char *binaryLine)
+{
+    char *addressingMethodOne = addressingMethod(operandOne, *symbolTableHead);
+    char *addressingMethodTwo = addressingMethod(operandTwo, *symbolTableHead);
+    char *ARE = "00";
+
+    /* Binary line is built as follows:
+    0 - 1 bits - ARE
+    2 - 3 bits - addressing method of the first operand
+    4 - 5 bits - addressing method of the second operand
+    6 - 9 bits - opcode
+    10 - 13 bits - unused
+    We'll need to add bits 0 - 5 to the binary line
+    */
+    char *result = calloc(1, sizeof(char) * 14);
+    if (result == NULL) {
+        printIntError(ERROR_CODE_10);
+    }
+    
+    
+    /* Add the binary line we got from the instruction to the result */
+    strcat(result, binaryLine);
+    /* Add the addressing method of the first operand to the result */
+    strcat(result, addressingMethodOne);
+    /* Add the addressing method of the second operand to the result */
+    strcat(result, addressingMethodTwo);
+    /* Add the ARE bits to the result */
+    strcat(result, ARE);
+
+    /* Reverse the result */
+
+    return result;    
+}
+
 /* Purpose is explained in the header file */
 char *handleInstruction(char *line, Node **symbolTableHead)
 {
