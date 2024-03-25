@@ -52,7 +52,7 @@ int countWords(char *line);
  * @param num - an integer to convert to binary.
  * @param binary - an array to update with the binary representation.
  */
-void intToBinary(int num, char **binary);
+char *intToBinary(int num, int bits);
 
 /**
  * @brief This function is used to convert an integer to a binary string.
@@ -62,7 +62,7 @@ void intToBinary(int num, char **binary);
  * @param num - an integer to convert to a binary string.
  * @return - a string containing the binary representation of the integer.
  */
-char *intToBinaryString(int num);
+char *intToBinaryString(int num, int bits);
 
 /**
  * @brief This function is used to check the addressing method of an operand.
@@ -73,6 +73,6 @@ char *intToBinaryString(int num);
  * @param operand - a string containing the operand to check the addressing method of.
  * @return - a binary representation of the addressing method.
  */
-char *addressingMethod(char *operand, Node *symbolTable);
+char *addressingMethod(char *operand, Node *symbolTable, int *addressingMethod);
 
 #endif

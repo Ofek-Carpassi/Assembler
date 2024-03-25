@@ -17,10 +17,18 @@ int main()
     printf("%s\n", outputFileName);
     */
     Node *head = NULL;
-    char *bL = "00000001";
-    // mov r1, r4
-    char *res = handleTwoOperands("r3", "#2", &head, bL);
+    
+    char *res = handleInstruction("sub r7 r6", &head);
+    
     printf("%s\n", res);
+
+    /*
+    Operand One: r7, Operand Two: r6
+    The current binary line is: 00000011
+    expect:
+    00000011111100
+    00000001111100
+    */
    
     return 0;
 }

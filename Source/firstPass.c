@@ -105,35 +105,82 @@ int checkLineType(char *line)
 
 char *handleTwoOperands(char *operandOne, char *operandTwo, Node **symbolTableHead, char *binaryLine)
 {
-    char *addressingMethodOne = addressingMethod(operandOne, *symbolTableHead);
-    char *addressingMethodTwo = addressingMethod(operandTwo, *symbolTableHead);
+    int firstAddressing = 0, secondAddressing = 0;
+    char *addressingMethodOne = addressingMethod(operandOne, *symbolTableHead, &firstAddressing);
+    char *addressingMethodTwo = addressingMethod(operandTwo, *symbolTableHead, &secondAddressing);
     char *ARE = "00";
 
-    /* Binary line is built as follows:
-    0 - 1 bits - ARE
-    2 - 3 bits - addressing method of the first operand
-    4 - 5 bits - addressing method of the second operand
-    6 - 9 bits - opcode
-    10 - 13 bits - unused
-    We'll need to add bits 0 - 5 to the binary line
-    */
-    char *result = calloc(1, sizeof(char) * 14);
+    char *result = (char *)calloc(14, sizeof(char));
     if (result == NULL) {
         printIntError(ERROR_CODE_10);
     }
-    
-    
-    /* Add the binary line we got from the instruction to the result */
+
     strcat(result, binaryLine);
-    /* Add the addressing method of the first operand to the result */
     strcat(result, addressingMethodOne);
-    /* Add the addressing method of the second operand to the result */
     strcat(result, addressingMethodTwo);
-    /* Add the ARE bits to the result */
     strcat(result, ARE);
+    strcat(result, "\n");
 
+    if(firstAddressing == secondAddressing && firstAddressing == 3)
+    {
+        result = (char *)realloc(result, sizeof(char) * 14);
+        if (result == NULL) {
+            printIntError(ERROR_CODE_10);
+        }
+
+        char *firstNumber = intToBinary(operandOne[1] - '0', 3);
+        char *secondNumber = intToBinary(operandTwo[1] - '0', 3);
+
+        strcat(result, "0000000");
+        strcat(result, firstNumber);
+        strcat(result, secondNumber);
+        strcat(result, "0");
+        strcat(result, "\n");
+        return result;
+    }
+
+    if(firstAddressing == 0)
+    {
+        result = realloc(result, sizeof(char) * 15);
+        if (result == NULL) {
+            printIntError(ERROR_CODE_10);
+        }
+        char *binaryNumber = intToBinary(atoi(operandOne + 1), BITS_AMOUNT);
+        /* We need the result to be 12 bits long + 00 for ARE */
+        char *temp = calloc(1, sizeof(char) * 14);
+        if (temp == NULL) {
+            printIntError(ERROR_CODE_10);
+        }
+        /* Add the binary number to the result */
+        strcat(temp, binaryNumber);
+        /* Add the ARE bits to the result */
+        strcat(temp, ARE);
+        /* Add the result to the binary line */
+        strcat(result, temp);
+        strcat(result, "\n");
+    }
+    else if(firstAddressing == 3 && secondAddressing != 3)
+    {
+        /* Reallocate the result to have 14 more bits */
+        result = realloc(result, sizeof(char) * 14);
+        if (result == NULL) {
+            printIntError(ERROR_CODE_10);
+        }
+        char *firstPart = "0000000";
+        char *lastPart = "0000";
+
+        int number = operandOne[1] - '0';
+        char *binaryNumber = intToBinary(number, 3);
+
+        /* Remove the new line character from the binary number */
+        binaryNumber[strlen(binaryNumber) - 1] = '\0';
+
+        strcat(result, firstPart);
+        strcat(result, binaryNumber);
+        strcat(result, lastPart);
+        strcat(result, "\n");
+    }
     /* Reverse the result */
-
     return result;    
 }
 
@@ -169,6 +216,20 @@ char *handleInstruction(char *line, Node **symbolTableHead)
         {
             printIntError(ERROR_CODE_32);
         }
+
+        char *firstPart = "0000";
+        char *binaryLine = calloc(1, sizeof(char) * 8);
+        if (binaryLine == NULL) {
+            printIntError(ERROR_CODE_10);
+        }
+        strcat(binaryLine, firstPart);
+        strcat(binaryLine, instructionsInBinary[instructionIndex]);
+
+        printf("%s\n", binaryLine);
+
+        char *result = handleTwoOperands(parsedLine[1], parsedLine[2], symbolTableHead, binaryLine);
+        //printf("%s\n", result);
+        return result;
     }
 
     if(instructionIndex == 4 || instructionIndex == 5 || (instructionIndex >= 7 && instructionIndex <= 13))
@@ -223,7 +284,7 @@ char* handleString(char *line) {
         /* Convert the character to ascii and then to binary */
         int number = parsedLine[1][i];
         /* Convert the number to a binary string */
-        char *binaryNumber = intToBinaryString(number);
+        char *binaryNumber = intToBinary(number, BITS_AMOUNT);
         /* Add the binary number to the binary line */
         strcat(binaryLine, binaryNumber);
     }
@@ -262,7 +323,7 @@ char *handleData(char *line, Node **symbolTableHead)
             /* Convert the string to an integer */
             int number = atoi(parsedLine[i]);
             /* Convert the number to a binary string */
-            char *binaryNumber = intToBinaryString(number);
+            char *binaryNumber = intToBinary(number, BITS_AMOUNT);
             /* Add the binary number to the binary line */
             strcat(binaryLine, binaryNumber);
         }
@@ -275,7 +336,7 @@ char *handleData(char *line, Node **symbolTableHead)
             if (found == 1)
             {
                 /* Convert the constant to a binary string */
-                char *binaryNumber = intToBinaryString(node->line);
+                char *binaryNumber = intToBinary(node->line, BITS_AMOUNT);
                 /* Add the binary number to the binary line */
                 strcat(binaryLine, binaryNumber);
             }

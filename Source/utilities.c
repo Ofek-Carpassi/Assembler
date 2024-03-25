@@ -144,41 +144,37 @@ int countWords(char *line)
 }
 
 /* Explained in the header file */
-void intToBinary(int num, char **res) 
+char *intToBinary(int num, int bits)
 {
-    /* loop through the bits of the number */
-    for (int i = 0; i < BITS_AMOUNT; i++) 
-    {
-        /* if the bit is 1, set the corresponding bit in the result to 1, otherwise set it to 0 */
-        (*res)[BITS_AMOUNT - 1 - i] = (num & (1 << i)) ? '1' : '0';
-    }
-    /* add the null terminator to the end of the result */
-    (*res)[BITS_AMOUNT] = '\0';
-}
-
-/* Explained in the header file */
-char *intToBinaryString(int num) 
-{
-    /* Allocate memory for the result */
-    char *res = (char *)malloc(sizeof(char) * (BITS_AMOUNT + 1)); // +1 for the null terminator
-    if (res == NULL)
+    /* Allocate a char array to store the result */
+    char *result = (char *)calloc(14, sizeof(char));
+    if (result == NULL)
     {
         printIntError(ERROR_CODE_10);
     }
-    /* Convert the number to binary */
-    intToBinary(num, &res);
-    /* add a new line character to the end of the result */
-    strcat(res, "\n");
-    /* return the result */
-    return res;
+
+    /* Loop through the bits of the number */
+    for (int i = 0; i < bits; i++) 
+    {
+        /* If the bit is 1, set the corresponding bit in the result to 1, otherwise set it to 0 */
+        result[bits - 1 - i] = (num & (1 << i)) ? '1' : '0';
+    }
+
+    /* Add the null terminator to the end of the result */
+    result[bits] = '\0';
+
+    return result;
 }
 
 /* Explained in the header file */
-char *addressingMethod(char *operand, Node *symbolTable)
+char *addressingMethod(char *operand, Node *symbolTable, int *addressingMethod)
 {
     /* If the operand is a register, return the register addressing method */
     if(operand[0] == '#')
+    {
+        *addressingMethod = 0;
         return "00";
+    }
     else if(operand[0] == 'r')
     {
         if(strlen(operand) > 2)
@@ -191,6 +187,7 @@ char *addressingMethod(char *operand, Node *symbolTable)
             printIntError(ERROR_CODE_32);
             return "11";
         }
+        *addressingMethod = 3;
         return "11";
     }
 
@@ -199,10 +196,12 @@ char *addressingMethod(char *operand, Node *symbolTable)
     Node *node = searchNodeInList(symbolTable, operand, &found);
     if(found)
     {
+        *addressingMethod = 1;
         return "01";
     }
     else
     {
+        *addressingMethod = 2;
         return "10";
     }
 }
