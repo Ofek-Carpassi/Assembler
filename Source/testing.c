@@ -10,17 +10,17 @@
 
 int main()
 {
-    /*
+    
     char *outputFileName = malloc(sizeof(char) * 9);
     executePreAssembler("test.txt", &outputFileName);
     executeFirstPass("test.txt", &outputFileName);
     printf("%s\n", outputFileName);
-    */
-    Node *head = NULL;
     
-    char *res = handleInstruction("sub r7 r6", &head);
+    // Node *head = NULL;
     
-    printf("%s\n", res);
+    // char *res = handleInstruction("cmp r3 #2", &head);
+    
+    // printf("%s\n", res);
 
     /*
     Operand One: r7, Operand Two: r6
