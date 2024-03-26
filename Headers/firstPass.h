@@ -83,7 +83,7 @@ char *handleTwoOperands(char *operandOne, char *operandTwo, Node **symbolTableHe
  * @param binaryLine A pointer to the binary line.
  * @return 1 if the operation was successful, 0 otherwise.
  */
-int handleOneOperand(char *operand, Node **symbolTableHead, char **binaryLine);
+char *handleOneOperand(char *operand, Node **symbolTableHead, char *binaryLine);
 
 /**
  * @brief This function handles a code declaration.
