@@ -361,6 +361,29 @@ char *handleInstruction(char *line, Node **symbolTableHead)
         {
             printIntError(ERROR_CODE_31);
         }
+
+        if(instructionIndex == 14)
+        {
+            char *result = (char *)calloc(15, sizeof(char));
+            if (result == NULL) {
+                printIntError(ERROR_CODE_10);
+            }
+
+            strcat(result, "00001110000000\n");
+
+            return result;
+        }
+        else
+        {
+            char *result = (char *)calloc(15, sizeof(char));
+            if (result == NULL) {
+                printIntError(ERROR_CODE_10);
+            }
+
+            strcat(result, "00001111000000\n");
+
+            return result;
+        }
     }
 }
 
