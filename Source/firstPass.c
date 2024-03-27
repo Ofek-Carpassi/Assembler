@@ -220,6 +220,71 @@ char *handleTwoOperands(char *operandOne, char *operandTwo, Node **symbolTableHe
     return result;    
 }
 
+char *handleOneOperand(char *operand, Node **symbolTableHead, char *binaryLine)
+{
+    int addressing = 0;
+    char *methodAddressing = addressingMethod(operand, *symbolTableHead, &addressing);
+    char *ARE = "00";
+
+    char *result = (char *)calloc(30, sizeof(char));
+    if (result == NULL) {
+        printIntError(ERROR_CODE_10);
+    }
+
+    /*
+    bits 0 - 1: ARE
+    bits 2 - 3: 00 (not used)
+    bits 4 - 5: addressing method
+    bits 6 - 9: opcode
+    bits 10 - 13: 0000 (not used)
+    bit 14: '\n'
+    */
+    strcat(result, binaryLine);
+    strcat(result, methodAddressing);
+    strcat(result, "00");
+    strcat(result, ARE);
+    strcat(result, "\n");
+
+    if(addressing == 0)
+    {
+        result = realloc(result, sizeof(char) * 30);
+        if(result == NULL)
+        {
+            printIntError(ERROR_CODE_10);
+        }
+
+        int number = 0;
+        int length = strlen(operand);
+        for(int i = 1; i < length; i++)
+        {
+            number = number * 10 + (operand[i] - '0');
+        }
+
+        char *binaryNumber = intToBinary(number, 12);
+        
+        strcat(result, binaryNumber);
+        strcat(result, "00\n");
+
+        free(binaryNumber);
+    }
+    else if(addressing == 3)
+    {
+        result = realloc(result, sizeof(char) * 30);
+        if(result == NULL)
+        {
+            printIntError(ERROR_CODE_10);
+        }
+
+        char *binaryNumber = intToBinary(operand[1] - '0', 3);
+        
+        strcat(result, "0000000");
+        strcat(result, binaryNumber);
+        strcat(result, "0000\n");
+    }
+
+    return result;
+}
+
 /* Purpose is explained in the header file */
 char *handleInstruction(char *line, Node **symbolTableHead)
 {
@@ -276,6 +341,18 @@ char *handleInstruction(char *line, Node **symbolTableHead)
         {
             printIntError(ERROR_CODE_32);
         }
+
+        char *binaryLine = (char *)calloc(9, sizeof(char));
+        if (binaryLine == NULL) {
+            printIntError(ERROR_CODE_10);
+        }
+
+        strcat(binaryLine, "0000");
+        strcat(binaryLine, instructionsInBinary[instructionIndex]);
+
+        char *result = handleOneOperand(parsedLine[1], symbolTableHead, binaryLine);
+
+        return result;
     }
 
     if(instructionIndex == 14 || instructionIndex == 15)
@@ -302,11 +379,19 @@ char* handleString(char *line) {
     char *parsedLine[wordAmount]; /* Create an array to store the parsed line */
     parseLine(line, parsedLine); /* Parse the line */
 
-    /* Create a new string to store the binary line */
-    char *binaryLine = calloc(1, sizeof(char) * 1); 
-    if (binaryLine == NULL) {
-        printIntError(ERROR_CODE_10);
+    int amountOfChars = 0;
+    for(int i = 0; parsedLine[1][i] != '\0'; i++)
+    {
+        if(parsedLine[1][i] == '"')
+        {
+            continue;
+        }
+        amountOfChars++;
     }
+
+    int lengthOfBinaryLine = amountOfChars * 15; /* Calculate the length of the binary line */
+
+    char *binaryLine = (char *)calloc(lengthOfBinaryLine, sizeof(char)); /* Create a new string to store the binary line */
 
     /* Loop through the string */
     int i = 0;
@@ -321,10 +406,8 @@ char* handleString(char *line) {
         char *binaryNumber = intToBinary(number, BITS_AMOUNT);
         /* Add the binary number to the binary line */
         strcat(binaryLine, binaryNumber);
+        strcat(binaryLine, "\n");
     }
-    /* Add a null terminator to the binary line */
-    int length = strlen(binaryLine);
-    binaryLine[length] = '\0';
     /* Return the binary line */
     return binaryLine;
 }
@@ -341,15 +424,16 @@ char *handleData(char *line, Node **symbolTableHead)
     char *parsedLine[wordAmount]; /* Create an array to store the parsed line */
     parseLine(line, parsedLine); /* Parse the line */
 
-    int length = wordAmount; /* Calculate the length of the binary line */
+    int amountOfNumbers = wordAmount; /* Calculate the amount of numbers in the line */
+    int lengthOfBinaryLine = amountOfNumbers * 15; /* Calculate the length of the binary line */
 
-    char *binaryLine = calloc(1, sizeof(char) * 1); /* Create a new string to store the binary line */
+    char *binaryLine = (char *)calloc(lengthOfBinaryLine, sizeof(char)); /* Create a new string to store the binary line */
     if (binaryLine == NULL) {
         printIntError(ERROR_CODE_10);
     }
 
     /* Loop through the parsed line */
-    for (int i = 1; i < length; i++)
+    for (int i = 1; i < amountOfNumbers; i++)
     {
         /* Check if the string is a number */
         if(isNumber(parsedLine[i]) == 1)
@@ -360,6 +444,7 @@ char *handleData(char *line, Node **symbolTableHead)
             char *binaryNumber = intToBinary(number, BITS_AMOUNT);
             /* Add the binary number to the binary line */
             strcat(binaryLine, binaryNumber);
+            strcat(binaryLine, "\n");
         }
         else
         {
@@ -373,14 +458,14 @@ char *handleData(char *line, Node **symbolTableHead)
                 char *binaryNumber = intToBinary(node->line, BITS_AMOUNT);
                 /* Add the binary number to the binary line */
                 strcat(binaryLine, binaryNumber);
+                strcat(binaryLine, "\n");
             }
             else
                 printIntError(ERROR_CODE_33); /* Print an error */
         }
     }
     /* Add a null terminator to the binary line */
-    length = strlen(binaryLine);
-    binaryLine[length] = '\0';
+    //binaryLine[lengthOfBinaryLine] = '\0';
     /* Return the binary line */
     return binaryLine;
 }

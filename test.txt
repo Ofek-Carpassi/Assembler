@@ -1,1 +1,4 @@
 prn #-5
+sub r1 r4
+LIST: .data 6 -9 2
+.string "a"
