@@ -10,7 +10,11 @@
 char *cleanLine(char *line)
 {
     /* Allocate memory for the cleaned line - same size + 1 for the null character */
-    char *cleanedLine = (char *)malloc(sizeof(char) * (strlen(line)+1));
+    char *cleanedLine = (char *)calloc(strlen(line) + 1, sizeof(char));
+    if (cleanedLine == NULL)
+    {
+        printIntError(ERROR_CODE_10);
+    }
     int originalIndex = 0; /* Index for the original line */
     int cleanedIndex = 0; /* Index for the cleaned line */
 
@@ -38,30 +42,19 @@ char *cleanLine(char *line)
         originalIndex++;
     }
     
-    /* Add the null character and the space at the end of the line */
-    cleanedLine[cleanedIndex] = ' ';
-    cleanedLine[cleanedIndex+1] = '\0';
-
     /* If the first character is a space, shift everything to the left */
-    if(cleanedLine[0] == ' ')
+    while(cleanedLine[0] == ' ')
     {
-        /* Shift everything one character to the left */
-        for(int i = 0; i < strlen(cleanedLine); i++)
+        for(int i = 0; i < cleanedIndex; i++)
         {
             cleanedLine[i] = cleanedLine[i+1];
         }
+        cleanedIndex--;
     }
 
-    if(cleanedLine[0] == ' ')
-    {
-        /* Shift everything one character to the left */
-        for(int i = 0; i < strlen(cleanedLine); i++)
-        {
-            cleanedLine[i] = cleanedLine[i+1];
-        }   
-    }
-
-    //printf("%s\n", cleanedLine);
+    /* Add the null character and the space at the end of the line */
+    cleanedLine[cleanedIndex] = ' ';
+    cleanedLine[cleanedIndex+1] = '\0';
 
     /* Return the cleaned line */
     return cleanedLine;
@@ -136,6 +129,10 @@ int countWords(char *line)
         /* If the current character is a space, increment the count */
         if(line[i++] == ' ')
         {
+            if(line[i] == '\0' || line[i] == '\n' || line[i] == '\t')
+            {
+                continue;
+            }
             count++;
         }
     }

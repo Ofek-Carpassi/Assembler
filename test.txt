@@ -1,4 +1,4 @@
-prn #-5
-sub r1 r4
-LIST: .data 6 -9 2
-.string "a"
+mcr m_mcr
+    cmp r3 #sz
+endmcr 
+m_mcr

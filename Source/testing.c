@@ -12,8 +12,8 @@ int main()
 {
     
     char *outputFileName = malloc(sizeof(char) * 9);
-    //executePreAssembler("test.txt", &outputFileName);
-    executeFirstPass("test.txt", &outputFileName);
+    executePreAssembler("test.txt", &outputFileName);
+    //executeFirstPass("test.txt", &outputFileName);
     printf("%s\n", outputFileName);
     
     // Node *head = NULL;

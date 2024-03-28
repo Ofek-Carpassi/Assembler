@@ -38,7 +38,7 @@ char *getMacroName(char *line);
  * @param name - a string containing the name of the macro.
  * @return - 1 if the macro was saved successfully, 0 otherwise.
  */
-int saveMacroToList(char *file, Node **head, int *lineNumber, char *name);
+int saveMacroToList(char *file, Node **head, int lineNumber, char *name);
 
 /**
  * @brief This function is used to check if a macro's name is valid.
@@ -64,6 +64,8 @@ int isValidMacroName(char *name);
  * @return - 1 if the macro call was replaced successfully, 0 otherwise.
  */
 int *replaceMacroCall(Node *macro, char *file);
+
+int isCallToMacro(char *line, Node **head);
 
 /**
 * Execute the pre assembler (the macro expansion) for the source file.
