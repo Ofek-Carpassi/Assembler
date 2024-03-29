@@ -56,18 +56,13 @@ int saveMacroToList(char *file, Node **head, int lineNumber, char *name)
     while(fgets(line, MAX_LINE_LENGTH, inputFile) != NULL && strncmp(line, "endmcr", 6) != 0)
     {
         char *cleanedLine = cleanLine(line);
-
-        macroDefinition = realloc(macroDefinition, strlen(macroDefinition) + strlen(cleanedLine) + 1);
+        /* Concatenate the line to the macro definition */
+        macroDefinition = realloc(macroDefinition, strlen(macroDefinition) + strlen(cleanedLine) + 2);
         if(macroDefinition == NULL)
         {
             printIntError(ERROR_CODE_10);
         }
-
-        /* Save the line to the linked list */
         strcat(macroDefinition, cleanedLine);
-        strcat(macroDefinition, "\n");
-
-        /* Free the cleaned line */
         free(cleanedLine);
 
         /* Increment the line number */
@@ -76,6 +71,27 @@ int saveMacroToList(char *file, Node **head, int lineNumber, char *name)
 
     /* Close the file */
     fclose(inputFile);
+
+    for(int i = 0; i < strlen(macroDefinition); i++)
+    {
+        // If the line is empty, remove it (but keep the new line at the end of the line)
+        if(macroDefinition[i] == '\n' && macroDefinition[i+1] == '\n')
+        {
+            // Remove the new line
+            for(int j = i; j < strlen(macroDefinition); j++)
+            {
+                macroDefinition[j] = macroDefinition[j+1];
+            }
+        }
+        if(macroDefinition[i] == ' ' && macroDefinition[i-1] == '\n')
+        {
+            // Remove the space
+            for(int j = i; j < strlen(macroDefinition); j++)
+            {
+                macroDefinition[j] = macroDefinition[j+1];
+            }
+        }
+    }
 
     /* Create a new node */
     addNode(head, name, macroDefinition, lineNumber);
@@ -106,8 +122,17 @@ int isCallToMacro(char *line, Node **head)
     /* Check if the single word in the line is a macro name */
     if(countWords(line) == 1)
     {
-        /* Remove the space at the end of the line */
-        line[strlen(line) - 1] = '\0';
+        for(int i = 0; i < strlen(line); i++)
+        {
+            /* If the current char is a letter or digit and the next one isn't a letter or digit, replace the next one with \0 */
+            if((line[i] >= 'a' && line[i] <= 'z') || (line[i] >= 'A' && line[i] <= 'Z') || (line[i] >= '0' && line[i] <= '9'))
+            {
+                if(line[i+1] == ' ' || line[i+1] == '\n' || line[i+1] == '\t')
+                {
+                    line[i+1] = '\0';
+                }
+            }
+        }
         int found = 0;
         Node *node = searchNodeInList(*head, line, &found);
         if(found)
@@ -152,12 +177,19 @@ void executePreAssembler(char *file, char *outputFileName[])
     /* Loop through the input file */
     while (fgets(line, MAX_LINE_LENGTH, inputFile) != NULL)
     {
-        printf("Line: %s\n", line);
+        printf("line: %s\n", line);
         /* Clean the line */
         char *cleanedLine = cleanLine(line);
+        printf("cleanedLine: %s\n", cleanedLine);
+        if(cleanedLine[0] == '\0')
+        {
+            continue;
+        }
+
         /* Print the cleaned line to the output file */
         if (!isMacroDeclaration(cleanedLine))
         {
+            printf("isnt macro declaration\n");
             if(isCallToMacro(cleanedLine, &macroList) == 1)
             {
                 /* Replace the macro call with the macro's definition */
@@ -167,7 +199,9 @@ void executePreAssembler(char *file, char *outputFileName[])
             }
             else
             {
-                fprintf(outputFile, "%s\n", cleanedLine);
+                printf("printing line\n");
+                fprintf(outputFile, "%s", cleanedLine);
+                printf("line printed\n");
             }
         }
         else
@@ -189,7 +223,10 @@ void executePreAssembler(char *file, char *outputFileName[])
             }
         }
 
+        printf("freeing cleanedLine\n");
+        /* Free the cleaned line */
         free(cleanedLine);
+        printf("cleanedLine freed\n");
         lineNumber++;
     }
 }

@@ -19,29 +19,29 @@
  */
 Node *createNode(char *name, char *data, int value)
 {
-    Node* node = (Node *)malloc(sizeof(Node));
-    if (node == NULL)
+    Node *newNode = (Node *)malloc(sizeof(Node));
+    if (newNode == NULL)
     {
         return NULL;
     }
-    node->name = (char *)malloc(strlen(name) + 1);
-    if (node->name == NULL)
+    newNode->name = (char *)malloc(strlen(name) + 1);
+    if (newNode->name == NULL)
     {
-        free(node);
+        free(newNode);
         return NULL;
     }
-    strcpy(node->name, name);
-    node->data = (char *)malloc(strlen(data) + 1);
-    if (node->data == NULL)
+    newNode->data = (char *)malloc(strlen(data) + 1);
+    if (newNode->data == NULL)
     {
-        free(node->name);
-        free(node);
+        free(newNode->name);
+        free(newNode);
         return NULL;
     }
-    strcpy(node->data, data);
-    node->line = value;
-    node->next = NULL;
-    return node;
+    strcpy(newNode->name, name);
+    strcpy(newNode->data, data);
+    newNode->line = value;
+    newNode->next = NULL;
+    return newNode;
 }
 
 /**
