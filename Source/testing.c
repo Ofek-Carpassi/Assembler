@@ -9,26 +9,12 @@
 #include "../Headers/utilities.h"
 
 int main()
-{
-    
+{   
     char *outputFileName = malloc(sizeof(char) * 9);
     executePreAssembler("test.txt", &outputFileName);
     //executeFirstPass("test.txt", &outputFileName);
+    //executeFirstPass("test.txt", &outputFileName);
     printf("%s\n", outputFileName);
-    
-    // Node *head = NULL;
-    
-    // char *res = handleInstruction("cmp r3 #2", &head);
-    
-    // printf("%s\n", res);
-
-    /*
-    Operand One: r7, Operand Two: r6
-    The current binary line is: 00000011
-    expect:
-    00000011111100
-    00000001111100
-    */
    
     return 0;
 }

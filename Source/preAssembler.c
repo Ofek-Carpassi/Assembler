@@ -8,61 +8,79 @@
 
 int isMacroDeclaration(char *line)
 {
+    char *cleanedLine = cleanLine(line);
     /* Check if the first word in the line is "mcr" */
-    if (strncmp(line, "mcr", 3) == 0)
+    if (strncmp(cleanedLine, "mcr", 3) == 0)
     {
+        free(cleanedLine);
         return 1;
     }
+    free(cleanedLine);
     return 0;
 }
 
 char *getMacroName(char *line)
 {
+    char *cleanedLine = cleanLine(line);
     /* Create a buffer to store the name */
-    char *name = malloc(sizeof(char) * MAX_LINE_LENGTH);
+    char *name = calloc(MAX_LINE_LENGTH, sizeof(char));
+    if(name == NULL)
+    {
+        printIntError(ERROR_CODE_10);
+    }
     /* Get the second word in the line */
-    sscanf(line, "%*s %s", name);
+    sscanf(cleanedLine, "%*s %s", name);
+    free(cleanedLine);
     /* Return the name */
     return name;
 }
 
-int saveMacroToList(char *file, Node **head, int lineNumber, char *name)
+void saveMacroToList(char *file, Node **head, int*lineNumber, char *name)
 {
     /* Open the file */
     FILE *inputFile = fopen(file, "r");
 
     /* If the file doesn't exist, print an error and return */
     if (inputFile == NULL)
-    {
         printIntError(ERROR_CODE_11);
-    }
+
+    char *line = calloc(MAX_LINE_LENGTH, sizeof(char));
+    if(line == NULL)
+        printIntError(ERROR_CODE_10);
 
     /* Skip all the lines until the lineNumber+1 */
-    for (int i = 1; i <= lineNumber; i++)
-    {
-        char line[MAX_LINE_LENGTH] = "";
+    for (int i = 1; i <= *lineNumber; i++)
         fgets(line, MAX_LINE_LENGTH, inputFile);
-    }
 
     /* Create a buffer to store the line */
-    char line[MAX_LINE_LENGTH] = "";
     char *macroDefinition = calloc(1, sizeof(char));
     if(macroDefinition == NULL)
-    {
         printIntError(ERROR_CODE_10);
-    }
 
-    /* Loop through the file */
-    while(fgets(line, MAX_LINE_LENGTH, inputFile) != NULL && strncmp(line, "endmcr", 6) != 0)
+    /* Loop through the file while there isn't a line with "endmcr" */
+    while(fgets(line, MAX_LINE_LENGTH, inputFile) != NULL)
     {
         char *cleanedLine = cleanLine(line);
-        /* Concatenate the line to the macro definition */
-        macroDefinition = realloc(macroDefinition, strlen(macroDefinition) + strlen(cleanedLine) + 2);
-        if(macroDefinition == NULL)
+        /* Check if the line is the end of the macro */
+        if(strncmp(cleanedLine, "endmcr", 6) == 0)
         {
-            printIntError(ERROR_CODE_10);
+            if(strlen(cleanedLine) > 7)
+                printIntError(ERROR_CODE_4);
+            break;
         }
+        /* Concatenate the line to the macro definition */
+        // Add a tab at the beginning of the cleaned line
+        char *tab = calloc(2, sizeof(char));
+        if(tab == NULL)
+            printIntError(ERROR_CODE_10);
+        tab[0] = '\t';
+        tab[1] = '\0';
+        macroDefinition = realloc(macroDefinition, strlen(macroDefinition) + strlen(tab) + strlen(cleanedLine) + 1);
+        if(macroDefinition == NULL)
+            printIntError(ERROR_CODE_10);
+        strcat(macroDefinition, tab);
         strcat(macroDefinition, cleanedLine);
+        free(tab);
         free(cleanedLine);
 
         /* Increment the line number */
@@ -79,25 +97,18 @@ int saveMacroToList(char *file, Node **head, int lineNumber, char *name)
         {
             // Remove the new line
             for(int j = i; j < strlen(macroDefinition); j++)
-            {
                 macroDefinition[j] = macroDefinition[j+1];
-            }
         }
         if(macroDefinition[i] == ' ' && macroDefinition[i-1] == '\n')
         {
             // Remove the space
             for(int j = i; j < strlen(macroDefinition); j++)
-            {
                 macroDefinition[j] = macroDefinition[j+1];
-            }
         }
     }
 
     /* Create a new node */
-    addNode(head, name, macroDefinition, lineNumber);
-
-    /* Return 1 */
-    return lineNumber;
+    addNode(head, name, macroDefinition, *lineNumber);
 }
 
 int isValidMacroName(char *name)
@@ -106,40 +117,30 @@ int isValidMacroName(char *name)
     char *invalidNames[] = {"mcr", "endmcr", ".data", ".string", ".entry", ".extern", "mov", "cmp", "add", "sub", "lea", "clr", "not", "inc", "dec", "jmp", "bne", "red", "prn", "jsr", "rts", "stop", "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7"};
     /* Loop through the array */
     for (int i = 0; i < 27; i++)
-    {
         /* If the name is invalid, return 0 */
         if (strcmp(name, invalidNames[i]) == 0)
-        {
             return 0;
-        }
-    }
     /* Return 1 */
     return 1;
 }
 
 int isCallToMacro(char *line, Node **head)
 {
+    char *cleanedLine = cleanLine(line);
     /* Check if the single word in the line is a macro name */
-    if(countWords(line) == 1)
+    if(countWords(cleanedLine) == 1)
     {
-        for(int i = 0; i < strlen(line); i++)
-        {
-            /* If the current char is a letter or digit and the next one isn't a letter or digit, replace the next one with \0 */
-            if((line[i] >= 'a' && line[i] <= 'z') || (line[i] >= 'A' && line[i] <= 'Z') || (line[i] >= '0' && line[i] <= '9'))
-            {
-                if(line[i+1] == ' ' || line[i+1] == '\n' || line[i+1] == '\t')
-                {
-                    line[i+1] = '\0';
-                }
-            }
-        }
         int found = 0;
-        Node *node = searchNodeInList(*head, line, &found);
+        /* Remove the last character from the line */
+        cleanedLine[strlen(cleanedLine) - 1] = '\0';
+        Node *node = searchNodeInList(*head, cleanedLine, &found);
         if(found)
         {
+            free(cleanedLine);
             return 1;
         }
     }
+    free(cleanedLine);
     return 0;
 }
 
@@ -155,19 +156,17 @@ void executePreAssembler(char *file, char *outputFileName[])
     FILE *inputFile = fopen(file, "r");
     /* If the file doesn't exist, print an error and return */
     if (inputFile == NULL)
-    {
         printIntError(ERROR_CODE_11);
-    }
 
     /* Create an output file with the same name but with the extension .am */
-    *outputFileName = malloc(sizeof(char) * (strlen(file) + 1));
+    *outputFileName = calloc(strlen(file) + 1, sizeof(char));
+    if(*outputFileName == NULL)
+        printIntError(ERROR_CODE_10);
     strcpy(*outputFileName, file);
-    /* Replace the last character with 'm' */
-    (*outputFileName)[strlen(file) - 1] = '\0';
-    /* Replace the last character with 'm' */
-    (*outputFileName)[strlen(file) - 2] = 'm';
-    /* Replace the second to last character with 'a' */
+    /* Replace the file from <name>.txt\0 to <name>.am\0 */
     (*outputFileName)[strlen(file) - 3] = 'a';
+    (*outputFileName)[strlen(file) - 2] = 'm';
+    (*outputFileName)[strlen(file) - 1] = '\0';
     /* Open the output file */
     FILE *outputFile = fopen(*outputFileName, "w");
 
@@ -177,56 +176,35 @@ void executePreAssembler(char *file, char *outputFileName[])
     /* Loop through the input file */
     while (fgets(line, MAX_LINE_LENGTH, inputFile) != NULL)
     {
-        printf("line: %s\n", line);
-        /* Clean the line */
-        char *cleanedLine = cleanLine(line);
-        printf("cleanedLine: %s\n", cleanedLine);
-        if(cleanedLine[0] == '\0')
-        {
-            continue;
-        }
-
         /* Print the cleaned line to the output file */
-        if (!isMacroDeclaration(cleanedLine))
+        if (!isMacroDeclaration(line))
         {
-            printf("isnt macro declaration\n");
-            if(isCallToMacro(cleanedLine, &macroList) == 1)
+            if(isCallToMacro(line, &macroList) == 1)
             {
                 /* Replace the macro call with the macro's definition */
                 int found = 0;
+                char *cleanedLine = cleanLine(line);
+                cleanedLine[strlen(cleanedLine) - 1] = '\0';
                 Node *node = searchNodeInList(macroList, cleanedLine, &found);
+                free(cleanedLine);
                 fprintf(outputFile, "%s", node->data);
             }
             else
-            {
-                printf("printing line\n");
-                fprintf(outputFile, "%s", cleanedLine);
-                printf("line printed\n");
-            }
+                fprintf(outputFile, "%s", line);
         }
         else
         {
             /* Get the name of the macro */
-            char *name = getMacroName(cleanedLine);
+            char *name = getMacroName(line);
             /* Check if the name is valid */
             if (!isValidMacroName(name))
-            {
                 printIntError(ERROR_CODE_3);
-            }
             /* Save the macro to the linked list */
-            lineNumber = saveMacroToList(file, &macroList, lineNumber, name);
-
+            saveMacroToList(file, &macroList, &lineNumber, name);
             /* Skip the lines of the macro */
             for (int i = 1; i <= lineNumber; i++)
-            {
                 fgets(line, MAX_LINE_LENGTH, inputFile);
-            }
         }
-
-        printf("freeing cleanedLine\n");
-        /* Free the cleaned line */
-        free(cleanedLine);
-        printf("cleanedLine freed\n");
         lineNumber++;
     }
 }

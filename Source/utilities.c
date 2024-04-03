@@ -53,8 +53,7 @@ char *cleanLine(char *line)
     }
 
     /* Add the null character and the space at the end of the line */
-    cleanedLine[cleanedIndex] = ' ';
-    cleanedLine[cleanedIndex+1] = '\0';
+    cleanedLine[cleanedIndex] = '\0';  
 
     /* Return the cleaned line */
     return cleanedLine;
@@ -126,15 +125,10 @@ int countWords(char *line)
     /* Loop through the line */
     while(line[i] != '\0')
     {
-        /* If the current character is a space, increment the count */
-        if(line[i++] == ' ')
-        {
-            if(line[i] == '\0' || line[i] == '\n' || line[i] == '\t')
-            {
-                continue;
-            }
+        /* If the current char is a char and the next char is a space, increment the count */
+        if(line[i] != ' ' && line[i+1] == ' ')
             count++;
-        }
+        i++;
     }
     /* Return the count (add 1 because the last word doesn't have a space after it) */
     return count+1;
