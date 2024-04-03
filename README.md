@@ -63,4 +63,4 @@ In the context of this project, contributions are like cherished treasures—whi
 
 Crafted with dedication by [Ofek Carpassi](https://github.com/Ofek-Carpassi) and [Natanel Sorokin](https://github.com/NatanelSorokin). All rights reserved.
 
-[MIT License](https://github.com/Ofek-Carpassi/Assembler?tab=MIT-1-ov-file#)
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
