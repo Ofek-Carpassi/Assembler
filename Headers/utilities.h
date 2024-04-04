@@ -75,4 +75,14 @@ char *intToBinaryString(int num, int bits);
  */
 char *addressingMethod(char *operand, Node *symbolTable, int *addressingMethod);
 
+/**
+ * @brief This function is used to remove commas from a string.
+ * 
+ * This function will remove commas from a string and return the string without commas.
+ * 
+ * @param line - a string containing the line to remove commas from.
+ * @return - a string containing the line without commas.
+ */
+char *removeCommas(char *line);
+
 #endif

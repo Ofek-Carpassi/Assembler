@@ -11,8 +11,11 @@ LOOP:   jmp L1
         m_mcr
 L1:     inc K
         bne LOOP
+        m_mcr
 END:    hlt
 .define len = 4
 STR:    .string “abcdef”
 LIST:   .data 6, -9, len
 K: .data 22
+        m_mcr
+        m_mcr

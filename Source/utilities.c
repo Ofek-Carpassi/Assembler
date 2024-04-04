@@ -196,3 +196,39 @@ char *addressingMethod(char *operand, Node *symbolTable, int *addressingMethod)
         return "10";
     }
 }
+
+char *removeCommas(char *line)
+{
+    /* Allocate memory for the cleaned line - same size + 1 for the null character */
+    char *cleanedLine = (char *)calloc(strlen(line) + 1, sizeof(char));
+    if (cleanedLine == NULL)
+    {
+        printIntError(ERROR_CODE_10);
+    }
+    int originalIndex = 0; /* Index for the original line */
+    int cleanedIndex = 0; /* Index for the cleaned line */
+
+    /* Loop through the original line */
+    while (line[originalIndex] != '\0')
+    {
+        /* If the current character is a comma, skip it */
+        if(line[originalIndex] == ',')
+        {
+            originalIndex++;
+            continue;
+        }
+
+        /* Copy the character to the cleaned line */
+        cleanedLine[cleanedIndex] = line[originalIndex];
+
+        /* Increment the indexes */
+        cleanedIndex++; 
+        originalIndex++;
+    }
+
+    /* Add the null character and the space at the end of the line */
+    cleanedLine[cleanedIndex] = '\0';  
+
+    /* Return the cleaned line */
+    return cleanedLine;
+}

@@ -238,4 +238,11 @@ void executePreAssembler(char *file, char *outputFileName[])
         /* Increment the line number */
         lineNumber++;
     }
+
+    /* Close the input and output files */
+    fclose(inputFile);
+    fclose(outputFile);
+
+    /* Free the macro list */
+    freeList(&macroList);
 }

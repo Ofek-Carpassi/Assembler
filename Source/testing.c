@@ -10,11 +10,13 @@
 
 int main()
 {   
-    char *outputFileName = malloc(sizeof(char) * 9);
-    executePreAssembler("test.txt", &outputFileName);
-    //executeFirstPass("test.txt", &outputFileName);
-    //executeFirstPass("test.txt", &outputFileName);
-    printf("%s\n", outputFileName);
+    char *inputFile = "test.txt";
+    char *preAssemblerOutput = (char *)malloc(strlen(inputFile));
+    char *firstPassOutput = (char *)malloc(strlen(inputFile));
+    executePreAssembler("test.txt", &preAssemblerOutput);
+    printf("%s\n", preAssemblerOutput);
+    executeFirstPass(preAssemblerOutput, &firstPassOutput);
+    printf("%s\n", firstPassOutput);
    
     return 0;
 }

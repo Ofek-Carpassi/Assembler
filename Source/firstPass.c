@@ -32,14 +32,12 @@ int isInstruction(char *word)
 }
 
 /* Purpose is explained in the header file */
-int checkLineType(char *line)
+char *checkLineType(char *line)
 {
-
-    /* If the line is a comment, set the line type to comment */
-    if (line[0] == ';' || line[0] == '\n') // If the line is a comment
-    {
-        return COMMENT; /* Return the comment type - the program will ignore this line */
-    }
+    printf("Line: %s\n", line);
+    /* Return an empty string if the line is empty - the executer will write nothing to the output file */
+    if (line[0] == ';' || line[0] == '\n')
+        return "";
 
     int wordAmount = countWords(line); /* Count the words in the line */
     if (wordAmount == 0) /* If the are no words in the line */
@@ -55,9 +53,12 @@ int checkLineType(char *line)
     /* Check the first word in the line is .define - constant declaration */
     if(strcmp(parsedLine[0], ".define") == 0)
     {
+        printf("Constant\n");
         /* Use handleConstant to add the constant to the symbol table */
         handleConstant(line, &symbolTable);
-        return CONSTANT;
+        printf("Constant added\n");
+        /* Return nothing - the executer will write nothing to the output file */
+        return "";
     }
     /* Check if the first word in the line is .data - data declaration */
     else if(strcmp(parsedLine[0], ".data") == 0)
@@ -65,7 +66,8 @@ int checkLineType(char *line)
         /* Use handleData to translate the data to binary */
         char *binaryLine = handleData(line, &symbolTable);
         printf("%s\n", binaryLine);
-        return DATA;
+        /* Return the binary line - the executer will write it to the output file */
+        return binaryLine;
     }
     /* Check if the first word in the line is .string - string declaration */
     else if(strcmp(parsedLine[0], ".string") == 0)
@@ -73,33 +75,38 @@ int checkLineType(char *line)
         /* Use handleString to translate the string to binary */
         char *binaryLine = handleString(line);
         printf("%s\n", binaryLine);
-        return STRING;
+        /* Return the binary line - the executer will write it to the output file */
+        return binaryLine;
     }
     else if(strcmp(parsedLine[0], ".entry") == 0)
     {
-        return ENTRY;
+        return "";
     }
     else if(strcmp(parsedLine[0], ".extern") == 0)
     {
-        return EXTERN;
+        return "";
     }
     /* If the first word ends with a colon - label declaration */
     else if(parsedLine[0][strlen(parsedLine[0]) - 1] == ':')
     {
+        printf("Label\n");
         /* Create a new line without the label - translate it to binary and add the label to the symbol table */
         char *newLine = handleLabel(line, &symbolTable);
-        int secondaryLineType = checkLineType(newLine);
-        return LABEL;
+        printf("New Line: %s\n", newLine);
+        char *binaryLine = checkLineType(newLine);
+        printf("%s\n", binaryLine);
+        /* Return the binary line - the executer will write it to the output file */
+        return binaryLine;
     }
     else if (isInstruction(parsedLine[0]))
     {
         char *binaryLine = handleInstruction(line, &symbolTable);
         printf("%s\n", binaryLine);
-        return INSTRUCTION;
+        return binaryLine;
     }
     else
     {
-        return ERROR;
+        return "ERROR";
     }
 }
 
@@ -511,11 +518,20 @@ char *handleLabel(char *line, Node **symbolTableHead)
     ...
 	*/
     /* Check of the type of the second word in the line (code or data) */
-    int type = checkLineType(parsedLine[1]);
+    int type = 0;
+    if (strcmp(parsedLine[1], ".data") == 0)
+        type = DATA;
+    else if (strcmp(parsedLine[1], ".string") == 0)
+        type = STRING;
+    else if (isInstruction(parsedLine[1]))
+        type = INSTRUCTION;
+    else
+        printIntError(ERROR_CODE_31);
     switch (type)
     {
         /* If the type is an instruction */
         case INSTRUCTION:
+            printf("Instruction\n");
             /* Add the label to the symbol table with the type code */
             addNode(symbolTableHead, parsedLine[0], "code", IC + 100);
             break;
@@ -613,50 +629,47 @@ int calcLength(char *line) {
 void executeFirstPass(char *file, char **outputFileName)
 {
     FILE *inputFile = fopen(file, "r"); // Open the input file
-
     if (inputFile == NULL) // If the file doesn't exist
-    {
         printIntError(ERROR_CODE_11); // Print an error and return
-    }
 
-    /* Create the output file name */
-    char outputName[strlen(file) + 2];
-    /* Copy the input file name to the output file name and change the ending to .am */
+    char outputName[MAX_LINE_LENGTH] = "";
     strcpy(outputName, file);
 
-    /* Find the dot in the file name */
     int dotIndex = 0;
-    while (outputName[dotIndex] != '.')
-    {
-        dotIndex++;
-    }
+    while (outputName[dotIndex++] != '.');
 
-    /* Change the ending to .am (after the dot there is .txt, so we need to replace it with .am) */
-    outputName[dotIndex++] = '.';
     outputName[dotIndex++] = 'o';
     outputName[dotIndex++] = 'b';
     outputName[dotIndex++] = 'j';
-    outputName[dotIndex++] = '\0';
+    outputName[dotIndex] = '\0';
 
-    /* Allocate memory for the output file name and copy the output name to it */
-    *outputFileName = (char *)malloc(sizeof(char) * (strlen(outputName) + 1));
+    *outputFileName = (char *)calloc(strlen(outputName) + 1, sizeof(char));
+    if (*outputFileName == NULL)
+        printIntError(ERROR_CODE_10);
     strcpy(*outputFileName, outputName);
 
-    /* Open the output file (create it with write permissions) */
     FILE *outputFile = fopen(outputName, "w");
-    /* If the file creation fails, print an error and return */
     if (outputFile == NULL)
-    {
         printIntError(ERROR_CODE_13);
-    }
 
     char line[MAX_LINE_LENGTH] = ""; // Create a buffer to store the line
 
     while(fgets(line, MAX_LINE_LENGTH, inputFile) != NULL) // Loop through the input file
     {
-        int lineType = checkLineType(line); // Check the type of the line
+        printf("%s\n", line);
+        char *cleanedLine = removeCommas(cleanLine(line)); // Clean the line
+        char *binaryLine = checkLineType(cleanedLine); // Check the type of the line
 
         // make sure the constant was added to the symbol table
         // Print the cleaned line to the output file
+
+        if (strcmp(binaryLine, "ERROR") != 0)
+        {
+            fprintf(outputFile, "%s", binaryLine);
+        }
+        free(cleanedLine); // Free the cleaned line
     }
+
+    fclose(inputFile); // Close the input file
+    fclose(outputFile); // Close the output file
 }

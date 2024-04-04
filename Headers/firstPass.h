@@ -170,7 +170,7 @@ void handleConstant(char *line, Node **symbolTableHead);
  *          8 if the line is an instruction
  *          0 if the line is illegal - an error
  */
-int checkLineType(char *line);
+char *checkLineType(char *line);
 
 /**
  * @brief This function executes the first pass algorithm
