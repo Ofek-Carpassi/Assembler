@@ -38,7 +38,7 @@ char *getMacroName(char *line);
  * @param name - a string containing the name of the macro.
  * @return - 1 if the macro was saved successfully, 0 otherwise.
  */
-void saveMacroToList(char *file, Node **head, int*lineNumber, char *name);
+int saveMacroToList(char *file, Node **head, int lineNumber, char *name);
 
 /**
  * @brief This function is used to check if a macro's name is valid.

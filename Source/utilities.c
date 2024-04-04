@@ -10,7 +10,7 @@
 char *cleanLine(char *line)
 {
     /* Allocate memory for the cleaned line - same size + 1 for the null character */
-    char *cleanedLine = (char *)calloc(strlen(line) + 1, sizeof(char));
+    char *cleanedLine = (char *)calloc(strlen(line) + 2, sizeof(char));
     if (cleanedLine == NULL)
     {
         printIntError(ERROR_CODE_10);
