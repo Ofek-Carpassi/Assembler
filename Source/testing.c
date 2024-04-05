@@ -15,8 +15,8 @@ int main()
     char *firstPassOutput = (char *)malloc(strlen(inputFile));
     executePreAssembler("test.txt", &preAssemblerOutput);
     printf("%s\n", preAssemblerOutput);
-    //executeFirstPass(preAssemblerOutput, &firstPassOutput);
-    //printf("%s\n", firstPassOutput);
+    executeFirstPass(preAssemblerOutput, &firstPassOutput);
+    printf("%s\n", firstPassOutput);
    
     return 0;
 }

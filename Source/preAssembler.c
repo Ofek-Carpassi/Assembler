@@ -204,8 +204,6 @@ void executePreAssembler(char *file, char *outputFileName[])
     /* Loop through the input file */
     while (fgets(line, MAX_LINE_LENGTH, inputFile) != NULL)
     {
-        printf("Line: %s", line);
-
         if(line[0] == ';')
         {
             lineNumber++;
@@ -214,7 +212,6 @@ void executePreAssembler(char *file, char *outputFileName[])
         }
 
         char *cleanedLine = cleanLine(line);
-        printf("Cleaned line: %s\n", cleanedLine);
 
         if(cleanedLine == NULL)
             printIntError(ERROR_CODE_10);
@@ -235,8 +232,6 @@ void executePreAssembler(char *file, char *outputFileName[])
             }
             else
             {
-                printf("Line: %s\n", cleanedLine);
-
                 for(int i = 0; i < strlen(cleanedLine); i++)
                 {
                     if(cleanedLine[i] == '\n')

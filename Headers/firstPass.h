@@ -121,7 +121,7 @@ char *handleString(char *line);
  * @param symbolTableHead A pointer to the head of the linked list.
  * @return The data in binary.
  */
-char *handleData(char *line, Node **symbolTableHead);
+char *handleData(char *parsedLine[], Node **symbolTableHead, int wordAmount);
 
 /**
  * @brief This function handles a label.
@@ -134,7 +134,7 @@ char *handleData(char *line, Node **symbolTableHead);
  * @param symbolTableHead A pointer to the head of the linked list.
  * @return 1 if the label was added to the symbol table, 0 otherwise.
  */
-char *handleLabel(char *line, Node **symbolTableHead);
+void *handleLabel(char *parsedLine[], Node **symbolTableHead, int type);
 
 /**
  * @brief This function handles a constant.

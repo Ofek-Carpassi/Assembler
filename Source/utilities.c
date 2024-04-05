@@ -69,7 +69,7 @@ void parseLine(char *line, char *parsedOutput[])
     int lineIndex = 0;
 
     while((c = line[lineIndex]) != '\0' && c != '\n')
-    {
+    {   
         if(c == ' ')
         {
             if(lineIndex == 0)
@@ -214,6 +214,12 @@ char *removeCommas(char *line)
         /* If the current character is a comma, skip it */
         if(line[originalIndex] == ',')
         {
+            /* Remove the comma but if the next character isn't a space, add a space */
+            if(line[originalIndex+1] != ' ')
+            {
+                cleanedLine[cleanedIndex] = ' ';
+                cleanedIndex++;
+            }
             originalIndex++;
             continue;
         }
