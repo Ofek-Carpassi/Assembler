@@ -154,6 +154,8 @@ char *checkLineType(char *line)
         else
             binaryLine = handleData(newParsedLine, &symbolTable, wordAmount);
 
+        DC += wordAmount - 1; /* Increment the data counter by the number of numbers in the data declaration */
+
         return binaryLine;
     }
     /* Check if the first word in the line is .string - string declaration */
@@ -163,6 +165,7 @@ char *checkLineType(char *line)
             handleLabel(parsedLine, &symbolTable, STRING);
         /* Use handleString to translate the string to binary */
         char *binaryLine = handleString(newParsedLine[1]);
+
         return binaryLine;
     }
     else if(strcmp(parsedLine[0], ".entry") == 0)
@@ -523,6 +526,8 @@ char* handleString(char *line) {
     strcat(binaryLine, binaryNumber);
     binaryLineNumber++;
     free(binaryNumber);
+
+    DC += amountOfChars + 1; /* Increment the data counter */
 
     /* Return the binary line */
     return binaryLine;
