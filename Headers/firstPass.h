@@ -96,7 +96,7 @@ char *handleOneOperand(char *operand, Node **symbolTableHead, char *binaryLine);
  * @param symbolTableHead A pointer to the head of the linked list.
  * @return 1 if the label was added to the symbol table, 0 otherwise.
  */
-char *handleInstruction(char *line, Node **symbolTableHead);
+char *handleInstruction(char *line, Node **symbolTableHead, int instructionIndex);
 
 /**
  * @brief This function handles a string.

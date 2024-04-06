@@ -1,5 +1,1 @@
-.define a = 1
-.define b = 2
-.define e = 5
-MAIN: .string "abcdef"
-LOOP:.data a,b,3
+mov r1, r2

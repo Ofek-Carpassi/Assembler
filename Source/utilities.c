@@ -137,64 +137,123 @@ int countWords(char *line)
 /* Explained in the header file */
 char *intToBinary(int num, int bits)
 {
-    /* Allocate a char array to store the result */
-    char *result = (char *)calloc(14, sizeof(char));
-    if (result == NULL)
-    {
+    /* Bits is the number of bits to represent the number */
+    /* Allocate memory for the binary representation */
+    char *binary = (char *)calloc(bits + 1, sizeof(char));
+    if (binary == NULL)
         printIntError(ERROR_CODE_10);
-    }
 
-    /* Loop through the bits of the number */
-    for (int i = 0; i < bits; i++) 
+    /* Loop through the bits */
+    for (int i = bits - 1; i >= 0; i--)
     {
-        /* If the bit is 1, set the corresponding bit in the result to 1, otherwise set it to 0 */
-        result[bits - 1 - i] = (num & (1 << i)) ? '1' : '0';
+        /* If the number is greater than 0, set the current bit to 1 and subtract 1 from the number */
+        if (num >= (1 << i))
+        {
+            binary[bits - 1 - i] = '1';
+            num -= (1 << i);
+        }
+        /* If the number is less than 0, set the current bit to 0 */
+        else
+        {
+            binary[bits - 1 - i] = '0';
+        }
     }
 
-    /* Add the null terminator to the end of the result */
-    result[bits] = '\0';
+    /* Add the null character at the end of the binary representation */
+    binary[bits] = '\0';
 
-    return result;
+    return binary;
 }
 
 /* Explained in the header file */
 char *addressingMethod(char *operand, Node *symbolTable, int *addressingMethod)
 {
-    /* If the operand is a register, return the register addressing method */
+    /* If immediate addressing method */
     if(operand[0] == '#')
     {
         *addressingMethod = 0;
         return "00";
     }
-    else if(operand[0] == 'r')
+
+    int openingBracket = -1;
+    int closingBracket = -1;
+    /* If index addressing method */
+    for(int i = 0; i < strlen(operand); i++)
     {
-        if(strlen(operand) > 2)
+        if(operand[i] == '[')
+            openingBracket = i;
+        else if(operand[i] == ']')
+            closingBracket = i;
+    }
+    if(openingBracket != -1 && closingBracket != -1 && closingBracket > openingBracket)
+    {
+        /* Parse the operand from the brackets */
+        char *inBrackets = (char *)calloc(closingBracket - openingBracket, sizeof(char));
+        char *beforeBrackets = (char *)calloc(openingBracket, sizeof(char));
+        for(int i = 0; i < openingBracket; i++)
         {
-            printIntError(ERROR_CODE_32);
-            return "11";
+            beforeBrackets[i] = operand[i];
         }
-        if(operand[1] < '0' || operand[1] > '7')
+        for(int i = openingBracket+1; i < closingBracket; i++)
         {
-            printIntError(ERROR_CODE_32);
-            return "11";
+            inBrackets[i-openingBracket-1] = operand[i];
         }
-        *addressingMethod = 3;
+
+        int isIndexLegal = -1;
+        /* Check if the value inside the brackets is a number or a constant */
+        if(isNumber(inBrackets))
+            isIndexLegal = 1;
+        else
+        {
+            int found = 0;
+            Node *current = searchNodeInList(symbolTable, inBrackets, &found);
+            if(found)
+                if(strcmp(current->data, "mdefine") == 0)
+                    isIndexLegal = 1;
+        }
+        if(isIndexLegal == -1)
+        {
+            printIntError(ERROR_CODE_13);
+            return "ERROR";
+        }
+
+        /* Make sure the value before the brackets is a label defined with .data or .string */
+        int found = 0;
+        Node *current = searchNodeInList(symbolTable, beforeBrackets, &found);
+        if(found)
+        {
+            if(strcmp(current->data, "data") == 0)
+            {
+                *addressingMethod = 2;
+                return "10";
+            }
+        }
+        printIntError(ERROR_CODE_14);
+        return "ERROR";
+    }
+
+    /* If register addressing method */
+    if(operand[0] == 'r')
+    {
+        if(strlen(operand) == 2 && operand[1] >= '0' && operand[1] <= '7')
+            *addressingMethod = 3;
+        else
+            printIntError(ERROR_CODE_12);
+
         return "11";
     }
 
-    /* Check if constantIndex addressing or direct addressing */
+    /* If direct addressing method */   
     int found = 0;
-    Node *node = searchNodeInList(symbolTable, operand, &found);
+    Node *current = searchNodeInList(symbolTable, operand, &found);
     if(found)
     {
         *addressingMethod = 1;
         return "01";
     }
-    else
-    {
-        *addressingMethod = 2;
-        return "10";
-    }
+
+    printIntError(ERROR_CODE_11);
+    return "ERROR";
 }
 
 char *removeCommas(char *line)

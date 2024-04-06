@@ -24,12 +24,12 @@ int isInstruction(char *word)
         /* Check if the word got from the call is an instruction */
         if (strcmp(word, instructionNames[i]) == 0)
         {
-            /* If it is, return 1 */
-            return 1;
+            /* return the index of the instruction */
+            return i;
         }
     }
-    /* If it's not, return 0 */
-    return 0;
+    /* Return -1 if the word is not an instruction */
+    return -1;
 }
 
 /* Purpose is explained in the header file */
@@ -40,6 +40,7 @@ char *checkLineType(char *line)
         return "";
 
     int wordAmount = countWords(line); /* Count the words in the line */
+    int originalWordAmount = wordAmount;
     if (wordAmount == 0) /* If the are no words in the line */
     {
         printIntError(ERROR_CODE_31); /* Print an error and return */
@@ -57,7 +58,58 @@ char *checkLineType(char *line)
         /* Check if the word contains a , or : */
         for(int j = 0; j < len; j++)
         {
-            /* If after the : or , there is nothing - ignore it */
+            if(parsedLine[i][j] == '[')
+            {
+                /* Break it down to two words
+                One containing everything before the [ and the other containing everything after the [ 
+                <word>[<index] -> <word> <index> */
+                char *firstWord = (char *)calloc(j + 1, sizeof(char));
+                if (firstWord == NULL) {
+                    printIntError(ERROR_CODE_10);
+                }
+                char *secondWord = (char *)calloc(len - j, sizeof(char));
+                if (secondWord == NULL) {
+                    printIntError(ERROR_CODE_10);
+                }
+
+                for(int k = 0; k < j; k++)
+                {
+                    firstWord[k] = parsedLine[i][k];
+                }
+                firstWord[j] = '\0';
+
+                for(int k = j + 1; k < len - 1; k++)
+                {
+                    secondWord[k - j - 1] = parsedLine[i][k];
+                }
+
+                secondWord[len - j - 1] = '\0';
+
+                /* Reallocate the parsed line to have one more word */
+                if (i == wordAmount - 1) {
+                    *parsedLine = realloc(*parsedLine, sizeof(char *) * (wordAmount + 1));
+                    if (parsedLine == NULL) {
+                        printIntError(ERROR_CODE_10);
+                    }
+                }
+
+                /* Shift all the words after the word with the [ */
+                for(int k = wordAmount - 1; k > i; k--)
+                {
+                    parsedLine[k + 1] = parsedLine[k];
+                }
+
+                /* Add the two new words to the parsed line */
+                parsedLine[i] = firstWord;
+                parsedLine[i + 1] = secondWord;
+
+                /* Increment the word amount */
+                wordAmount++;
+
+                /* Break the loop */
+                break;
+            }
+            /* If after the : or , or [] which is a part of the addressing method there is something - break it down to two words */
             if(parsedLine[i][j] == ':' || parsedLine[i][j] == ',')
             {
                 if(parsedLine[i][j+1] == '\0')
@@ -106,12 +158,22 @@ char *checkLineType(char *line)
 
                 /* Increment the word amount */
                 wordAmount++;
+                originalWordAmount++;
 
                 /* Break the loop */
                 break;
             }
         }
     }
+
+    printf("New parsed line: \n");
+    for(int i = 0; i < wordAmount; i++)
+    {
+        printf("%s\n", parsedLine[i]);
+    }
+    printf("\n");
+
+    printf("Line: %s\n", line);
 
     /* Check the first word in the line is .define - constant declaration */
     if(strcmp(parsedLine[0], ".define") == 0)
@@ -168,34 +230,45 @@ char *checkLineType(char *line)
 
         return binaryLine;
     }
-    else if(strcmp(parsedLine[0], ".entry") == 0)
+    /* Check if the first word in the line is .extern */
+    else if(strcmp(newParsedLine[0], ".extern") == 0)
     {
+        for(int i = 1; i < wordAmount; i++)
+            addNode(&symbolTable, parsedLine[i], "external", 0);
         return "";
     }
-    else if(strcmp(parsedLine[0], ".extern") == 0)
+    if(isLabel)
+        handleLabel(parsedLine, &symbolTable, INSTRUCTION);
+    int instructionIndex = isInstruction(newParsedLine[0]);
+    if(instructionIndex != -1)
     {
-        return "";
-    }
-    /* If the first word ends with a colon - label declaration */
-    else if(parsedLine[0][strlen(parsedLine[0]) - 1] == ':')
-    {
-        printf("Label\n");
-        /* Create a new line without the label - translate it to binary and add the label to the symbol table */
-        //char *newLine = handleLabel(line, &symbolTable);
-        //printf("New Line: %s\n", newLine);
-        //char *binaryLine = checkLineType(newLine);
-        //printf("%s\n", binaryLine);
-        /* Return the binary line - the executer will write it to the output file */
-        //return binaryLine;
-    }
-    else if (isInstruction(parsedLine[0]))
-    {
-        char *binaryLine = handleInstruction(line, &symbolTable);
-        return binaryLine;
-    }
-    else
-    {
-        return "ERROR";
+        /* ifLabel - remove the label defenition from the line and pass the rest to handleInstruction */
+        if(isLabel)
+        {
+            char *newLine = (char *)calloc(strlen(line), sizeof(char));
+            if (newLine == NULL) 
+                printIntError(ERROR_CODE_10);
+
+            int i = 0;
+            for(i = 0; line[i] != ':'; i++);
+            while(line[i] == ' ' || line[i] == '\t' || line[i] == ':')
+                i++;
+            /* Copy the rest of the line to the new line */
+            int j = 0;
+            for(j = 0; line[i] != '\0'; i++, j++)
+            {
+                newLine[j] = line[i];
+            }
+            newLine[j] = '\0';
+            printf("New line: %s\n", newLine);
+            char *binaryLine = handleInstruction(newLine, &symbolTable, instructionIndex);
+
+            free(newLine);
+
+            return binaryLine;
+        }
+        /* Use handleInstruction to translate the instruction to binary */
+        char *binaryLine = handleInstruction(line, &symbolTable, instructionIndex);
     }
 }
 
@@ -206,69 +279,105 @@ char *handleTwoOperands(char *operandOne, char *operandTwo, Node **symbolTableHe
     char *addressingMethodTwo = addressingMethod(operandTwo, *symbolTableHead, &secondAddressing);
     char *ARE = "00";
 
-    char *result = (char *)calloc(15, sizeof(char));
-    if (result == NULL) {
+    if(addressingMethodOne == NULL || addressingMethodTwo == NULL)
+    {
         printIntError(ERROR_CODE_10);
+        return NULL;
     }
 
-    strcat(result, binaryLine);
-    strcat(result, addressingMethodOne);
-    strcat(result, addressingMethodTwo);
-    strcat(result, ARE);
-    strcat(result, "\n");
+    char *result = (char *)calloc(15, sizeof(char));
+    if (result == NULL)
+        printIntError(ERROR_CODE_10);
 
-    free(addressingMethodOne);
-    free(addressingMethodTwo);
-
-    if(firstAddressing == secondAddressing && firstAddressing == 3)
+    if(secondAddressing == 0)
     {
-        result = (char *)realloc(result, sizeof(char) * 15);
-        if (result == NULL) {
-            printIntError(ERROR_CODE_10);
-        }
-
-        char *firstNumber = intToBinary(operandOne[1] - '0', 3);
-        char *secondNumber = intToBinary(operandTwo[1] - '0', 3);
-
-        strcat(result, "0000000");
-        strcat(result, firstNumber);
-        strcat(result, secondNumber);
-        strcat(result, "0");
-        strcat(result, "\n");
-
-        return result;
+        printIntError(ERROR_CODE_31);
+        return "ERROR";
     }
 
     if(firstAddressing == 0)
     {
+        ARE = "00";
+        strcat(result, binaryLine);
+        strcat(result, addressingMethodOne);
+        strcat(result, addressingMethodTwo);
+        strcat(result, ARE);
+
         result = realloc(result, sizeof(char) * 15);
         if(result == NULL)
-        {
             printIntError(ERROR_CODE_10);
-        }
 
-        int number = 0;
+        char* variable = (char *)calloc(strlen(operandOne), sizeof(char));
+        if (variable == NULL)
+            printIntError(ERROR_CODE_10);
+
         int length = strlen(operandOne);
         for(int i = 1; i < length; i++)
-        {
-            number = number * 10 + (operandOne[i] - '0');
-        }
+            variable[i-1] = operandOne[i];
+        variable[length-1] = '\0';
 
+        /* Check if it's a number or a constant */
+        int number = 0;
+        if(isNumber(variable) == 0)
+        {
+            int found = 0;
+            Node *node = searchNodeInList(*symbolTableHead, variable, &found);
+            if(found == 1 && strcmp(node->data, "mdefine") == 0)
+                number = node->line;
+            else
+                printIntError(ERROR_CODE_33);
+        }
+        else
+            number = atoi(variable);
+        
         char *binaryNumber = intToBinary(number, 12);
         
+        strcat(result, "\n");
         strcat(result, binaryNumber);
         strcat(result, "00");
-        strcat(result, "\n");
 
         free(binaryNumber);
+        free(variable);
+
+        printf("Result: %s\n", result);
     }
-    else if(firstAddressing == 3 && secondAddressing != 3)
+    if(firstAddressing == secondAddressing && firstAddressing == 3)
     {
+        ARE = "00";
+        strcat(result, binaryLine);
+        strcat(result, addressingMethodOne);
+        strcat(result, addressingMethodTwo);
+        strcat(result, ARE);
+
+        result = (char *)realloc(result, sizeof(char) * 15);
+        if (result == NULL)
+            printIntError(ERROR_CODE_10);
+
+        char *firstNumber = intToBinary(operandOne[1] - '0', 3);
+        char *secondNumber = intToBinary(operandTwo[1] - '0', 3);
+
+        strcat(result, "\n0000000");
+        strcat(result, firstNumber);
+        strcat(result, secondNumber);
+        strcat(result, "0");
+
+        free(firstNumber);
+        free(secondNumber);
+
+        return result;
+    }
+    if(firstAddressing == 3 && secondAddressing != 3)
+    {
+        ARE = "00";
+        strcat(result, binaryLine);
+        strcat(result, addressingMethodOne);
+        strcat(result, addressingMethodTwo);
+        strcat(result, ARE);
+
         /* Reallocate the result to have 14 more bits */
         result = realloc(result, sizeof(char) * 15);
-        if (result == NULL) {
+        if (result == NULL)
             printIntError(ERROR_CODE_10);
-        }
 
         char *binaryNumber = intToBinary(operandOne[1] - '0', 3);
 
@@ -276,42 +385,21 @@ char *handleTwoOperands(char *operandOne, char *operandTwo, Node **symbolTableHe
         strcat(result, binaryNumber);
         strcat(result, "0000\n");
     }
-
-    /* Operate the same like we did on the first operand but on the second operand */
-    if(secondAddressing == 0)
-    {
-        result = realloc(result, sizeof(char) * 15);
-        if(result == NULL)
-        {
-            printIntError(ERROR_CODE_10);
-        }
-
-        int number = 0;
-        int length = strlen(operandTwo);
-        for(int i = 1; i < length; i++)
-        {
-            number = number * 10 + (operandTwo[i] - '0');
-        }
-
-        char *binaryNumber = intToBinary(number, 12);
-        
-        strcat(result, binaryNumber);
-        strcat(result, "00\n");
-    }
-    else if(secondAddressing == 3 && firstAddressing != 3)
+    if(secondAddressing == 3 && firstAddressing != 3)
     {
         /* Reallocate the result to have 14 more bits */
         result = realloc(result, sizeof(char) * 15);
-        if (result == NULL) {
+        if (result == NULL)
             printIntError(ERROR_CODE_10);
-        }
 
         char *binaryNumber = intToBinary(operandTwo[1] - '0', 3);
-
-        strcat(result, "0000000000");
+        
+        strcat(result, "\n0000000");
         strcat(result, binaryNumber);
-        strcat(result, "0\n");
+        strcat(result, "0000");
     }
+
+    printf("Result: %s\n", result);
 
     return result;    
 }
@@ -382,42 +470,22 @@ char *handleOneOperand(char *operand, Node **symbolTableHead, char *binaryLine)
 }
 
 /* Purpose is explained in the header file */
-char *handleInstruction(char *line, Node **symbolTableHead)
+char *handleInstruction(char *line, Node **symbolTableHead, int instructionIndex)
 {
     int wordAmount = countWords(line); /* Count the words in the line */
-    if (wordAmount == 0) /* If the are no words in the line */
-    {
-        printIntError(ERROR_CODE_31); /* Print an error and return */
-    }
     char *parsedLine[wordAmount]; /* Create an array to store the parsed line */
     parseLine(line, parsedLine); /* Parse the line */
-
-    /* Find the instruction in the instruction names array */
-    int instructionIndex = 0;
-    for (int i = 0; i < OPCODES_COUNT; i++)
-    {
-        if (strcmp(parsedLine[0], instructionNames[i]) == 0)
-        {
-            instructionIndex = i;
-            break;
-        }
-    }
 
     if((instructionIndex >= 0 && instructionIndex <= 3) || instructionIndex == 6)
     {
         if(wordAmount > 3)
-        {
             printIntError(ERROR_CODE_31);
-        }
         else if(wordAmount < 3)
-        {
             printIntError(ERROR_CODE_32);
-        }
 
         char *binaryLine = (char *)calloc(9, sizeof(char));
-        if (binaryLine == NULL) {
+        if (binaryLine == NULL)
             printIntError(ERROR_CODE_10);
-        }
 
         strcat(binaryLine, "0000");
         strcat(binaryLine, instructionsInBinary[instructionIndex]);
@@ -430,18 +498,13 @@ char *handleInstruction(char *line, Node **symbolTableHead)
     if(instructionIndex == 4 || instructionIndex == 5 || (instructionIndex >= 7 && instructionIndex <= 13))
     {
         if(wordAmount > 2)
-        {
             printIntError(ERROR_CODE_31);
-        }
         else if(wordAmount < 2)
-        {
             printIntError(ERROR_CODE_32);
-        }
 
         char *binaryLine = (char *)calloc(9, sizeof(char));
-        if (binaryLine == NULL) {
+        if (binaryLine == NULL)
             printIntError(ERROR_CODE_10);
-        }
 
         strcat(binaryLine, "0000");
         strcat(binaryLine, instructionsInBinary[instructionIndex]);
@@ -451,19 +514,14 @@ char *handleInstruction(char *line, Node **symbolTableHead)
         return result;
     }
 
-    if(instructionIndex == 14 || instructionIndex == 15)
-    {
+    if(instructionIndex == 14 || instructionIndex == 15){
         if(wordAmount > 1)
-        {
             printIntError(ERROR_CODE_31);
-        }
-
         if(instructionIndex == 14)
         {
             char *result = (char *)calloc(15, sizeof(char));
-            if (result == NULL) {
+            if (result == NULL)
                 printIntError(ERROR_CODE_10);
-            }
 
             strcat(result, "00001110000000\n");
 
@@ -472,9 +530,8 @@ char *handleInstruction(char *line, Node **symbolTableHead)
         else
         {
             char *result = (char *)calloc(15, sizeof(char));
-            if (result == NULL) {
+            if (result == NULL)
                 printIntError(ERROR_CODE_10);
-            }
 
             strcat(result, "00001111000000\n");
 
@@ -595,12 +652,6 @@ char *handleData(char *parsedLine[], Node **symbolTableHead, int wordAmount)
 /* Purpose is explained in the header file */
 void *handleLabel(char *parsedLine[], Node **symbolTableHead, int type)
 {
-    /*
-    parsedLine[0] = <label>:
-    parsedLine[1] = <instruction or declaration>
-    parsedLine[2] = <operand 1>
-    ...
-	*/
     switch (type)
     {
         /* If the type is an instruction */
@@ -611,7 +662,8 @@ void *handleLabel(char *parsedLine[], Node **symbolTableHead, int type)
         /* If the type is a data or string declaration */
         case DATA:
         case STRING:
-            /* Add the label to the symbol table with the type data */
+            /* Save the label in the symbol table with the type data - remove the : from the label */
+            parsedLine[0][strlen(parsedLine[0]) - 1] = '\0';
             addNode(symbolTableHead, parsedLine[0], "data", DC);
             break;
     }
