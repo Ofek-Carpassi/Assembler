@@ -73,16 +73,12 @@ void parseLine(char *line, char *parsedOutput[])
         if(c == ' ')
         {
             if(lineIndex == 0)
-            {
                 continue;
-            }
             else
             {
                 parsedOutput[arrayIndex] = (char *)malloc(sizeof(char) * (lineIndex - startIndex + 1));
                 for(int i = startIndex; i < lineIndex; i++)
-                {
                     parsedOutput[arrayIndex][i-startIndex] = line[i];
-                }
                 parsedOutput[arrayIndex][lineIndex - startIndex] = '\0';
                 arrayIndex++;
                 startIndex = lineIndex + 1;
@@ -92,26 +88,24 @@ void parseLine(char *line, char *parsedOutput[])
     }
     parsedOutput[arrayIndex] = (char *)malloc(sizeof(char) * (lineIndex - startIndex + 1));
     for(int i = startIndex; i < lineIndex; i++)
-    {
         parsedOutput[arrayIndex][i-startIndex] = line[i];
-    }
     parsedOutput[arrayIndex][lineIndex - startIndex] = '\0';
     arrayIndex++;
 }
 
 /* Explained in the header file */
-int isNumber(const char *str)
+int isNumber(char *str)
 {
-    if (*str == '-') { // handle negative numbers
-        str++;
-    }
+    int i = 0;
     /* Loop through the string */
-    while (*str) {
+    if(str[0] == '-' || str[0] == '+')
+        i++;
+
+    for(; i < strlen(str); i++)
         /* If the current character is not a digit, return 0 */
-        if (!isdigit(*str++)) {
+        if (!isdigit(str[i]))
             return 0;
-        }
-    }
+     
     /* If all characters are digits, return 1 */
     return 1;
 }
@@ -138,35 +132,25 @@ int countWords(char *line)
 char *intToBinary(int num, int bits)
 {
     /* Bits is the number of bits to represent the number */
-    /* Allocate memory for the binary representation */
-    char *binary = (char *)calloc(bits + 1, sizeof(char));
+    char *binary = (char *)calloc(bits+1, sizeof(char));
     if (binary == NULL)
         printIntError(ERROR_CODE_10);
 
     /* Loop through the bits */
-    for (int i = bits - 1; i >= 0; i--)
+    for(int i = bits-1; i >= 0; i--)
     {
-        /* If the number is greater than 0, set the current bit to 1 and subtract 1 from the number */
-        if (num >= (1 << i))
-        {
-            binary[bits - 1 - i] = '1';
-            num -= (1 << i);
-        }
-        /* If the number is less than 0, set the current bit to 0 */
-        else
-        {
-            binary[bits - 1 - i] = '0';
-        }
+        /* If the number is odd, add 1 to the binary string */
+        binary[i] = (num % 2 == 1) ? '1' : '0';
+        num /= 2;
     }
-
-    /* Add the null character at the end of the binary representation */
+    /* Add the null character at the end of the string */
     binary[bits] = '\0';
-
+    /* Return the binary string */
     return binary;
 }
 
 /* Explained in the header file */
-char *addressingMethod(char *operand, Node *symbolTable, int *addressingMethod)
+char *getAddressingMethod(char *operand, Node *symbolTable, int *addressingMethod)
 {
     /* If immediate addressing method */
     if(operand[0] == '#')

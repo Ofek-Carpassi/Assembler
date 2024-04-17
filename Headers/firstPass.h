@@ -29,23 +29,6 @@ Algorithm:
 19. Start the second pass.
 */
 
-/*
-Algorithm - written codly so we know which functions we need to write:
-1. IC (Instruction Counter) and DC (Data Counter) are initialized to 0.
-2. Read a line from the input file - if the input has ended, go to step 11. (executeFirstPass - loops through the file)
-3. Check the type of the line. (checkLineType)
-4. If the line is empty or a comment, go to step 2. (continue the loop)
-5. Is the line a constant declaration? if so call handleConstantDeclaration. (handleConstantDeclaration)
-6. Is the line a label declaration? if so call handleLabelDeclaration. (handleLabelDeclaration)
-7. Is it an instruction to save data? if so call handleDataDeclaration. (handleDataDeclaration)
-8. Is it an instruction to save code? if so call handleCodeDeclaration. (handleInstruction)
-9. Calculate L (amount of words the instruction takes). (calcLength)
-10. Update IC by L. Go to step 2. (continue the loop)
-11. The input file was read, if there were any errors on the first pass, stop here.
-12. Update the symbol table of each data type with the value of IC + 100.
-13. Start the second pass.
-*/
-
 /**
  * @brief This function calculates the length of an instruction.
  * 
@@ -96,7 +79,7 @@ char *handleOneOperand(char *operand, Node **symbolTableHead, char *binaryLine);
  * @param symbolTableHead A pointer to the head of the linked list.
  * @return 1 if the label was added to the symbol table, 0 otherwise.
  */
-char *handleInstruction(char *line, Node **symbolTableHead, int instructionIndex);
+char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmount);
 
 /**
  * @brief This function handles a string.
@@ -171,6 +154,10 @@ void handleConstant(char *line, Node **symbolTableHead);
  *          0 if the line is illegal - an error
  */
 char *checkLineType(char *line);
+
+char *operandHandling(char *operand, Node **symbolTableHead, int addressingMethod, int isConstant, int isSource);
+
+char *handleTwoRegisters(char *soruceRegister, char *destinationRegister);
 
 /**
  * @brief This function executes the first pass algorithm

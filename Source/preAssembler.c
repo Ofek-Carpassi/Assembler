@@ -33,9 +33,7 @@ char *getMacroName(char *line)
     /* Create a buffer to store the name */
     char *name = calloc(MAX_LINE_LENGTH, sizeof(char));
     if(name == NULL)
-    {
         printIntError(ERROR_CODE_10);
-    }
 
     /* Get the name from the line (the line looks like "mcr <name>") */
     sscanf(cleanedLine, "%*s %s", name);
@@ -101,18 +99,14 @@ int saveMacroToList(char *file, Node **head, int lineNumber, char *name)
     {
         /* Remove the new lines and spaces */
         if(macroDefinition[i] == '\n' && macroDefinition[i+1] == '\n')
-        {
             // Remove the new line
             for(int j = i; j < strlen(macroDefinition); j++)
                 macroDefinition[j] = macroDefinition[j+1];
-        }
         /* Remove the spaces at the beginning of the line */
         if(macroDefinition[i] == ' ' && macroDefinition[i-1] == '\n')
-        {
-            // Remove the space
+             // Remove the space
             for(int j = i; j < strlen(macroDefinition); j++)
                 macroDefinition[j] = macroDefinition[j+1];
-        }
     }
 
     if(macroDefinition[strlen(macroDefinition) - 1] == '\n')
@@ -233,10 +227,8 @@ void executePreAssembler(char *file, char *outputFileName[])
             else
             {
                 for(int i = 0; i < strlen(cleanedLine); i++)
-                {
                     if(cleanedLine[i] == '\n')
                         cleanedLine[i] = '\0';
-                }
 
                 if(lineNumber != 1)
                     fprintf(outputFile, "\n%s", cleanedLine);

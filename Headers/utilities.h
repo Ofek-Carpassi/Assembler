@@ -32,7 +32,7 @@ void parseLine(char *line, char *parsedOutput[]);
  * @param str - a string to check if it is a number.
  * @return - 1 if the string is a number, 0 otherwise.
  */
-int isNumber(const char *str);
+int isNumber(char *str);
 
 /**
  * @brief This function is used to count the number of words in a line.
@@ -73,7 +73,7 @@ char *intToBinaryString(int num, int bits);
  * @param operand - a string containing the operand to check the addressing method of.
  * @return - a binary representation of the addressing method.
  */
-char *addressingMethod(char *operand, Node *symbolTable, int *addressingMethod);
+char *getAddressingMethod(char *operand, Node *symbolTable, int *addressingMethod);
 
 /**
  * @brief This function is used to remove commas from a string.
