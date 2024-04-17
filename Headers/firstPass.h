@@ -37,7 +37,7 @@ Algorithm:
  * @param line The line to calculate the length of.
  * @return The amount of words in the instruction.
  */
-int calcLength(char *line);
+void calcLength(char **parsedLine, int wordAmount);
 
 /**
  * @brief This function handles an instruction with two operands.

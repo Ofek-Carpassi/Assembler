@@ -202,18 +202,8 @@ char *getAddressingMethod(char *operand, Node *symbolTable, int *addressingMetho
         }
 
         /* Make sure the value before the brackets is a label defined with .data or .string */
-        int found = 0;
-        Node *current = searchNodeInList(symbolTable, beforeBrackets, &found);
-        if(found)
-        {
-            if(strcmp(current->data, "data") == 0)
-            {
-                *addressingMethod = 2;
-                return "10";
-            }
-        }
-        printIntError(ERROR_CODE_14);
-        return "ERROR";
+        *addressingMethod = 2;
+        return "10";
     }
 
     /* If register addressing method */
