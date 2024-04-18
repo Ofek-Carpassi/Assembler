@@ -477,9 +477,6 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
         int addressingMethod = -1;
         char *addressing = getAddressingMethod(operand, *symbolTableHead, &addressingMethod);
 
-        if(addressingMethod == -1)
-            printIntError(ERROR_CODE_11);
-
         if(addressingMethod == 2)
         {
             /* get the index from the operand <label>[<index>] */
@@ -586,7 +583,7 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
     else if(arguments == 2)
     {
         if(wordAmount != 3)
-            printIntError(ERROR_CODE_31);
+            printExtError(ERROR_CODE_47, (location){fileName, lineNumberSrcFile});
 
         char *sourceOperand = parsedLine[1];
         char *destinationOperand = parsedLine[2];
@@ -596,9 +593,6 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
 
         int destinationAddressingMethod = -1;
         char *destinationAddressing = getAddressingMethod(destinationOperand, *symbolTableHead, &destinationAddressingMethod);
-
-        if(sourceAddressingMethod == -1 || destinationAddressingMethod == -1)
-            printIntError(ERROR_CODE_11);
 
         if(sourceAddressingMethod == 3 && destinationAddressingMethod == 3)
         {

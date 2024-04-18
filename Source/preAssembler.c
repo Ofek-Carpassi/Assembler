@@ -6,6 +6,9 @@
 #include "../Headers/globalVariables.h" // Used to get the maximum line length
 #include "../Headers/utilities.h" // Used to clean the line
 
+int lineNumberSrc = 1;
+char *fileNameSrc = NULL;
+
 int isMacroDeclaration(char *line)
 {
     /* Clean the line from white spaces */
@@ -14,8 +17,10 @@ int isMacroDeclaration(char *line)
     if (strncmp(cleanedLine, "mcr", 3) == 0)
     {
         /* Check if the line has exactly 2 words */
-        if(countWords(cleanedLine) != 2)
-            printIntError(ERROR_CODE_4); /* Print an error */
+        if(countWords(cleanedLine) < 2)
+            printExtError(ERROR_CODE_15, (location){fileNameSrc, lineNumberSrc});
+        else if(countWords(cleanedLine) > 2)
+            printExtError(ERROR_CODE_16, (location){fileNameSrc, lineNumberSrc});
         /* Free the cleaned line */
         free(cleanedLine);
         return 1;
@@ -31,7 +36,7 @@ char *getMacroName(char *line)
     char *cleanedLine = cleanLine(line);
 
     /* Create a buffer to store the name */
-    char *name = calloc(MAX_LINE_LENGTH, sizeof(char));
+    char *name = (char *)calloc(strlen(cleanedLine) - 3, sizeof(char));
     if(name == NULL)
         printIntError(ERROR_CODE_10);
 
@@ -43,7 +48,7 @@ char *getMacroName(char *line)
     return name;
 }
 
-int saveMacroToList(char *file, Node **head, int lineNumber, char *name)
+int saveMacroToList(char *file, Node **head, int lineNumberSrc, char *name)
 {
     /* Open the file */
     FILE *inputFile = fopen(file, "r");
@@ -55,8 +60,8 @@ int saveMacroToList(char *file, Node **head, int lineNumber, char *name)
     if(line == NULL)
         printIntError(ERROR_CODE_10);
 
-    /* Skip all the lines until the lineNumber+1 */
-    for (int i = 1; i <= lineNumber; i++)
+    /* Skip all the lines until the lineNumberSrc+1 */
+    for (int i = 1; i <= lineNumberSrc; i++)
         fgets(line, MAX_LINE_LENGTH, inputFile);
 
     /* Create a buffer to store the macro definition */
@@ -75,7 +80,7 @@ int saveMacroToList(char *file, Node **head, int lineNumber, char *name)
         {
             /* If the line has more than 7 characters, print an error */
             if(strlen(cleanedLine) > 7)
-                printIntError(ERROR_CODE_4);
+                printExtError(ERROR_CODE_4, (location){file, lineNumberSrc});
             break;
         }
 
@@ -88,7 +93,7 @@ int saveMacroToList(char *file, Node **head, int lineNumber, char *name)
         free(cleanedLine);
 
         /* Increment the line number */
-        lineNumber++;
+        lineNumberSrc++;
     }
 
     /* Close the file */
@@ -113,7 +118,7 @@ int saveMacroToList(char *file, Node **head, int lineNumber, char *name)
         macroDefinition[strlen(macroDefinition) - 1] = '\0';
 
     /* Create a new node containing the macro */
-    addNode(head, name, macroDefinition, lineNumber);
+    addNode(head, name, macroDefinition, lineNumberSrc);
 
     /* Free the macro definition */
     free(macroDefinition);
@@ -124,7 +129,7 @@ int saveMacroToList(char *file, Node **head, int lineNumber, char *name)
     /* Free the name */
     free(name);
 
-    return lineNumber;
+    return lineNumberSrc;
 }
 
 int isValidMacroName(char *name)
@@ -169,10 +174,9 @@ int isCallToMacro(char *line, Node **head)
 /* Explained in the header file */
 void executePreAssembler(char *file, char *outputFileName[])
 {
+    fileNameSrc = file;
     /* Create a linked list to store the macros */
     Node *macroList = NULL;
-    /* Create a variable to store the line number */
-    int lineNumber = 1;
 
     /* Open the input file */
     FILE *inputFile = fopen(file, "r");
@@ -200,7 +204,7 @@ void executePreAssembler(char *file, char *outputFileName[])
     {
         if(line[0] == ';')
         {
-            lineNumber++;
+            lineNumberSrc++;
             fprintf(outputFile, "\n", line);
             continue;
         }
@@ -230,7 +234,7 @@ void executePreAssembler(char *file, char *outputFileName[])
                     if(cleanedLine[i] == '\n')
                         cleanedLine[i] = '\0';
 
-                if(lineNumber != 1)
+                if(lineNumberSrc != 1)
                     fprintf(outputFile, "\n%s", cleanedLine);
                 else
                     fprintf(outputFile, "%s", cleanedLine);
@@ -244,16 +248,16 @@ void executePreAssembler(char *file, char *outputFileName[])
             if (!isValidMacroName(name))
                 printIntError(ERROR_CODE_3);
             /* Save the macro to the linked list */
-            int newLineNumber = saveMacroToList(file, &macroList, lineNumber, name);
+            int newlineNumberSrc = saveMacroToList(file, &macroList, lineNumberSrc, name);
             /* Skip the lines of the macro */
-            for(; lineNumber <= newLineNumber; lineNumber++)
+            for(; lineNumberSrc <= newlineNumberSrc; lineNumberSrc++)
                 fgets(line, MAX_LINE_LENGTH, inputFile);
         }
         /* Free the cleaned line */
         free(cleanedLine);
 
         /* Increment the line number */
-        lineNumber++;
+        lineNumberSrc++;
     }
 
     /* Close the input and output files */
