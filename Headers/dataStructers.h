@@ -53,4 +53,6 @@ void freeNode(Node *node);
 */
 void freeList(Node **head);
 
+void printList(Node *head);
+
 #endif

@@ -62,6 +62,20 @@ Node *searchNodeInList(Node *head, char *name, int *found)
     Node *current = head;
     while (current != NULL)
     {
+        printf("current->name: %s\n", current->name);
+        printf("name: %s\n", name);
+        printf("strcmp: %d\n", strcmp(current->name, name));
+        printf("strlen: %d\n", strlen(current->name));
+        printf("strlen: %d\n", strlen(name));
+
+        for(int i = 0; i < strlen(current->name); i++)
+        {
+            printf("current->name[%d]: %d\n", i, current->name[i]);
+        }
+        for(int i = 0; i < strlen(name); i++)
+        {
+            printf("name[%d]: %d\n", i, name[i]);
+        }
         if (strcmp(current->name, name) == 0)
         {
             *found = 1;
@@ -129,4 +143,14 @@ void freeList(Node **head)
         current = next;
     }
     *head = NULL;
+}
+
+void printList(Node *head)
+{
+    Node *current = head;
+    while (current != NULL)
+    {
+        printf("Name: %s, Data: %s, Line: %d\n", current->name, current->data, current->line);
+        current = current->next;
+    }
 }

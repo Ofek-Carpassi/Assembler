@@ -117,7 +117,7 @@ char *handleData(char *parsedLine[], Node **symbolTableHead, int wordAmount);
  * @param symbolTableHead A pointer to the head of the linked list.
  * @return 1 if the label was added to the symbol table, 0 otherwise.
  */
-void *handleLabel(char *parsedLine[], Node **symbolTableHead, int type);
+void *handleLabel(char *label, Node **symbolTableHead, int type);
 
 /**
  * @brief This function handles a constant.
@@ -130,7 +130,7 @@ void *handleLabel(char *parsedLine[], Node **symbolTableHead, int type);
  * @param symbolTableHead A pointer to the head of the linked list.
  * @return 1 if the constant was added to the symbol table, 0 otherwise.
  */
-void handleConstant(char *line, Node **symbolTableHead);
+void handleConstant(char **parsedLine, Node **symbolTableHead, int wordAmount);
 
 /**
  * @brief This function checks the type of the line and returns it.

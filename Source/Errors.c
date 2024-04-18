@@ -52,7 +52,10 @@ Error errors[] = {
     {ERROR_CODE_41, "Label defined as .extern and defined in the file"},
     {ERROR_CODE_42, "Input number in .data line is out of range"},
     {ERROR_CODE_43, "Illegal data line directive"},
-    {ERROR_CODE_44, "Instruction '.data' line contains illegal chars or syntax error"}
+    {ERROR_CODE_44, "Instruction '.data' line contains illegal chars or syntax error"},
+    {ERROR_CODE_45, "Failed to read line from file"},
+    {ERROR_CODE_46, "Unkown variable"},
+    {ERROR_CODE_47, "Too many or too few operands to instruction"}
 };
 
 void printIntError(int errorID)
