@@ -14,68 +14,42 @@ int lineNumberSrcFile = 1; /* Initialize the line number of the source file */
 Node *symbolTable = NULL; /* Create the symbol table */
 char *fileName = NULL; /* Create the file name */
 
-/* The names of the instructions */
-const char *instructionNames[] = {
-    "mov",
-    "cmp",
-    "add",
-    "sub",
-    "not",
-    "clr",
-    "lea",
-    "inc",
-    "dec",
-    "jmp",
-    "bne",
-    "red",
-    "prn",
-    "jsr",
-    "rts",
-    "hlt"
-};
-
-/* The amount of instructions */
-#define OPCODES_COUNT 16
-
 typedef struct OPCODE {
+    char *name;
     char *binary;
     int arguments;
 } Opcode;
 
 const Opcode opcodes[] = {
-    {"0000", 2}, // mov
-    {"0001", 2}, // cmp
-    {"0010", 2}, // add
-    {"0011", 2}, // sub
-    {"0100", 1}, // not
-    {"0101", 1}, // clr
-    {"0110", 2}, // lea
-    {"0111", 1}, // inc
-    {"1000", 1}, // dec
-    {"1001", 1}, // jmp
-    {"1010", 1}, // bne
-    {"1011", 1}, // red
-    {"1100", 1}, // prn
-    {"1101", 1}, // jsr
-    {"1110", 0}, // rts
-    {"1111", 0}  // hlt
+    {"mov", "0000", 2},
+    {"cmp", "0001", 2},
+    {"add", "0010", 2},
+    {"sub", "0011", 2},
+    {"not", "0100", 1},
+    {"clr", "0101", 1},
+    {"lea", "0110", 2},
+    {"inc", "0111", 1},
+    {"dec", "1000", 1},
+    {"jmp", "1001", 1},
+    {"bne", "1010", 1},
+    {"red", "1011", 1},
+    {"prn", "1100", 1},
+    {"jsr", "1101", 1},
+    {"rts", "1110", 0},
+    {"hlt", "1111", 0}
 };
 
 /* Purpose is explained in the header file */
 int isInstruction(char *word)
 {
     /* Loop through the instruction names */
-    for (int i = 0; i < OPCODES_COUNT; i++)
+    for(int i = 0; i < OPCODES_COUNT; i++)
     {
-        /* Check if the word got from the call is an instruction */
-        if (strcmp(word, instructionNames[i]) == 0)
-        {
-            /* return the index of the instruction */
-            return i;
-        }
+        /* If the word is an instruction name */
+        if(strcmp(word, opcodes[i].name) == 0)
+            return i; /* Return the index of the instruction */
     }
-    /* Return -1 if the word is not an instruction */
-    return -1;
+    return -1; /* Return -1 if the word is not an instruction name */
 }
 
 /* Purpose is explained in the header file */
@@ -86,21 +60,19 @@ char *checkLineType(char *line)
         return "";
 
     int wordAmount = countWords(line); /* Count the words in the line */
-    int originalWordAmount = wordAmount;
     if (wordAmount == 0) /* If the are no words in the line */
         printIntError(ERROR_CODE_45); /* Print an error */
-    /* Allocate memory for the parsed line */
+
+    /* Parse the line */
     char **parsedLine = parseLine(line, wordAmount);
 
-    /* print the parsed line */
-    for(int i = 0; i < wordAmount; i++)
-        printf("Parsed line[%d]: %s\n", i, parsedLine[i]);
-
-    /* run on the first word and check if there's a : somewhere in the word */
+    /* run on the first word and check if there's a : in it - not at the end of the word 
+    this means the line looks like <label>:<word> and we need to split it to two words */
     for(int i = 0; i < strlen(parsedLine[0])-1; i++)
     {
         if(parsedLine[0][i] == ':')
         {
+            /* Add one more word to the word amount */
             wordAmount++;
             /* save everything until the : including it in a string */
             char *label = (char *)calloc(i+1, sizeof(char));
@@ -108,23 +80,24 @@ char *checkLineType(char *line)
                 printIntError(ERROR_CODE_10);
             for(int j = 0; j < i+1; j++)
                 label[j] = parsedLine[0][j];
+
             /* save everything after the : in a string */
             char *restOfLine = (char *)calloc(strlen(parsedLine[0]) - i, sizeof(char));
             if (restOfLine == NULL)
                 printIntError(ERROR_CODE_10);
             for(int j = i+1; j < strlen(parsedLine[0]); j++)
                 restOfLine[j-i-1] = parsedLine[0][j];
+
             /* Reallocate the parsed line to have one more word */
             parsedLine = (char **)realloc(parsedLine, sizeof(char *) * wordAmount);
             if (parsedLine == NULL)
                 printIntError(ERROR_CODE_10);
-            /* move all the words one index to the right, remove the first word
-            put the label in the first index and the rest of the line in the second index.
-            all the rest of the words will be moved one index to the right */
+            /* move all the words one place to the right */
             for(int j = wordAmount-1; j > 1; j--)
             {
                 parsedLine[j] = parsedLine[j-1];
             }
+            /* Save the label and the rest of the line in the first two words */
             parsedLine[0] = label;
             parsedLine[1] = restOfLine;
             break;
@@ -139,61 +112,62 @@ char *checkLineType(char *line)
         free(parsedLine);
         return "CONSTANT";
     }
-    int isLabel = 0;
 
-    /* Check if it's a label */
-    int len = strlen(parsedLine[0]) - 1;
-    if(parsedLine[0][len] == ':')
-        isLabel = 1;
-
-    /* We won't use this variable if it's not a label - it doesn't matter what it contains if it isn't a label */
+    /* A variable to save the first word - only used if the first word is a label */
     char *label = (char *)calloc(strlen(parsedLine[0]), sizeof(char));
     /* Remove the : from the label */
     strcpy(label, parsedLine[0]);
-    label[len] = '\0';
-    if(isLabel)
-    {
-        
-        /* int i = last word index */
-        printf("Word amount: %d\n", wordAmount);
-        for(int i = 0; i < wordAmount; i++){
-            printf("i: %d, Parsed line[%d]: %s\n", i, i, parsedLine[i]);
-            parsedLine[i] = parsedLine[i+1];
-        }
+    label[strlen(label)-1] = '\0';
 
+    /* Create isLabel flag */
+    int isLabel = 0;
+    if(parsedLine[0][strlen(parsedLine[0])-1] == ':')
+    {
+        isLabel = 1;
+        /* Move all the words one place to the left - remove the label */
+        for(int i = 0; i < wordAmount; i++)
+            parsedLine[i] = parsedLine[i+1];
+        /* Decrement the word amount */
         wordAmount--;
     }
-
-    printf("reparsed the line\n");
-    for(int i = 0; i < wordAmount; i++)
-        printf("Parsed line[%d]: %s\n", i, parsedLine[i]);
 
     /* Check if the first word in the line is .data - data declaration */
     if(strcmp(parsedLine[0], ".data") == 0)
     {
+        /* If the first word is a label - add the label to the symbol table */
         if(isLabel)
+        {
             handleLabel(label, &symbolTable, DATA);
+            IC++;
+        }
             
         /* Use handleData to translate the data to binary */
         char *binaryLine = handleData(parsedLine, &symbolTable, wordAmount);
 
-        DC += wordAmount - 1; /* Increment the data counter by the number of numbers in the data declaration */
+        /* Increment the data counter by the number of numbers in the data declaration */
+        DC += wordAmount - 1;
+        /* Calculate L - the amount of words the instruction takes */
         calcLength(parsedLine, wordAmount);
-        if(isLabel)
-            IC++;
+
+        /* Free the parsed line and return the result */
         free(parsedLine);
         return binaryLine;
     }
     /* Check if the first word in the line is .string - string declaration */
     else if(strcmp(parsedLine[0], ".string") == 0)
     {   
+        /* If the first word is a label - add the label to the symbol table */
         if(isLabel)
+        {
             handleLabel(label, &symbolTable, STRING);
+            IC++;
+        }
         /* Use handleString to translate the string to binary */
         char *binaryLine = handleString(parsedLine[1]);
+        /* Calculate L - the amount of words the instruction takes */
         calcLength(parsedLine, wordAmount);
-        if(isLabel)
-            IC++;
+
+        /* Free the parsed line and return the result */
         free(parsedLine);
         return binaryLine;
     }
@@ -206,25 +180,21 @@ char *checkLineType(char *line)
         free(parsedLine);
         return "";
     }
-    printf("Is label: %d\n", isLabel);
+
     if(isLabel)
         handleLabel(label, &symbolTable, INSTRUCTION);
-    printf("Parsed line[0]: %s\n", parsedLine[0]);
+    
     if(parsedLine[0][strlen(parsedLine[0])-1] == '\n')
         parsedLine[0][strlen(parsedLine[0])-1] = '\0';
+
     int instructionIndex = isInstruction(parsedLine[0]);
-    printf("Instruction index: %d\n", instructionIndex);
     if(instructionIndex != -1)
     {
-        printf("Calling handle instruction\n");
         /* Use handleInstruction to translate the instruction to binary */
         char *binaryLine = handleInstruction(parsedLine, &symbolTable, wordAmount);
-        printf("Binary line: %s\n", binaryLine);
         calcLength(parsedLine, wordAmount);
-        printf("new IC: %d\n", IC);
 
         free(parsedLine);
-
         return binaryLine;
     }
 }
@@ -242,7 +212,6 @@ char *operandHandling(char *operand, Node **symbolTableHead, int addressingMetho
     */
     if(operand[0] == '#' && addressingMethod == 0)
     {
-        printList(*symbolTableHead);
         /* Remove the # from the operand */
         char *variable = (char *)calloc(strlen(operand), sizeof(char));
         for(int i = 1; i < strlen(operand); i++)
@@ -251,7 +220,6 @@ char *operandHandling(char *operand, Node **symbolTableHead, int addressingMetho
         if(variable[strlen(variable)-1] == '\n')
             variable[strlen(variable)-1] = '\0';
 
-        printf("Variable: %s\n", variable);
         /* Check if the string is a number or a constant */
         if(isNumber(variable) == 1 && !isConstant)
         {
@@ -274,7 +242,6 @@ char *operandHandling(char *operand, Node **symbolTableHead, int addressingMetho
             /* Check if the index is a constant in the symbol table */
             int found = 0;
             Node *node = searchNodeInList(*symbolTableHead, variable, &found);
-            printf("Found: %d\n", found);
             /* If the constant is found in the symbol table */
             if (found == 1)
             {
@@ -362,8 +329,6 @@ char *operandHandling(char *operand, Node **symbolTableHead, int addressingMetho
     else if(addressingMethod == -1)
     {
         /* Check if the index is a number or a constant */
-        printf("Operand: %s\n", operand);
-        printf("Is constant: %d\n", isConstant);
         if(isNumber(operand) == 1 && !isConstant)
         {
             /* Convert the index to an integer */
@@ -465,8 +430,6 @@ char *handleTwoRegisters(char *soruceRegister, char *destinationRegister)
 the parsedLine array is defined as char **parsedLine = (char **)calloc(wordAmount, sizeof(char *)); */
 char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmount)
 {
-    printf("Handle instruction is called\n");
-    printf("parsedLine[0]: %s\n", parsedLine[0]);
     /* First we'll get the instruction */
     int instructionIndex = isInstruction(parsedLine[0]);
     /* Get the opcode */
@@ -558,9 +521,6 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
             if(!isNumber(inBrackets))
                 isConstant = 1;
 
-            printf("In brackets: %s\n", inBrackets);
-            printf("Before brackets: %s\n", beforeBrackets);
-
             char *indexBinary = operandHandling(inBrackets, symbolTableHead, -1, isConstant, 1);
 
             char *result = (char *)calloc(strlen(operandBinary) + strlen(indexBinary) + 17, sizeof(char));
@@ -626,10 +586,7 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
     else if(arguments == 2)
     {
         if(wordAmount != 3)
-        {
-            printf("Word amount: %d\n", wordAmount);
             printIntError(ERROR_CODE_31);
-        }
 
         char *sourceOperand = parsedLine[1];
         char *destinationOperand = parsedLine[2];
@@ -1041,30 +998,37 @@ char *handleData(char *parsedLine[], Node **symbolTableHead, int wordAmount)
             }
             lineNumber++;
             free(binaryNumber);
-            printf("Binary line: %s\n", binaryLine);
         }
         else
         {
-            /* Check if the string is a constant in the symbol table */
+            /* Check if the index is a constant in the symbol table */
+            char *variable = (char *)calloc(strlen(parsedLine[i])-1, sizeof(char));
+            strcpy(variable, parsedLine[i]);
+            if(variable[strlen(variable)-1] == '\n')
+                variable[strlen(variable)-1] = '\0';
             int found = 0;
-            Node *node = searchNodeInList(*symbolTableHead, parsedLine[i], &found);
+            Node *node = searchNodeInList(*symbolTableHead, variable, &found);
             /* If the constant is found in the symbol table */
             if (found == 1)
             {
                 /* Convert the constant to a binary string */
-                char *binaryNumber = intToBinary(node->line, BITS_AMOUNT);
+                char *binaryNumber = intToBinary(node->line, 3);
                 /* Add the binary number to the binary line */
+                char *result = (char *)calloc(15, sizeof(char));
+                if (result == NULL)
+                    printIntError(ERROR_CODE_10);
                 if(lineNumber == 1)
                     strcat(binaryLine, binaryNumber);
                 else {
                     strcat(binaryLine, "\n");
                     strcat(binaryLine, binaryNumber);
                 }
-                lineNumber++;
                 free(binaryNumber);
+                lineNumber++;
+                return result;
             }
             else
-                printIntError(ERROR_CODE_33); /* Print an error */
+                printExtError(ERROR_CODE_46, (location){fileName, lineNumberSrcFile}); /* Print an error */
         }
     }
     /* Add a null terminator to the binary line */
@@ -1117,14 +1081,10 @@ void handleConstant(char **parsedLine, Node **symbolTableHead, int wordAmount)
 /* Only a prototype - still not working */
 void calcLength(char **parsedLine, int wordAmount)
 {
-    printf("Word amount: %d\n", wordAmount);
     for(int i = 0; i < wordAmount; i++)
     {
-        
-        printf("parsedLine[%d]: %s\n", i, parsedLine[i]);
         int addressingMethod = -1;
         char *addressing = getAddressingMethod(parsedLine[i], symbolTable, &addressingMethod);
-        printf("Addressing method: %d\n", addressingMethod);
         if(addressingMethod != 2)
             IC += 1;
         else
@@ -1166,11 +1126,7 @@ void executeFirstPass(char *file, char **outputFileName)
     while(fgets(line, MAX_LINE_LENGTH, inputFile) != NULL) // Loop through the input file
     {
         cleanedLine = removeCommas(cleanLine(line)); // Clean the line
-        printf("Cleaned line: %s\n", cleanedLine);
         binaryLine = checkLineType(cleanedLine); // Check the type of the line
-        printf("Binary line: %s\n", binaryLine);
-
-        printf("Line number: %d\n", lineNumber);
 
         if (strcmp(binaryLine, "ERROR") != 0 && strcmp(binaryLine, "CONSTANT") != 0)
         {
@@ -1181,7 +1137,6 @@ void executeFirstPass(char *file, char **outputFileName)
         free(binaryLine);
 
         lineNumberSrcFile++;
-        printf("Line number: %d\n", lineNumber);
     }
 
     fclose(inputFile); // Close the input file

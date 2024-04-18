@@ -205,7 +205,6 @@ char *getAddressingMethod(char *operand, Node *symbolTable, int *addressingMetho
             isIndexLegal = 1;
         else
         {
-            printf("inBrackets: %s\n", inBrackets);
             int found = 0;
             Node *current = searchNodeInList(symbolTable, inBrackets, &found);
             if(found)
