@@ -1054,11 +1054,11 @@ void *handleLabel(char *label, Node **symbolTableHead, int type)
 void handleConstant(char **parsedLine, Node **symbolTableHead, int wordAmount)
 {
     if(wordAmount != 4)
-        printIntError(ERROR_CODE_31); /* Print an error and return */
+        printIntError(ERROR_CODE_49); /* Print an error and return */
     /* Check if the constant is a number */
     if (isNumber(parsedLine[3]) == 0)
     {
-        printIntError(ERROR_CODE_31); /* Print an error and return */
+        printIntError(ERROR_CODE_45); /* Print an error and return */
         return;
     }
     
@@ -1066,7 +1066,7 @@ void handleConstant(char **parsedLine, Node **symbolTableHead, int wordAmount)
     int found = 0;
     searchNodeInList(*symbolTableHead, parsedLine[1], &found);
     if (found == 1)
-        printIntError(ERROR_CODE_33);
+        printIntError(ERROR_CODE_48);
     /* Add the constant to the symbol table */
     else
         addNode(symbolTableHead, parsedLine[1], "mdefine", atoi(parsedLine[3]));
@@ -1091,7 +1091,7 @@ void executeFirstPass(char *file, char **outputFileName)
     fileName = file;
     FILE *inputFile = fopen(file, "r"); // Open the input file
     if (inputFile == NULL) // If the file doesn't exist
-        printIntError(ERROR_CODE_11); // Print an error and return
+        printExtError(ERROR_CODE_11, (location){fileName, lineNumberSrcFile}); // Print an error and return
 
     char outputName[MAX_LINE_LENGTH] = "";
     strcpy(outputName, file);
