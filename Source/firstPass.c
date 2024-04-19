@@ -115,10 +115,6 @@ char *checkLineType(char *line)
         }
     }
 
-    printf("parsedLine: \n");
-    for(i = 0; i < wordAmount; i++)
-        printf("%s\n", parsedLine[i]);
-
     /* Check the first word in the line is .define - constant declaration */
     if(strcmp(parsedLine[0], ".define") == 0)
     {
@@ -220,7 +216,6 @@ char *operandHandling(char *operand, Node **symbolTableHead, int addressingMetho
 {
     char *binaryNumber;
     char *result;
-    printf("operand: %s\n", operand);
     /* 
     This function doesn't handle the case of two registers
     This function knows how to handle the case of only registers and only numbers
@@ -250,7 +245,6 @@ char *operandHandling(char *operand, Node **symbolTableHead, int addressingMetho
             char *binaryNumber = intToBinary(number, 12);
             /* Add the binary number to the binary line */
             char *result = (char *)calloc(15, sizeof(char));
-            printf("binary number: %s\n", binaryNumber);
             if (result == NULL)
                 printIntError(ERROR_CODE_10);
             strcat(result, binaryNumber);
@@ -325,7 +319,6 @@ char *operandHandling(char *operand, Node **symbolTableHead, int addressingMetho
     {
         /* Get the register number */
         int registerNumber = operand[1] - '0';
-        printf("register number: %d\n", registerNumber);
         /* Convert the register number to a binary string */
         if(registerNumber < 0 || registerNumber > 7 || strlen(operand) != 2)
             printExtError(ERROR_CODE_32, fileLoc);
@@ -612,7 +605,6 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
     }
     else if(arguments == 2)
     {
-        printf("parsedLine[0]: %s\n", parsedLine[0]);
         if(wordAmount != 3)
             printExtError(ERROR_CODE_47, fileLoc);
 
@@ -955,8 +947,6 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
         free(operandBinarySrc);
         free(operandBinaryDest);
 
-        printf("result: %s\n", result);
-
         lineNumber += 3;
 
         return result;
@@ -995,8 +985,6 @@ char* handleString(char *line) {
         /* Convert the number to a binary string */
         char *binaryNumber = intToBinary(number, BITS_AMOUNT);
 
-        printf("line[i]: %c\n", line[i]);
-        printf("number: %d\n", number);
         /* Add the binary number to the binary line */
         if(lineNumber == 1)
             strcat(binaryLine, binaryNumber);
@@ -1040,7 +1028,6 @@ char *handleData(char *parsedLine[], Node **symbolTableHead, int wordAmount)
     /* Run from 1 to wordAmount because the first word is .data */
     for (i = 1; i < wordAmount; i++)
     {
-        printf("parsedLine[i]: %s\n", parsedLine[i]);
         /* Check if the string is a number */
         if(isNumber(parsedLine[i]) == 1)
         {
@@ -1057,8 +1044,6 @@ char *handleData(char *parsedLine[], Node **symbolTableHead, int wordAmount)
                 strcat(binaryLine, binaryNumber);
             }
             lineNumber++;
-            printf("binaryNumber: %s\n", binaryNumber);
-            printf("binaryLine: %s\n", binaryLine);
             free(binaryNumber);
         }
         else
@@ -1073,7 +1058,6 @@ char *handleData(char *parsedLine[], Node **symbolTableHead, int wordAmount)
                 variable[strlen(variable)-1] = '\0';
             found = 0;
             node = searchNodeInList(*symbolTableHead, variable, &found);
-            printf("operand %s was found: %d\n", variable, found);
             /* If the constant is found in the symbol table */
             if (found == 1)
             {
@@ -1096,7 +1080,6 @@ char *handleData(char *parsedLine[], Node **symbolTableHead, int wordAmount)
     }
     /* Add a null terminator to the binary line */
     /* Return the binary line */
-    printf("binaryLine: %s\n", binaryLine);
     return binaryLine;
 }
 
@@ -1123,12 +1106,14 @@ void handleLabel(char *label, Node **symbolTableHead, int type)
 void handleConstant(char **parsedLine, Node **symbolTableHead, int wordAmount)
 {
     int found = 0;  
-    if(wordAmount != 4)
-        printIntError(ERROR_CODE_31); /* Print an error and return */
+    if(wordAmount == 3)
+        printExtError(ERROR_CODE_49, fileLoc);
+    else if(wordAmount != 4)
+        printExtError(ERROR_CODE_50, fileLoc);
     /* Check if the constant is a number */
     if (isNumber(parsedLine[3]) == 0)
     {
-        printIntError(ERROR_CODE_31); /* Print an error and return */
+        printExtError(ERROR_CODE_51, fileLoc);
         return;
     }
     
@@ -1136,7 +1121,7 @@ void handleConstant(char **parsedLine, Node **symbolTableHead, int wordAmount)
     found = 0;
     searchNodeInList(*symbolTableHead, parsedLine[1], &found);
     if (found == 1)
-        printIntError(ERROR_CODE_33);
+        printExtError(ERROR_CODE_48, fileLoc);
     /* Add the constant to the symbol table */
     else
         addNode(symbolTableHead, parsedLine[1], "mdefine", atoi(parsedLine[3]));
@@ -1167,7 +1152,7 @@ void executeFirstPass(char *file, char **outputFileName)
     Node *current;
     FILE *inputFile = fopen(file, "r");
     if (inputFile == NULL) 
-        printIntError(ERROR_CODE_11); 
+        printIntError(ERROR_CODE_12);
 
     *outputFileName = calloc(strlen(file) + 2, sizeof(char));
     if(*outputFileName == NULL)
@@ -1187,7 +1172,6 @@ void executeFirstPass(char *file, char **outputFileName)
 
     while(fgets(line, MAX_LINE_LENGTH, inputFile) != NULL) 
     {
-        printf("line: %s\n", line);
         cleanedLine = removeCommas(cleanLine(line));
         binaryLine = checkLineType(cleanedLine);
 

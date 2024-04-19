@@ -89,8 +89,6 @@ int saveMacroToList(char *file, Node **head, int lineNumberSrc, char *name)
             printIntError(ERROR_CODE_10);
         strcat(macroDefinition, cleanedLine);
 
-        printf("macroDefinition: %s\n", macroDefinition);
-
         /* Increment the line number */
         lineNumberSrc++;
     }
@@ -118,8 +116,6 @@ int saveMacroToList(char *file, Node **head, int lineNumberSrc, char *name)
 
     if(macroDefinition[strlen(macroDefinition) - 1] == '\n')
         macroDefinition[strlen(macroDefinition) - 1] = '\0';
-
-    printf("macroDefinition: %s\n", macroDefinition);
 
     /* Create a new node containing the macro */
     addNode(head, name, macroDefinition, lineNumberSrc);
@@ -151,12 +147,9 @@ int isCallToMacro(char *line, Node **head)
 
     strcpy(lineCopy, line);
 
-    printf("lineCopy: %s\n", lineCopy);
-
     /* Check if the single word in the line is a macro name */
     if(countWords(lineCopy) == 1)
     {
-        printf("countWords: %d\n", countWords(lineCopy));
         /* Check if the lineCopy is a macro call */
         found = 0;
         /* Make sure the lineCopy doesn't end with a new lineCopy */
@@ -164,8 +157,6 @@ int isCallToMacro(char *line, Node **head)
             lineCopy[strlen(lineCopy) - 1] = '\0';
         /* Search for the macro in the list */
         searchNodeInList(*head, lineCopy, &found);
-        printList(*head);
-        printf("found: %d\n", found);
         /* If the macro is found, return true */
         if(found)
         {
@@ -227,8 +218,6 @@ void executePreAssembler(char *file, char **outputFileName)
         {
             if(cleanedLine[strlen(cleanedLine) - 1] == '\n')
                 cleanedLine[strlen(cleanedLine) - 1] = '\0';
-            printf("isCallToMacro: %d\n", isCallToMacro(cleanedLine, &macroList));
-            printf("cleanedLine: %s\n", cleanedLine);
             /* If the line isn't a macro declaration, check if it's a macro call */
             if(isCallToMacro(cleanedLine, &macroList) == 1)
             {
@@ -260,13 +249,11 @@ void executePreAssembler(char *file, char **outputFileName)
             /* Get the name of the macro */
             char *name = getMacroName(line);
 
-            printf("name: %s\n", name);
             /* Check if the name is valid */
             if(!isValidMacroName(name))
                 printIntError(ERROR_CODE_3);
             /* Save the macro to the linked list */
             newlineNumberSrc = saveMacroToList(file, &macroList, lineNumberSrc, name);
-            printList(macroList);
             /* Skip the lines of the macro */
             for(; lineNumberSrc <= newlineNumberSrc; lineNumberSrc++)
                 fgets(line, MAX_LINE_LENGTH, inputFile);
