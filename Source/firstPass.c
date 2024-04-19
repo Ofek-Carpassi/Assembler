@@ -149,7 +149,6 @@ char *checkLineType(char *line)
         if(isLabel)
         {
             handleLabel(label, &symbolTable, DATA);
-            IC++;
         }
             
         /* Use handleData to translate the data to binary */
@@ -157,8 +156,6 @@ char *checkLineType(char *line)
 
         /* Increment the data counter by the number of numbers in the data declaration */
         DC += wordAmount - 1;
-        /* Calculate L - the amount of words the instruction takes */
-        calcLength(parsedLine, wordAmount);
 
         /* Free the parsed line and return the result */
         free(parsedLine);
@@ -168,15 +165,12 @@ char *checkLineType(char *line)
     else if(strcmp(parsedLine[0], ".string") == 0)
     {   
         /* If the first word is a label - add the label to the symbol table */
-        if(isLabel)
-        {
+        if(isLabel){
             handleLabel(label, &symbolTable, STRING);
-            IC++;
         }
+
         /* Use handleString to translate the string to binary */
         binaryLine = handleString(parsedLine[1]);
-        /* Calculate L - the amount of words the instruction takes */
-        calcLength(parsedLine, wordAmount);
 
         /* Free the parsed line and return the result */
         free(parsedLine);
@@ -188,7 +182,6 @@ char *checkLineType(char *line)
         i = 0;
         for(i = 1; i < wordAmount; i++)
             addNode(&symbolTable, parsedLine[i], "external", 0);
-        calcLength(parsedLine, wordAmount);
         free(parsedLine);
         return "";
     }
@@ -204,7 +197,6 @@ char *checkLineType(char *line)
     {
         /* Use handleInstruction to translate the instruction to binary */
         binaryLine = handleInstruction(parsedLine, &symbolTable, wordAmount);
-        calcLength(parsedLine, wordAmount);
 
         free(parsedLine);
         return binaryLine;
@@ -563,7 +555,7 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
             free(operandBinary);
             free(indexBinary);
 
-            lineNumber += 2;
+            lineNumber += 3;
 
             return result;
         }
@@ -744,7 +736,7 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
             free(operandBinaryDest);
             free(indexBinaryDest);
 
-            lineNumber += 3;
+            lineNumber += 5;
 
             return result;
         }
@@ -821,7 +813,7 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
             free(operandBinaryDest);
 
 
-            lineNumber += 3;
+            lineNumber += 4;
 
             return result;
         }
@@ -897,7 +889,7 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
             free(operandBinaryDest);
             free(indexBinaryDest);
 
-            lineNumber += 3;
+            lineNumber += 4;
 
             return result;
         }
@@ -993,7 +985,6 @@ char* handleString(char *line) {
             strcat(binaryLine, binaryNumber);
         }
 
-        lineNumber++;
         free(binaryNumber);
     }
     /* Code the null terminator */
@@ -1004,10 +995,11 @@ char* handleString(char *line) {
         strcat(binaryLine, "\n");
         strcat(binaryLine, binaryNumber);
     }
-    lineNumber++;
     free(binaryNumber);
 
     DC += amountOfChars + 1; /* Increment the data counter */
+
+    lineNumber += amountOfChars + 1; /* Increment the line number */
 
     /* Return the binary line */
     return binaryLine;
@@ -1043,7 +1035,6 @@ char *handleData(char *parsedLine[], Node **symbolTableHead, int wordAmount)
                 strcat(binaryLine, "\n");
                 strcat(binaryLine, binaryNumber);
             }
-            lineNumber++;
             free(binaryNumber);
         }
         else
@@ -1071,13 +1062,13 @@ char *handleData(char *parsedLine[], Node **symbolTableHead, int wordAmount)
                     strcat(binaryLine, "\n");
                     strcat(binaryLine, binaryNumber);
                 }
-                lineNumber++;
                 free(binaryNumber);
             }
             else
                 printExtError(ERROR_CODE_46, fileLoc);
         }
     }
+    lineNumber += wordAmount - 1; /* Increment the line number */
     /* Add a null terminator to the binary line */
     /* Return the binary line */
     return binaryLine;
@@ -1091,7 +1082,7 @@ void handleLabel(char *label, Node **symbolTableHead, int type)
         /* If the type is an instruction */
         case INSTRUCTION:
             /* Add the label to the symbol table */
-            addNode(symbolTableHead, label, "instruction", IC);
+            addNode(symbolTableHead, label, "code", IC + 100);
             break;
         /* If the type is a data type */
         case DATA:
@@ -1172,6 +1163,7 @@ void executeFirstPass(char *file, char **outputFileName)
 
     while(fgets(line, MAX_LINE_LENGTH, inputFile) != NULL) 
     {
+        int originalOutputLine = lineNumber;
         cleanedLine = removeCommas(cleanLine(line));
         binaryLine = checkLineType(cleanedLine);
 
@@ -1185,6 +1177,8 @@ void executeFirstPass(char *file, char **outputFileName)
 
         lineNumberSrcFile++;
         fileLoc.line = lineNumberSrcFile;
+
+        IC += (lineNumber - originalOutputLine);
     }
 
     fclose(inputFile);
@@ -1192,16 +1186,16 @@ void executeFirstPass(char *file, char **outputFileName)
 
     /* Update every symbol that is a data type by adding IC + 100 */
     /* Run through the symbol table */
+    printList(symbolTable);
+    printf("IC: %d\n", IC);
     current = symbolTable;
     while (current != NULL)
     {
-        /* If the symbol is a data type */
-        if (strcmp(current->data, "data") == 0)
-        {
-            /* Update the line */
-            current->line += IC + 100;
-        }
+        if(strcmp(current->data, "data") == 0)
+            current->line = current->line + IC + 100;
         /* Move to the next node */
         current = current->next;
     }
+
+    printList(symbolTable);
 }

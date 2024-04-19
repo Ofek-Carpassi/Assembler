@@ -59,7 +59,7 @@ Error errors[] = {
     {ERROR_CODE_48, "The constant is already in the table"},
     {ERROR_CODE_49, "Constant definition is missing a value"},
     {ERROR_CODE_50, "Illegal constant definition"},
-    {ERROR_CODE_51, "Constant definition missing a number"},
+    {ERROR_CODE_51, "Constant definition missing a number"}
 };
 
 void printIntError(int errorID)

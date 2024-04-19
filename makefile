@@ -1,41 +1,36 @@
 # Compiler
 CC = gcc
-# Compiler flags
-CFLAGS = -Wall -Wextra -IHeaders
 
-# Source files directory
-SRCDIR = Source
-# Header files directory
-INCDIR = Headers
-# Object files directory
-OBJDIR = obj
+# Compiler flags
+CFLAGS = -Wall -Wextra -pedantic
 
 # Source files
-SOURCES = $(wildcard $(SRCDIR)/*.c)
+SOURCES = Source/dataStructures.c Source/Erros.c Source/firstPass.c Source/preAssembler.c Source/testing.c Source/utilities.c
+
+# Header files
+HEADERS = Header/dataStructures.h Header/erros.h Header/firstPass.h Header/globalVariables.h Header/preAssembler.h Header/utilities.h Header/secondPass.h
+
 # Object files
-OBJECTS = $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(SOURCES))
+OBJECTS = $(SOURCES:.c=.o)
 
-# Executable name
-EXECUTABLE = my_program
-
-# Phony targets
-.PHONY: all clean
+# Target executable
+TARGET = testing
 
 # Default target
-all: $(EXECUTABLE)
+all: $(TARGET)
 
-# Linking the object files to create the executable
-$(EXECUTABLE): $(OBJECTS)
-	$(CC) $(CFLAGS) $^ -o $@
+# Build the target
+$(TARGET): $(OBJECTS)
+	$(CC) $(CFLAGS) -o $(TARGET) $(OBJECTS)
 
-# Compiling each source file into object files
-$(OBJDIR)/%.o: $(SRCDIR)/%.c | $(OBJDIR)
+# Build object files
+%.o: %.c $(HEADERS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Create the object directory if it does not exist
-$(OBJDIR):
-	mkdir -p $(OBJDIR)
-
-# Clean rule
+# Clean up object files
 clean:
-	rm -rf $(OBJDIR) $(EXECUTABLE)
+	rm -f $(OBJECTS) $(TARGET)
+
+# Run testing
+run:
+	./$(TARGET)
