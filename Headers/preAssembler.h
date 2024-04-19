@@ -2,7 +2,7 @@
 #define PREASSEM_H
 
 #include <stdio.h>
-#include "dataStructers.h"
+#include "dataStructures.h"
 
 /**
  * @brief This function is used to check if a line is a declaration of a macro.

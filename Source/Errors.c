@@ -55,11 +55,7 @@ Error errors[] = {
     {ERROR_CODE_44, "Instruction '.data' line contains illegal chars or syntax error"},
     {ERROR_CODE_45, "Failed to read line from file"},
     {ERROR_CODE_46, "Unkown variable"},
-    {ERROR_CODE_47, "Too many or too few operands to instruction"},
-    {ERROR_CODE_48, "The symbol is already in the table"},
-    {ERROR_CODE_49, "The line is too short"}
-
-
+    {ERROR_CODE_47, "Too many or too few operands to instruction"}
 };
 
 void printIntError(int errorID)

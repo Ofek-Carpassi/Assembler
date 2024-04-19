@@ -1,22 +1,21 @@
-#include <stdlib.h> // Used for malloc
-#include <string.h> // Used for strlen
-#include <ctype.h> // Used for isdigit
-#include "../Headers/globalVariables.h" // Include the header file with the global variables
-#include "../Headers/errors.h" // Include the header file with the error codes
-#include "../Headers/dataStructers.h" // Include the header file with the data structures
-#include "../Headers/utilities.h" // Include the header file with the function declarations
+#include <stdlib.h> 
+#include <string.h> 
+#include <ctype.h> 
+#include "../Headers/globalVariables.h"
+#include "../Headers/errors.h"
+#include "../Headers/dataStructures.h"
+#include "../Headers/utilities.h"
 
 /* Explained in the header file */
 char *cleanLine(char *line)
 {
+    /* Initialize all needed variables */
+    int originalIndex = 0, cleanedIndex = 0, i = 0;
+    char *cleanedLine;
     /* Allocate memory for the cleaned line - same size + 1 for the null character */
-    char *cleanedLine = (char *)calloc(strlen(line) + 2, sizeof(char));
+    cleanedLine = (char *)calloc(strlen(line) + 2, sizeof(char));
     if (cleanedLine == NULL)
-    {
         printIntError(ERROR_CODE_10);
-    }
-    int originalIndex = 0; /* Index for the original line */
-    int cleanedIndex = 0; /* Index for the cleaned line */
 
     /* Loop through the original line */
     while (line[originalIndex] != '\0')
@@ -45,7 +44,7 @@ char *cleanLine(char *line)
     /* If the first character is a space, shift everything to the left */
     while(cleanedLine[0] == ' ')
     {
-        for(int i = 0; i < cleanedIndex; i++)
+        for(i = 0; i < cleanedIndex; i++)
         {
             cleanedLine[i] = cleanedLine[i+1];
         }
@@ -62,15 +61,15 @@ char *cleanLine(char *line)
 /* Explained in the header file */
 char **parseLine(char *line, int wordAmount)
 {
+    /* Initialize all needed variables */
+    int wordIndex = 0, lineIndex = 0, wordLength = 0, i = 0;
+    char **parsedLine;
     /* Parse the line by spaces, commas, tabs */
-    char **parsedLine = (char **)calloc(wordAmount+1, sizeof(char *));
+    parsedLine = (char **)calloc(wordAmount+1, sizeof(char *));
     if (parsedLine == NULL)
     {
         printIntError(ERROR_CODE_10);
     }
-    int wordIndex = 0; /* Index for the word */
-    int lineIndex = 0; /* Index for the line */
-    int wordLength = 0; /* Length of the word */
 
     /* Loop through the line */
     while (line[lineIndex] != '\0')
@@ -97,7 +96,7 @@ char **parseLine(char *line, int wordAmount)
         }
 
         /* Copy the word to the parsed line */
-        for (int i = 0; i < wordLength; i++)
+        for (i = 0; i < wordLength; i++)
         {
             parsedLine[wordIndex][i] = line[lineIndex - wordLength + i];
         }
@@ -117,8 +116,9 @@ char **parseLine(char *line, int wordAmount)
 /* Explained in the header file */
 int isNumber(char *str)
 {
+    int i = 0;
     /* Loop through the string, allow for - or + at the beginning */
-    for(int i = 0; i < strlen(str)-1; i++)
+    for(i = 0; i < strlen(str)-1; i++)
     {
         if(i == 0 && (str[i] == '-' || str[i] == '+'))
             continue;
@@ -151,27 +151,34 @@ int countWords(char *line)
 /* Explained in the header file */
 char *intToBinary(int num, int bits)
 {
-    /* Bits is the number of bits to represent the number */
-    char *binary = (char *)calloc(bits+1, sizeof(char));
-    if (binary == NULL)
+    int i = 0;
+    char *binary = (char *)calloc(bits + 1, sizeof(char));
+    if(binary == NULL)
         printIntError(ERROR_CODE_10);
 
-    /* Loop through the bits */
-    for(int i = bits-1; i >= 0; i--)
-    {
-        /* If the number is odd, add 1 to the binary string */
-        binary[i] = (num % 2 == 1) ? '1' : '0';
-        num /= 2;
-    }
-    /* Add the null character at the end of the string */
+    if(num < 0)
+        for(i = bits-1; i >= 0; i--)
+        {
+            binary[i] = (num % 2 == 0) ? '1' : '0';
+            num /= 2;
+        }
+    else
+        for(i = bits-1; i >= 0; i--)
+        {
+            binary[i] = (num % 2 == 0) ? '0' : '1';
+            num /= 2;
+        }
+
     binary[bits] = '\0';
-    /* Return the binary string */
+
     return binary;
 }
 
 /* Explained in the header file */
 char *getAddressingMethod(char *operand, Node *symbolTable, int *addressingMethod)
 {
+    int openingBracket = -1, closingBracket = -1, i = 0, isIndexLegal = -1;
+    char *inBrackets;
     /* If immediate addressing method */
     if(operand[0] == '#')
     {
@@ -179,10 +186,8 @@ char *getAddressingMethod(char *operand, Node *symbolTable, int *addressingMetho
         return "00";
     }
 
-    int openingBracket = -1;
-    int closingBracket = -1;
     /* If index addressing method */
-    for(int i = 0; i < strlen(operand); i++)
+    for(i = 0; i < strlen(operand); i++)
     {
         if(operand[i] == '[')
             openingBracket = i;
@@ -192,14 +197,16 @@ char *getAddressingMethod(char *operand, Node *symbolTable, int *addressingMetho
     if(openingBracket != -1 && closingBracket != -1 && closingBracket > openingBracket)
     {
         /* Parse the operand from the brackets */
-        char inBrackets[closingBracket-openingBracket];
-        for(int i = openingBracket+1; i < closingBracket; i++)
+        inBrackets = (char *)calloc(closingBracket-openingBracket, sizeof(char));
+        if(inBrackets == NULL)
+            printIntError(ERROR_CODE_10);
+        for(i = openingBracket+1; i < closingBracket; i++)
         {
             inBrackets[i-openingBracket-1] = operand[i];
         }
         inBrackets[closingBracket-openingBracket-1] = '\0';
 
-        int isIndexLegal = -1;
+        isIndexLegal = -1;
         /* Check if the value inside the brackets is a number or a constant */
         if(isNumber(inBrackets))
             isIndexLegal = 1;
@@ -239,14 +246,15 @@ char *getAddressingMethod(char *operand, Node *symbolTable, int *addressingMetho
 
 char *removeCommas(char *line)
 {
+    int originalIndex = 0; /* Index for the original line */
+    int cleanedIndex = 0; /* Index for the cleaned line */
+    char *cleanedLine; /* The cleaned line */
     /* Allocate memory for the cleaned line - same size + 1 for the null character */
-    char *cleanedLine = (char *)calloc(strlen(line) + 1, sizeof(char));
+    cleanedLine = (char *)calloc(strlen(line) + 1, sizeof(char));
     if (cleanedLine == NULL)
     {
         printIntError(ERROR_CODE_10);
     }
-    int originalIndex = 0; /* Index for the original line */
-    int cleanedIndex = 0; /* Index for the cleaned line */
 
     /* Loop through the original line */
     while (line[originalIndex] != '\0')
