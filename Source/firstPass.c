@@ -154,8 +154,9 @@ char *checkLineType(char *line)
         /* Use handleData to translate the data to binary */
         binaryLine = handleData(parsedLine, &symbolTable, wordAmount);
 
-        /* Increment the data counter by the number of numbers in the data declaration */
-        DC += wordAmount - 1;
+        /* Word amount is the amount of words in the line not including the label
+        we need to update DC by the amount of numbers / constants we added not including the label nor the .data */
+        DC += (wordAmount - 1);
 
         /* Free the parsed line and return the result */
         free(parsedLine);
@@ -446,7 +447,7 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
     char *opcode, *result, *operand, *addressing, *inBrackets, *beforeBrackets, *operandBinary, *indexBinary, *variable, *sourceOperand, *destinationOperand;
     char *sourceAddressing, *destinationAddressing, *regs, *inBracketsSrc, *inBracketsDest, *beforeBracketsSrc, *beforeBracketsDest;
     char *operandBinarySrc, *operandBinaryDest, *indexBinarySrc, *indexBinaryDest;
-    int i = 0, j = 0;
+    int i = 0, j = 0, originalLineNumber = lineNumber;
 
     /* First we'll get the instruction */
     instructionIndex = isInstruction(parsedLine[0]);
@@ -484,6 +485,9 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
         strcat(result, opcode);
         strcat(result, "000000");
         lineNumber++;
+        /* IC needs to be incremented by the amount of lines we added */
+        IC += (lineNumber - originalLineNumber);
+
         return result;
     }
     else if(arguments == 1)
@@ -556,6 +560,7 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
             free(indexBinary);
 
             lineNumber += 3;
+            IC += (lineNumber - originalLineNumber);
 
             return result;
         }
@@ -593,6 +598,7 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
 
         free(operandBinary);
         lineNumber += 2;
+        IC += (lineNumber - originalLineNumber);
         return result;
     }
     else if(arguments == 2)
@@ -629,6 +635,7 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
             result[strlen(result) - 1] = '\0';
 
             lineNumber += 2;
+            IC += (lineNumber - originalLineNumber);
 
             free(regs);
             return result;
@@ -737,6 +744,7 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
             free(indexBinaryDest);
 
             lineNumber += 5;
+            IC += (lineNumber - originalLineNumber);
 
             return result;
         }
@@ -814,6 +822,7 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
 
 
             lineNumber += 4;
+            IC += (lineNumber - originalLineNumber);
 
             return result;
         }
@@ -890,6 +899,7 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
             free(indexBinaryDest);
 
             lineNumber += 4;
+            IC += (lineNumber - originalLineNumber);
 
             return result;
         }
@@ -940,6 +950,7 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
         free(operandBinaryDest);
 
         lineNumber += 3;
+        IC += (lineNumber - originalLineNumber);
 
         return result;
     }
@@ -952,13 +963,12 @@ char* handleString(char *line) {
     int i = 0;
     int lengthOfBinaryLine = 0;
     char *binaryNumber, *binaryLine;
-    /* Loop through the string */
-    for (i = 0; i < strlen(line); i++)
-    {
-        if(line[i] == '"')
-            continue;
+    /* Count the amount of chars in the string not including the "" */
+    for (i = 1; i < strlen(line) - 1; i++)
         amountOfChars++;
-    }
+
+    /* AmountOfChars is now too big by 1, we need to subtract 1 */
+    amountOfChars--;
 
     lengthOfBinaryLine = (amountOfChars+1) * 15; /* Calculate the length of the binary line */
 
@@ -970,7 +980,7 @@ char* handleString(char *line) {
     Loop through the string
     The first char is " and the last char is ", the loop should run from 1 to amountOfChars 
     */
-    for (i = 1; i < amountOfChars; i++)
+    for (i = 1; i < amountOfChars+1; i++)
     {
         /* Convert the character to ascii and then to binary */
         int number = line[i];
@@ -997,7 +1007,8 @@ char* handleString(char *line) {
     }
     free(binaryNumber);
 
-    DC += amountOfChars + 1; /* Increment the data counter */
+    /* We need to update DC by the amount of chars we coded including the null terminator */
+    DC += amountOfChars + 1;
 
     lineNumber += amountOfChars + 1; /* Increment the line number */
 
@@ -1118,22 +1129,6 @@ void handleConstant(char **parsedLine, Node **symbolTableHead, int wordAmount)
         addNode(symbolTableHead, parsedLine[1], "mdefine", atoi(parsedLine[3]));
 }
 
-/* Only a prototype - still not working */
-void calcLength(char **parsedLine, int wordAmount)
-{
-    int i = 0;
-    int addressingMethod;   
-    for(i = 0; i < wordAmount; i++)
-    {
-        addressingMethod = -1;
-        getAddressingMethod(parsedLine[i], symbolTable, &addressingMethod);
-        if(addressingMethod != 2)
-            IC += 1;
-        else
-            IC += 2;
-    }
-}
-
 void executeFirstPass(char *file, char **outputFileName)
 {
     char line[MAX_LINE_LENGTH + 1];
@@ -1163,7 +1158,6 @@ void executeFirstPass(char *file, char **outputFileName)
 
     while(fgets(line, MAX_LINE_LENGTH, inputFile) != NULL) 
     {
-        int originalOutputLine = lineNumber;
         cleanedLine = removeCommas(cleanLine(line));
         binaryLine = checkLineType(cleanedLine);
 
@@ -1177,8 +1171,6 @@ void executeFirstPass(char *file, char **outputFileName)
 
         lineNumberSrcFile++;
         fileLoc.line = lineNumberSrcFile;
-
-        IC += (lineNumber - originalOutputLine);
     }
 
     fclose(inputFile);
@@ -1186,9 +1178,10 @@ void executeFirstPass(char *file, char **outputFileName)
 
     /* Update every symbol that is a data type by adding IC + 100 */
     /* Run through the symbol table */
-    printList(symbolTable);
-    printf("IC: %d\n", IC);
     current = symbolTable;
+
+    /* IC will be wrong - it should be IC - 1 because the first line is 0 */
+
     while (current != NULL)
     {
         if(strcmp(current->data, "data") == 0)
@@ -1196,6 +1189,4 @@ void executeFirstPass(char *file, char **outputFileName)
         /* Move to the next node */
         current = current->next;
     }
-
-    printList(symbolTable);
 }
