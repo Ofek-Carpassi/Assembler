@@ -155,7 +155,7 @@ void handleConstant(char **parsedLine, Node **symbolTableHead, int wordAmount);
  */
 char *checkLineType(char *line);
 
-char *operandHandling(char *operand, Node **symbolTableHead, int addressingMethod, int isConstant, int isSource);
+char *operandHandling(char *operand, Node **symbolTableHead, int addressingMethod, int isConstant, int isSource, int *hasLabel);
 
 char *handleTwoRegisters(char *soruceRegister, char *destinationRegister);
 

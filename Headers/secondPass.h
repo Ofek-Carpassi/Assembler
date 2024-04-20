@@ -2,7 +2,7 @@
 #define SECONDPASS_H
 
 #include <stdio.h>
-#include "dataStructers.h"
+#include "dataStructures.h"
 
 /*
 Algorithm:
@@ -76,10 +76,20 @@ char *checkStart(char *line);
  */
 int checkFieldLabel(char *line);
 
+
+int isEntry(char *line);
+
+char *convertToEncryptedBase4(char *binaryLine);
+
+int hasLabel(char *line);
+
 /**
  * @brief This function executes the second pass algorithm.
  * 
  * @param file - The input file to read from.
  * @param outputFileName - The name of the output file.
  */
-void executeSecondPass(char *file, char **outputFileName)
+void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead);
+
+
+#endif

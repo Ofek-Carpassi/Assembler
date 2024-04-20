@@ -7,6 +7,7 @@
 #include "../Headers/firstPass.h"
 #include "../Headers/dataStructures.h"
 #include "../Headers/utilities.h"
+#include "../Headers/secondPass.h"
 
 int main()
 {   

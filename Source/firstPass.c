@@ -7,6 +7,7 @@
 #include "../Headers/globalVariables.h" /* Include the header file with the global variables */
 #include "../Headers/utilities.h" /* Include the header file with the utility functions */
 #include "../Headers/dataStructures.h" /* Include the header file with the data structures */
+#include "../Headers/secondPass.h" /* Include the header file with the second pass functions */
 
 int IC = 0, DC = 0; /* Initialize the instruction counter and the data counter */
 int lineNumber = 1; /* Initialize the line number */
@@ -205,7 +206,7 @@ char *checkLineType(char *line)
     return "ERROR";
 }
 
-char *operandHandling(char *operand, Node **symbolTableHead, int addressingMethod, int isConstant, int isSource)
+char *operandHandling(char *operand, Node **symbolTableHead, int addressingMethod, int isConstant, int isSource, int *hasLabel)
 {
     char *binaryNumber;
     char *result;
@@ -278,6 +279,7 @@ char *operandHandling(char *operand, Node **symbolTableHead, int addressingMetho
         If the label is not found in the symbol table - second pass will handle it - return an empty string */
         int found = 0;
         Node *node = searchNodeInList(*symbolTableHead, operand, &found);
+        *hasLabel = 1;
         if (found == 1 && strcmp(node->data, "data") == 0)
         {
             /* Convert the label to a binary string */
@@ -289,6 +291,7 @@ char *operandHandling(char *operand, Node **symbolTableHead, int addressingMetho
             strcat(result, binaryNumber);
             strcat(result, "10\n");
             free(binaryNumber);
+            
             return result;
         }
         else if (found == 1 && strcmp(node->data, "external") == 0)
@@ -302,10 +305,11 @@ char *operandHandling(char *operand, Node **symbolTableHead, int addressingMetho
             strcat(result, binaryNumber);
             strcat(result, "01\n");
             free(binaryNumber);
+
             return result;
         }
         else
-            return "\n";
+            return "";
     }
     /* registers */
     else if (operand[0] == 'r' && addressingMethod == 3)
@@ -398,7 +402,7 @@ char *operandHandling(char *operand, Node **symbolTableHead, int addressingMetho
             return result;
         }
         else
-            return "\n";
+            return "";
     }
 
     return NULL;
@@ -448,6 +452,9 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
     char *sourceAddressing, *destinationAddressing, *regs, *inBracketsSrc, *inBracketsDest, *beforeBracketsSrc, *beforeBracketsDest;
     char *operandBinarySrc, *operandBinaryDest, *indexBinarySrc, *indexBinaryDest;
     int i = 0, j = 0, originalLineNumber = lineNumber;
+    int hasLabel = 0, srcHasLabel = 0, destHasLabel = 0;
+    
+    FILE *lineNumbers = fopen("lineNumbers.txt", "a");
 
     /* First we'll get the instruction */
     instructionIndex = isInstruction(parsedLine[0]);
@@ -455,20 +462,8 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
     opcode = opcodes[instructionIndex].binary;
     /* Get the number of arguments */
     arguments = opcodes[instructionIndex].arguments;
-    /* Now there are three cases:
-    1. The instruction's operands are two registers
-    2. At least one of the operands addressing method is 10 - index addressing method
-    3. None of the above
-    If the first case - call handleTwoRegisters with the two operands
-    If the second case - call operandHandling 3-4 (depends on the amount of indexes) times
-    If the third case - call operandHandling for each operand
 
-    Get the addressing method for each operand
-    If the addressing method is 00 - immediate addressing method
-    If the addressing method is 01 - direct addressing method
-    If the addressing method is 10 - index addressing method
-    If the addressing method is 11 - register addressing method
-    */
+    
     if(arguments == 0)
     {
         /* make sure parsed line has only the instruction - no operands */
@@ -487,6 +482,9 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
         lineNumber++;
         /* IC needs to be incremented by the amount of lines we added */
         IC += (lineNumber - originalLineNumber);
+
+        fprintf(lineNumbers, "1\n");
+        fclose(lineNumbers);
 
         return result;
     }
@@ -532,13 +530,13 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
                 beforeBrackets[i] = operand[i];
             }
 
-            operandBinary = operandHandling(beforeBrackets, symbolTableHead, addressingMethod, 0, 0);
+            operandBinary = operandHandling(beforeBrackets, symbolTableHead, addressingMethod, 0, 0, &hasLabel);
 
             isConstant = 0;
             if(!isNumber(inBrackets))
                 isConstant = 1;
 
-            indexBinary = operandHandling(inBrackets, symbolTableHead, -1, isConstant, 1);
+            indexBinary = operandHandling(inBrackets, symbolTableHead, -1, isConstant, 1, &hasLabel);
 
             result = (char *)calloc(strlen(operandBinary) + strlen(indexBinary) + 17, sizeof(char));
             if(result == NULL)
@@ -562,6 +560,9 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
             lineNumber += 3;
             IC += (lineNumber - originalLineNumber);
 
+            fprintf(lineNumbers, "3 2\n");
+            fclose(lineNumbers);
+
             return result;
         }
 
@@ -577,8 +578,11 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
         if(addressingMethod == 0 && !isNumber(variable))
             isConstant = 1;
         free(variable);
-
-        operandBinary = operandHandling(operand, symbolTableHead, addressingMethod, isConstant, 1);
+        
+        hasLabel = 0;
+        printf("addressingMethod: %d\n", addressingMethod);
+        operandBinary = operandHandling(operand, symbolTableHead, addressingMethod, isConstant, 1, &hasLabel);
+        printf("hasLabel: %d\n", hasLabel);
 
         result = (char *)calloc(strlen(operandBinary) + 17, sizeof(char));
         if(result == NULL)
@@ -599,6 +603,13 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
         free(operandBinary);
         lineNumber += 2;
         IC += (lineNumber - originalLineNumber);
+
+        if(hasLabel)
+            fprintf(lineNumbers, "2 2\n");
+        else
+            fprintf(lineNumbers, "2\n");
+        fclose(lineNumbers);
+
         return result;
     }
     else if(arguments == 2)
@@ -638,6 +649,10 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
             IC += (lineNumber - originalLineNumber);
 
             free(regs);
+
+            fprintf(lineNumbers, "2\n");
+            fclose(lineNumbers);
+
             return result;
         }
         else if(sourceAddressingMethod == 2 && destinationAddressingMethod == 2)
@@ -671,13 +686,13 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
                 beforeBracketsSrc[i] = sourceOperand[i];
             }
 
-            operandBinarySrc = operandHandling(beforeBracketsSrc, symbolTableHead, sourceAddressingMethod, 0, 1);
+            operandBinarySrc = operandHandling(beforeBracketsSrc, symbolTableHead, sourceAddressingMethod, 0, 1, &hasLabel);
 
             isConstant = 0;
             if(!isNumber(inBracketsSrc))
                 isConstant = 1;
 
-            indexBinarySrc = operandHandling(inBracketsSrc, symbolTableHead, -1, isConstant, 1);
+            indexBinarySrc = operandHandling(inBracketsSrc, symbolTableHead, -1, isConstant, 1, &hasLabel);
 
             /* get the index from the operand <label>[<index>] */
             inBracketsDest = (char *)calloc(strlen(destinationOperand), sizeof(char));
@@ -711,13 +726,13 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
                 beforeBracketsDest[i] = destinationOperand[i];
             }
 
-            operandBinaryDest = operandHandling(beforeBracketsDest, symbolTableHead, destinationAddressingMethod, 0, 0);
+            operandBinaryDest = operandHandling(beforeBracketsDest, symbolTableHead, destinationAddressingMethod, 0, 0, &hasLabel);
 
             isConstant = 0;
             if(!isNumber(inBracketsDest))
                 isConstant = 1;
 
-            indexBinaryDest = operandHandling(inBracketsDest, symbolTableHead, -1, isConstant, 0);
+            indexBinaryDest = operandHandling(inBracketsDest, symbolTableHead, -1, isConstant, 0, &hasLabel);
 
             result = (char *)calloc(strlen(operandBinarySrc) + strlen(indexBinarySrc) + strlen(operandBinaryDest) + strlen(indexBinaryDest) + 17, sizeof(char));
             if(result == NULL)
@@ -745,6 +760,10 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
 
             lineNumber += 5;
             IC += (lineNumber - originalLineNumber);
+
+            /* Write the line numbers and the index of the labels to the file */
+            fprintf(lineNumbers, "5 2 3\n");
+            fclose(lineNumbers);
 
             return result;
         }
@@ -779,13 +798,13 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
                 beforeBrackets[i] = sourceOperand[i];
             }
 
-            operandBinarySrc = operandHandling(beforeBrackets, symbolTableHead, sourceAddressingMethod, 0, 1);
+            operandBinarySrc = operandHandling(beforeBrackets, symbolTableHead, sourceAddressingMethod, 0, 1, &hasLabel);
 
             isConstant = 0;
             if(!isNumber(inBrackets))
                 isConstant = 1;
 
-            indexBinarySrc = operandHandling(inBrackets, symbolTableHead, -1, isConstant, 1);
+            indexBinarySrc = operandHandling(inBrackets, symbolTableHead, -1, isConstant, 1, &hasLabel);
 
             isConstant = 0;
             variable = (char *)calloc(strlen(sourceOperand), sizeof(char));
@@ -796,7 +815,7 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
 
             free(variable);
 
-            operandBinaryDest = operandHandling(destinationOperand, symbolTableHead, destinationAddressingMethod, isConstant, 0);
+            operandBinaryDest = operandHandling(destinationOperand, symbolTableHead, destinationAddressingMethod, isConstant, 0, &hasLabel);
 
             result = (char *)calloc(strlen(operandBinarySrc) + strlen(indexBinarySrc) + strlen(operandBinaryDest) + 17, sizeof(char));
             if(result == NULL)
@@ -820,9 +839,11 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
             free(indexBinarySrc);
             free(operandBinaryDest);
 
-
             lineNumber += 4;
             IC += (lineNumber - originalLineNumber);
+
+            fprintf(lineNumbers, "4 2\n");
+            fclose(lineNumbers);
 
             return result;
         }
@@ -838,7 +859,7 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
 
             free(variable);
 
-            operandBinarySrc = operandHandling(sourceOperand, symbolTableHead, sourceAddressingMethod, isConstant, 1);
+            operandBinarySrc = operandHandling(sourceOperand, symbolTableHead, sourceAddressingMethod, isConstant, 1, &hasLabel);
 
             /* get the index from the operand <label>[<index>] */
             inBrackets = (char *)calloc(strlen(destinationOperand), sizeof(char));
@@ -873,8 +894,8 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
             if(!isNumber(inBrackets))
                 isConstant = 1;
 
-            indexBinaryDest = operandHandling(inBrackets, symbolTableHead, -1, isConstant, 1);
-            operandBinaryDest = operandHandling(beforeBrackets, symbolTableHead, destinationAddressingMethod, 0, 0);
+            indexBinaryDest = operandHandling(inBrackets, symbolTableHead, -1, isConstant, 1, &hasLabel);
+            operandBinaryDest = operandHandling(beforeBrackets, symbolTableHead, destinationAddressingMethod, 0, 0, &hasLabel);
 
             result = (char *)calloc(strlen(operandBinarySrc) + strlen(operandBinaryDest) + strlen(indexBinaryDest) + 17, sizeof(char));
             if(result == NULL)
@@ -901,6 +922,9 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
             lineNumber += 4;
             IC += (lineNumber - originalLineNumber);
 
+            fprintf(lineNumbers, "4 3\n");
+            fclose(lineNumbers);
+
             return result;
         }
 
@@ -914,7 +938,8 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
 
         free(variable);
 
-        operandBinarySrc = operandHandling(sourceOperand, symbolTableHead, sourceAddressingMethod, isConstant, 1);
+        srcHasLabel = 0;
+        operandBinarySrc = operandHandling(sourceOperand, symbolTableHead, sourceAddressingMethod, isConstant, 1, &srcHasLabel);
 
         /* Translate the destination operand */
         isConstant = 0;
@@ -926,7 +951,8 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
 
         free(variable);
 
-        operandBinaryDest = operandHandling(destinationOperand, symbolTableHead, destinationAddressingMethod, isConstant, 0);
+        destHasLabel = 0;
+        operandBinaryDest = operandHandling(destinationOperand, symbolTableHead, destinationAddressingMethod, isConstant, 0, &destHasLabel);
 
         result = (char *)calloc(strlen(operandBinarySrc) + strlen(operandBinaryDest) + 17, sizeof(char));
         if(result == NULL)
@@ -952,8 +978,20 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
         lineNumber += 3;
         IC += (lineNumber - originalLineNumber);
 
+        if(srcHasLabel && destHasLabel)
+            fprintf(lineNumbers, "3 2 3\n");
+        else if(srcHasLabel)
+            fprintf(lineNumbers, "3 2\n");
+        else if(destHasLabel)
+            fprintf(lineNumbers, "3 3\n");
+        else
+            fprintf(lineNumbers, "3\n");
+
+        fclose(lineNumbers);
+
         return result;
     }
+    fclose(lineNumbers);
     return "ERROR";
 }
 
@@ -963,12 +1001,10 @@ char* handleString(char *line) {
     int i = 0;
     int lengthOfBinaryLine = 0;
     char *binaryNumber, *binaryLine;
+    FILE *lineNumbers = fopen("lineNumbers.txt", "a");
     /* Count the amount of chars in the string not including the "" */
     for (i = 1; i < strlen(line) - 1; i++)
         amountOfChars++;
-
-    /* AmountOfChars is now too big by 1, we need to subtract 1 */
-    amountOfChars--;
 
     lengthOfBinaryLine = (amountOfChars+1) * 15; /* Calculate the length of the binary line */
 
@@ -996,6 +1032,7 @@ char* handleString(char *line) {
         }
 
         free(binaryNumber);
+        lineNumber++;
     }
     /* Code the null terminator */
     binaryNumber = intToBinary(0, 14);
@@ -1010,7 +1047,11 @@ char* handleString(char *line) {
     /* We need to update DC by the amount of chars we coded including the null terminator */
     DC += amountOfChars + 1;
 
-    lineNumber += amountOfChars + 1; /* Increment the line number */
+    lineNumber++;
+
+    /* Write the line numbers to the file */
+    fprintf(lineNumbers, "%d\n", amountOfChars);
+    fclose(lineNumbers);
 
     /* Return the binary line */
     return binaryLine;
@@ -1024,6 +1065,7 @@ char *handleData(char *parsedLine[], Node **symbolTableHead, int wordAmount)
     int found = 0;
     char *variable;
     char *binaryLine = (char *)calloc(15, sizeof(char)); /* Create a new string to store the binary line */
+    FILE *lineNumbers = fopen("lineNumbers.txt", "a");
     if(binaryLine == NULL)
         printIntError(ERROR_CODE_10);
 
@@ -1080,6 +1122,10 @@ char *handleData(char *parsedLine[], Node **symbolTableHead, int wordAmount)
         }
     }
     lineNumber += wordAmount - 1; /* Increment the line number */
+
+    fprintf(lineNumbers, "%d\n", wordAmount - 1);
+    fclose(lineNumbers);
+
     /* Add a null terminator to the binary line */
     /* Return the binary line */
     return binaryLine;
@@ -1140,15 +1186,13 @@ void executeFirstPass(char *file, char **outputFileName)
     if (inputFile == NULL) 
         printIntError(ERROR_CODE_12);
 
-    *outputFileName = calloc(strlen(file) + 2, sizeof(char));
-    if(*outputFileName == NULL)
+    /* output file is a temporary file that will be deleted after the second pass
+    the outputFile's name is "tempFile.obj" */
+    *outputFileName = (char *)calloc(13, sizeof(char));
+    if (*outputFileName == NULL)
         printIntError(ERROR_CODE_10);
-    strcpy(*outputFileName, file);
-    /* Replace the file from <name>.txt\0 to <name>.obj\0 */
-    (*outputFileName)[strlen(file) - 2] = 'o';
-    (*outputFileName)[strlen(file)-1] = 'b';
-    (*outputFileName)[strlen(file)] = 'j';
-    (*outputFileName)[strlen(file) + 1] = '\0';
+
+    strcpy(*outputFileName, "tempFile.obj");
 
     outputFile = fopen(*outputFileName, "w");
     if (outputFile == NULL)
@@ -1189,4 +1233,8 @@ void executeFirstPass(char *file, char **outputFileName)
         /* Move to the next node */
         current = current->next;
     }
+
+    printList(symbolTable);
+
+    executeSecondPass(file, *outputFileName, symbolTable);
 }

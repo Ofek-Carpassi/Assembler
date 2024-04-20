@@ -14,5 +14,5 @@ L1:     inc K
 END:    hlt
 .define len = 4
 STR:    .string "abcdef"
-LIST:   .data 6, -9, len
-K: .data 22
+LIST: .data 6, -9, len
+K:      .data 22
