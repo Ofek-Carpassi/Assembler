@@ -1016,7 +1016,7 @@ char* handleString(char *line) {
     Loop through the string
     The first char is " and the last char is ", the loop should run from 1 to amountOfChars 
     */
-    for (i = 1; i < amountOfChars+1; i++)
+    for (i = 1; i < amountOfChars; i++)
     {
         /* Convert the character to ascii and then to binary */
         int number = line[i];
@@ -1045,7 +1045,7 @@ char* handleString(char *line) {
     free(binaryNumber);
 
     /* We need to update DC by the amount of chars we coded including the null terminator */
-    DC += amountOfChars + 1;
+    DC += amountOfChars;
 
     lineNumber++;
 
@@ -1223,6 +1223,9 @@ void executeFirstPass(char *file, char **outputFileName)
     /* Update every symbol that is a data type by adding IC + 100 */
     /* Run through the symbol table */
     current = symbolTable;
+
+    printf("IC: %d\n", IC);
+    printf("DC: %d\n", DC);
 
     /* IC will be wrong - it should be IC - 1 because the first line is 0 */
 

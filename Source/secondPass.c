@@ -118,6 +118,7 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead) 
     Node *current = NULL;
     int found = 0;
     char *token = NULL;
+    int numbersAmount = 0;
 
     FILE *file = fopen(srcFile, "r");
     FILE *tmpFile = fopen(tmpFileName, "r");
@@ -132,8 +133,8 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead) 
     obj = fopen(outputFileName, "w");
 
     while (fgets(line, MAX_LINE_LENGTH, file) != NULL) {
-        printf("Line: %s", line);
-        printf("isEntry: %d\n\n", isEntry(line));
+        printf("\nLine: %s", line);
+        printf("isEntry: %d", isEntry(line));
         
         /* If the line doesn't have .entry - we'll do the if statement */
         if (isEntry(line) == 0 && !strstr(line, ".define")) {
@@ -157,46 +158,82 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead) 
                 token = strtok(NULL, " ");
                 i++;
             }
-            printf("i: %d\n", i);
+            numbersAmount = i;
             /* If there are no more numbers, we'll just write the lines to the obj file */
-            if (i == 1) {
-                for(j = 0; j < numbers[0] + 1; j++) {
+            printf("line: %s\n", line);
+            printf("numbersAmount: %d\n", numbersAmount);
+            printf("numbers[0]: %d\n", numbers[0]);
+            if (numbersAmount == 1) {
+                /* read numbers[0] lines from the tmp file and write them to the obj file */
+                for(i = 0; i < numbers[0]; i++) {
                     fgets(tmpLine, MAX_LINE_LENGTH, tmpFile);
                     fprintf(obj, "%s", tmpLine);
                 }
-            } else {
-                /* skip (numbers[0] - numbers[1]) lines */
-                for(j = 0; j < numbers[0] - numbers[1] + 1; j++) {
+            }
+            else if(numbersAmount == 2)
+            {
+                printf("reading %d lines from the tmp file\n", numbers[1]-1);
+                /* read numbers[1]-1 lines from the tmp file and write them to the obj file */
+                for(i = 0; i < numbers[1]-1; i++) {
                     fgets(tmpLine, MAX_LINE_LENGTH, tmpFile);
                     fprintf(obj, "%s", tmpLine);
                 }
-                /* Get the numbers[1]-1 word from the line */
                 label = getLabelFromLine(line, numbers[1]-1);
-                printf("Label: %s\n", label);
-                if(label[strlen(label)-1] == '\n') {
+                if(label[strlen(label)-1] == '\n')
                     label[strlen(label)-1] = '\0';
-                }
-                /* Get the label's data from the symbol table */
+                found = 0;
                 current = searchNodeInList(symbolTableHead, label, &found);
+                printf("label: %s\n", label);
                 if (found) {
                     base4 = intToBinary(current->line, 14);
                     fprintf(obj, "%s\n", base4);
                 }
-                printf("Base4: %s\n", base4);
-                printf("current->line: %d\n", current->line);
-                free(base4);
-                /* skip (numbers[2] - numbers[1]) if numbers[2] exists */
-                if (i == 3) {
-                    for(j = 0; j < numbers[2] - numbers[1] + 1; j++) {
-                        fgets(tmpLine, MAX_LINE_LENGTH, tmpFile);
-                        fprintf(obj, "%s", tmpLine);
-                    }
-                    label = getLabelFromLine(line, numbers[2]-1);
-                    current = searchNodeInList(symbolTableHead, label, &found);
-                    if (found) {
-                        base4 = intToBinary(current->line, 14);
-                        fprintf(obj, "%s\n", base4);
-                    }
+                printf("reading %d lines from the tmp file\n", numbers[0]-numbers[1]);
+                /* read the rest of the lines from the tmp file and write them to the obj file */
+                for(i = 0; i < numbers[0] - numbers[1]; i++) {
+                    fgets(tmpLine, MAX_LINE_LENGTH, tmpFile);
+                    fprintf(obj, "%s", tmpLine);
+                }
+            }
+            else if(numbersAmount == 3)
+            {
+                printf("reading %d lines from the tmp file\n", numbers[1]-1);
+                /* read numbers[1]-1 lines from the tmp file and write them to the obj file */
+                for(i = 0; i < numbers[1]-1; i++) {
+                    fgets(tmpLine, MAX_LINE_LENGTH, tmpFile);
+                    fprintf(obj, "%s", tmpLine);
+                }
+                label = getLabelFromLine(line, numbers[1]-1);
+                if(label[strlen(label)-1] == '\n')
+                    label[strlen(label)-1] = '\0';
+                found = 0;
+                current = searchNodeInList(symbolTableHead, label, &found);
+                printf("label: %s\n", label);
+                if (found) {
+                    base4 = intToBinary(current->line, 14);
+                    fprintf(obj, "%s\n", base4);
+                }
+                printf("reading %d lines from the tmp file\n", numbers[0]-numbers[2]-1);
+                /* read numbers[2]-numbers[1]-1 lines from the tmp file and write them to the obj file */
+                for(i = 0; i < numbers[0] - numbers[2] - 1; i++) {
+                    fgets(tmpLine, MAX_LINE_LENGTH, tmpFile);
+                    fprintf(obj, "%s", tmpLine);
+                }
+                label = getLabelFromLine(line, numbers[2]-1);
+                if(label[strlen(label)-1] == '\n')
+                    label[strlen(label)-1] = '\0';
+                found = 0;
+                current = searchNodeInList(symbolTableHead, label, &found);
+                printf("label: %s\n", label);
+                if (found) {
+                    base4 = intToBinary(current->line, 14);
+                    fprintf(obj, "%s\n", base4);
+                }
+                printf("reading %d lines from the tmp file\n", numbers[0]-numbers[2]);
+                /* read the rest of the lines from the tmp file and write them to the obj file */
+                for(i = 0; i < numbers[0] - numbers[2] - 1; i++) {
+                    fgets(tmpLine, MAX_LINE_LENGTH, tmpFile);
+                    fprintf(obj, "%s", tmpLine);
                 }
             }
         }
@@ -205,10 +242,10 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead) 
     fclose(file);
     fclose(obj);
     fclose(tmpFile);
+    fclose(lineNumbers);
 
-    /*remove(tmpFileName);*/
+    remove(tmpFileName);
+    remove("lineNumbers.txt");
 
     free(outputFileName);
-
-    return;
 }
