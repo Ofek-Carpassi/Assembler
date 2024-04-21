@@ -182,8 +182,11 @@ char *checkLineType(char *line)
     else if(strcmp(parsedLine[0], ".extern") == 0)
     {
         i = 0;
-        for(i = 1; i < wordAmount; i++)
+        for(i = 1; i < wordAmount; i++){
+            if(parsedLine[i][strlen(parsedLine[i])-1] == '\n')
+                parsedLine[i][strlen(parsedLine[i])-1] = '\0';
             addNode(&symbolTable, parsedLine[i], "external", 0);
+        }
         free(parsedLine);
         return "";
     }

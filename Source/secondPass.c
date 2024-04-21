@@ -5,11 +5,17 @@
 #include "../Headers/dataStructures.h"
 #include "../Headers/utilities.h"
 #include "../Headers/secondPass.h"
-
-#define MAX_LINE_LENGTH 1024
+#include "../Headers/Errors.h"
+#include "../Headers/globalVariables.h"
 
 int InstructionCounter = 0;
 int objLineNumber = 1;
+
+/* Struct for entry and extern labels */
+typedef struct entryExtern {
+    char *label;
+    int value;
+} EntryExtern;
 
 /* the function isEntry check if the line has .entry */
 int isEntry(char *line) {
@@ -104,12 +110,64 @@ char *getLabelFromLine(char *line, int index) {
     return label;
 }
 
+void merge(EntryExtern *arr, int l, int m, int r) {
+    int i, j, k;
+    int n1 = m - l + 1;
+    int n2 = r - m;
+
+    EntryExtern *L = (EntryExtern *)calloc(n1, sizeof(EntryExtern));
+    EntryExtern *R = (EntryExtern *)calloc(n2, sizeof(EntryExtern));
+
+    for (i = 0; i < n1; i++)
+        L[i] = arr[l + i];
+    for (j = 0; j < n2; j++)
+        R[j] = arr[m + 1 + j];
+
+    i = 0;
+    j = 0;
+    k = l;
+    while (i < n1 && j < n2) {
+        if (L[i].value <= R[j].value) {
+            arr[k] = L[i];
+            i++;
+        }
+        else {
+            arr[k] = R[j];
+            j++;
+        }
+        k++;
+    }
+
+    while (i < n1) {
+        arr[k] = L[i];
+        i++;
+        k++;
+    }
+
+    while (j < n2) {
+        arr[k] = R[j];
+        j++;
+        k++;
+    }
+
+    free(L);
+    free(R);
+}
+
+void mergeSort(EntryExtern *arr, int l, int r) {
+    if (l < r) {
+        int m = l + (r - l) / 2;
+
+        mergeSort(arr, l, m);
+        mergeSort(arr, m + 1, r);
+
+        merge(arr, l, m, r);
+    }
+}
+
 void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead) {
-    char line[MAX_LINE_LENGTH + 1];
-    char tmpLine[MAX_LINE_LENGTH + 1];
-    char numbersLine[MAX_LINE_LENGTH + 1];
-    int numbers[3];
-    int i = 0;
+    char line[MAX_LINE_LENGTH + 1], tmpLine[MAX_LINE_LENGTH + 1], numbersLine[MAX_LINE_LENGTH + 1];
+    int numbers[3], i = 0;
     char *base4 = NULL;
     FILE *obj = NULL;
     char *label = NULL;
@@ -119,7 +177,15 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead) 
     int numbersAmount = 0;
     char *binaryLine = NULL;
     char *binaryNumber = NULL;
-
+    int entryFileCreated = 0;
+    char *entryFileName = NULL;
+    char *externFileName = NULL;
+    FILE *entryFile = NULL;
+    FILE *externFile = NULL;
+    int entriesCount = 0;
+    int externsCount = 0;
+    EntryExtern *entriesArray = NULL;
+    EntryExtern *externsArray = (EntryExtern *)calloc(1, sizeof(EntryExtern));
     FILE *file = fopen(srcFile, "r");
     FILE *tmpFile = fopen(tmpFileName, "r");
     FILE *lineNumbers = fopen("lineNumbers.txt", "r");
@@ -133,6 +199,9 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead) 
     obj = fopen(outputFileName, "w");
 
     while (fgets(line, MAX_LINE_LENGTH, file) != NULL) {
+        /* If the line contains .entry or the line is empty - we'll skip it */
+        if (strstr(line, ".extern") != NULL || strlen(line) == 1)
+            continue;
         /* If the line doesn't have .entry - we'll do the if statement */
         if (isEntry(line) == 0 && !strstr(line, ".define")) {
             /* We have a file called lineNumbers.txt that gives us crazy information
@@ -201,6 +270,15 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead) 
                     free(base4);
                     free(binaryLine);
                     objLineNumber++;
+
+                    /* If the label is external - we'll add it to the externs array
+                    it's value will be the line number + 100 and it's label will be the label */
+                    if(strcmp(current->data, "external") == 0) {
+                        externsArray = (EntryExtern *)realloc(externsArray, (sizeof(EntryExtern) * (externsCount + 1)));
+                        externsArray[externsCount].label = current -> name;
+                        externsArray[externsCount].value = objLineNumber + 98;
+                        externsCount++;
+                    }
                 }
                 /* read the rest of the lines from the tmp file and write them to the obj file */
                 for(i = 0; i < numbers[0] - numbers[1]; i++) {
@@ -246,6 +324,13 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead) 
                     free(base4);
                     free(binaryLine);
                     objLineNumber++;
+
+                    if(strcmp(current->data, "external") == 0) {
+                        externsArray = (EntryExtern *)realloc(externsArray, (sizeof(EntryExtern) * (externsCount + 1)));
+                        externsArray[externsCount].label = current -> name;
+                        externsArray[externsCount].value = objLineNumber + 98;
+                        externsCount++;
+                    }
                 }
                 /* read numbers[2]-numbers[1]-1 lines from the tmp file and write them to the obj file */
                 for(i = 0; i < numbers[0] - numbers[2] - 1; i++) {
@@ -277,6 +362,13 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead) 
                     free(base4);
                     free(binaryLine);
                     objLineNumber++;
+
+                    if(strcmp(current->data, "external") == 0) {
+                        externsArray = (EntryExtern *)realloc(externsArray, (sizeof(EntryExtern) * (externsCount + 1)));
+                        externsArray[externsCount].label = current -> name;
+                        externsArray[externsCount].value = objLineNumber + 98;
+                        externsCount++;
+                    }
                 }
                 /* read the rest of the lines from the tmp file and write them to the obj file */
                 for(i = 0; i < numbers[0] - numbers[2] - 1; i++) {
@@ -291,6 +383,19 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead) 
                 }
             }
         }
+        else if(isEntry(line) == 1)
+        {
+            /* change the labels type to entry */
+            label = getLabelFromLine(line, 1);
+            if(label[strlen(label)-1] == '\n')
+                label[strlen(label)-1] = '\0';
+            found = 0;
+            current = searchNodeInList(symbolTableHead, label, &found);
+            if (found) {
+                current->data = "entry";
+            }
+            free(label);
+        }
     }
 
     fclose(file);
@@ -302,4 +407,66 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead) 
     remove("lineNumbers.txt");
 
     free(outputFileName);
+
+    /* Run on the symbol table - only if there are labels of type entry *create* a .ent file */
+    current = symbolTableHead;
+    entryFileCreated = 0;
+    entriesCount = 0;
+    /* Create an entries array using the EntryExtern struct */
+    entriesArray = (EntryExtern *)calloc(1, sizeof(EntryExtern));
+    while(current != NULL) {
+        if(strcmp(current->data, "entry") == 0) {
+            if(!entryFileCreated)
+            {
+                /* Create the file */
+                entryFileName = (char *)calloc(strlen(srcFile) + 5, sizeof(char));
+                strcpy(entryFileName, srcFile);
+                /* Remove the .am extension */
+                entryFileName[strlen(entryFileName) - 3] = '\0';
+                strcat(entryFileName, ".ent");
+                entryFile = fopen(entryFileName, "w");
+                free(entryFileName);
+                entryFileCreated = 1;
+            }
+            entriesArray = (EntryExtern *)realloc(entriesArray, (sizeof(EntryExtern) * (i + 1)));
+            entriesArray[entriesCount].label = current -> name;
+            entriesArray[entriesCount].value = current -> line;
+            entriesCount++;
+        }
+        current = current->next;
+    }
+
+    mergeSort(entriesArray, 0, entriesCount - 1);
+
+    for(i = 0; i < entriesCount; i++) {
+        if(i == 0) fprintf(entryFile, "%s %d", entriesArray[i].label, entriesArray[i].value);
+        else fprintf(entryFile, "\n%s %d", entriesArray[i].label, entriesArray[i].value);
+    }
+
+    if(externsCount > 0) {
+        /* Create the file */
+        externFileName = (char *)calloc(strlen(srcFile) + 5, sizeof(char));
+        strcpy(externFileName, srcFile);
+        /* Remove the .am extension */
+        externFileName[strlen(externFileName) - 3] = '\0';
+        strcat(externFileName, ".ext");
+        externFile = fopen(externFileName, "w");
+        free(externFileName);
+
+        for(i = 0; i < externsCount; i++) {
+            if(i == 0) fprintf(externFile, "%s %d", externsArray[i].label, externsArray[i].value);
+            else fprintf(externFile, "\n%s %d", externsArray[i].label, externsArray[i].value);
+        }
+    }
+
+    free(entriesArray);
+    free(externsArray);
+
+    if(entryFileCreated)
+        fclose(entryFile);
+    if(externsCount > 0)
+        fclose(externFile);
+
+    free(entryFile);
+    free(externFile);
 }
