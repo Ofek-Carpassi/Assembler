@@ -187,14 +187,13 @@ void executePreAssembler(char *file, char **outputFileName)
         printIntError(ERROR_CODE_11);
 
     /* Create an output file with the same name but with the extension .am */
-    *outputFileName = calloc(strlen(file) + 1, sizeof(char));
+    *outputFileName = calloc(strlen(file), sizeof(char));
     if(*outputFileName == NULL)
         printIntError(ERROR_CODE_10);
     strcpy(*outputFileName, file);
-    /* Replace the file from <name>.txt\0 to <name>.am\0 */
-    (*outputFileName)[strlen(file) - 3] = 'a';
-    (*outputFileName)[strlen(file) - 2] = 'm';
-    (*outputFileName)[strlen(file) - 1] = '\0';
+    /* Replace the file from <name>.as to <name>.am */
+    (*outputFileName)[strlen(*outputFileName) - 2] = 'a';
+    (*outputFileName)[strlen(*outputFileName) - 1] = 'm';
     /* Open the output file */
     outputFile = fopen(*outputFileName, "w");
 

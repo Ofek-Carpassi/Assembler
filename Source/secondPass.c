@@ -190,11 +190,11 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead) 
     FILE *tmpFile = fopen(tmpFileName, "r");
     FILE *lineNumbers = fopen("lineNumbers.txt", "r");
     
-    char *outputFileName = (char *)calloc(strlen(srcFile) + 5, sizeof(char));
+    char *outputFileName = (char *)calloc(strlen(srcFile), sizeof(char));
     strcpy(outputFileName, srcFile);
-    /* Remove the .am extension */
-    outputFileName[strlen(outputFileName) - 3] = '\0';
-    strcat(outputFileName, ".ob");
+    /* Output file name would be <name>.ob\0 instead of <name>.as\0 */
+    outputFileName[strlen(outputFileName) - 2] = 'o';
+    outputFileName[strlen(outputFileName) - 1] = 'b';
 
     obj = fopen(outputFileName, "w");
 
