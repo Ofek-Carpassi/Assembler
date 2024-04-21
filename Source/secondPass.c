@@ -9,7 +9,7 @@
 #define MAX_LINE_LENGTH 1024
 
 int InstructionCounter = 0;
-int objLine = 1;
+int objLineNumber = 1;
 
 /* the function isEntry check if the line has .entry */
 int isEntry(char *line) {
@@ -52,7 +52,6 @@ char *convertToEncryptedBase4(char *binaryLine) {
 
     int i, j;
 
-    printf("Binary line: %s\n", binaryLine);
     for (i = 0, j = 0; i < binaryLineLength; i += 2, j++) {
         int value = 0;
         if (binaryLine[i] == '1') {
@@ -102,7 +101,6 @@ char *getLabelFromLine(char *line, int index) {
         if(label[i] == '[')
             label[i] = '\0';
     }
-    printf("Label: %s\n", label);
     return label;
 }
 
@@ -111,7 +109,7 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead) 
     char tmpLine[MAX_LINE_LENGTH + 1];
     char numbersLine[MAX_LINE_LENGTH + 1];
     int numbers[3];
-    int i = 0, j = 0;
+    int i = 0;
     char *base4 = NULL;
     FILE *obj = NULL;
     char *label = NULL;
@@ -119,6 +117,8 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead) 
     int found = 0;
     char *token = NULL;
     int numbersAmount = 0;
+    char *binaryLine = NULL;
+    char *binaryNumber = NULL;
 
     FILE *file = fopen(srcFile, "r");
     FILE *tmpFile = fopen(tmpFileName, "r");
@@ -133,9 +133,6 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead) 
     obj = fopen(outputFileName, "w");
 
     while (fgets(line, MAX_LINE_LENGTH, file) != NULL) {
-        printf("\nLine: %s", line);
-        printf("isEntry: %d", isEntry(line));
-        
         /* If the line doesn't have .entry - we'll do the if statement */
         if (isEntry(line) == 0 && !strstr(line, ".define")) {
             /* We have a file called lineNumbers.txt that gives us crazy information
@@ -149,7 +146,6 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead) 
             then we'll convert the label's data from the symbol table to binary and write it in the matching line
             */
             fgets(numbersLine, MAX_LINE_LENGTH, lineNumbers);
-            printf("Numbers line: %s", numbersLine);
             /* parse the line to numbers - the max amount of numbers is 3 */
             token = strtok(numbersLine, " ");
             i = 0;
@@ -160,80 +156,138 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead) 
             }
             numbersAmount = i;
             /* If there are no more numbers, we'll just write the lines to the obj file */
-            printf("line: %s\n", line);
-            printf("numbersAmount: %d\n", numbersAmount);
-            printf("numbers[0]: %d\n", numbers[0]);
             if (numbersAmount == 1) {
                 /* read numbers[0] lines from the tmp file and write them to the obj file */
                 for(i = 0; i < numbers[0]; i++) {
                     fgets(tmpLine, MAX_LINE_LENGTH, tmpFile);
-                    fprintf(obj, "%s", tmpLine);
+                    base4 = convertToEncryptedBase4(tmpLine);
+                    if(objLineNumber == 1)
+                        fprintf(obj, "%s", base4);
+                    else
+                        fprintf(obj, "\n%s", base4);
+                    free(base4);
+                    objLineNumber++;
                 }
             }
             else if(numbersAmount == 2)
             {
-                printf("reading %d lines from the tmp file\n", numbers[1]-1);
                 /* read numbers[1]-1 lines from the tmp file and write them to the obj file */
                 for(i = 0; i < numbers[1]-1; i++) {
                     fgets(tmpLine, MAX_LINE_LENGTH, tmpFile);
-                    fprintf(obj, "%s", tmpLine);
+                    base4 = convertToEncryptedBase4(tmpLine);
+                    if(objLineNumber == 1)
+                        fprintf(obj, "%s", base4);
+                    else
+                        fprintf(obj, "\n%s", base4);
+                    free(base4);
+                    objLineNumber++;
                 }
                 label = getLabelFromLine(line, numbers[1]-1);
                 if(label[strlen(label)-1] == '\n')
                     label[strlen(label)-1] = '\0';
                 found = 0;
                 current = searchNodeInList(symbolTableHead, label, &found);
-                printf("label: %s\n", label);
                 if (found) {
-                    base4 = intToBinary(current->line, 14);
-                    fprintf(obj, "%s\n", base4);
+                    binaryLine = (char *)calloc(15, sizeof(char));
+                    binaryNumber = intToBinary(current->line, 12);
+                    strcat(binaryLine, binaryNumber);
+                    strcat(binaryLine, "10");
+                    base4 = convertToEncryptedBase4(binaryLine);
+                    if(objLineNumber == 1)
+                        fprintf(obj, "%s", base4);
+                    else
+                        fprintf(obj, "\n%s", base4);
+                    free(binaryNumber);
+                    free(base4);
+                    free(binaryLine);
+                    objLineNumber++;
                 }
-                printf("reading %d lines from the tmp file\n", numbers[0]-numbers[1]);
                 /* read the rest of the lines from the tmp file and write them to the obj file */
                 for(i = 0; i < numbers[0] - numbers[1]; i++) {
                     fgets(tmpLine, MAX_LINE_LENGTH, tmpFile);
-                    fprintf(obj, "%s", tmpLine);
+                    base4 = convertToEncryptedBase4(tmpLine);
+                    if(objLineNumber == 1)
+                        fprintf(obj, "%s", base4);
+                    else
+                        fprintf(obj, "\n%s", base4);
+                    free(base4);
+                    objLineNumber++;
                 }
             }
             else if(numbersAmount == 3)
             {
-                printf("reading %d lines from the tmp file\n", numbers[1]-1);
                 /* read numbers[1]-1 lines from the tmp file and write them to the obj file */
                 for(i = 0; i < numbers[1]-1; i++) {
                     fgets(tmpLine, MAX_LINE_LENGTH, tmpFile);
-                    fprintf(obj, "%s", tmpLine);
+                    base4 = convertToEncryptedBase4(tmpLine);
+                    if(objLineNumber == 1)
+                        fprintf(obj, "%s", base4);
+                    else
+                        fprintf(obj, "\n%s", base4);
+                    free(base4);
+                    objLineNumber++;
                 }
                 label = getLabelFromLine(line, numbers[1]-1);
                 if(label[strlen(label)-1] == '\n')
                     label[strlen(label)-1] = '\0';
                 found = 0;
                 current = searchNodeInList(symbolTableHead, label, &found);
-                printf("label: %s\n", label);
                 if (found) {
-                    base4 = intToBinary(current->line, 14);
-                    fprintf(obj, "%s\n", base4);
+                    binaryLine = (char *)calloc(15, sizeof(char));
+                    binaryNumber = intToBinary(current->line, 12);
+                    strcat(binaryLine, binaryNumber);
+                    strcat(binaryLine, "10");
+                    base4 = convertToEncryptedBase4(binaryLine);
+                    if(objLineNumber == 1)
+                        fprintf(obj, "%s", base4);
+                    else
+                        fprintf(obj, "\n%s", base4);
+                    free(binaryNumber);
+                    free(base4);
+                    free(binaryLine);
+                    objLineNumber++;
                 }
-                printf("reading %d lines from the tmp file\n", numbers[0]-numbers[2]-1);
                 /* read numbers[2]-numbers[1]-1 lines from the tmp file and write them to the obj file */
                 for(i = 0; i < numbers[0] - numbers[2] - 1; i++) {
                     fgets(tmpLine, MAX_LINE_LENGTH, tmpFile);
-                    fprintf(obj, "%s", tmpLine);
+                    base4 = convertToEncryptedBase4(tmpLine);
+                    if(objLineNumber == 1)
+                        fprintf(obj, "%s", base4);
+                    else
+                        fprintf(obj, "\n%s", base4);
+                    free(base4);
+                    objLineNumber++;
                 }
                 label = getLabelFromLine(line, numbers[2]-1);
                 if(label[strlen(label)-1] == '\n')
                     label[strlen(label)-1] = '\0';
                 found = 0;
                 current = searchNodeInList(symbolTableHead, label, &found);
-                printf("label: %s\n", label);
                 if (found) {
-                    base4 = intToBinary(current->line, 14);
-                    fprintf(obj, "%s\n", base4);
+                    binaryLine = (char *)calloc(15, sizeof(char));
+                    binaryNumber = intToBinary(current->line, 12);
+                    strcat(binaryLine, binaryNumber);
+                    strcat(binaryLine, "10");
+                    base4 = convertToEncryptedBase4(binaryLine);
+                    if(objLineNumber == 1)
+                        fprintf(obj, "%s", base4);
+                    else
+                        fprintf(obj, "\n%s", base4);
+                    free(binaryNumber);
+                    free(base4);
+                    free(binaryLine);
+                    objLineNumber++;
                 }
-                printf("reading %d lines from the tmp file\n", numbers[0]-numbers[2]);
                 /* read the rest of the lines from the tmp file and write them to the obj file */
                 for(i = 0; i < numbers[0] - numbers[2] - 1; i++) {
                     fgets(tmpLine, MAX_LINE_LENGTH, tmpFile);
-                    fprintf(obj, "%s", tmpLine);
+                    base4 = convertToEncryptedBase4(tmpLine);
+                    if(objLineNumber == 1)
+                        fprintf(obj, "%s", base4);
+                    else
+                        fprintf(obj, "\n%s", base4);
+                    free(base4);
+                    objLineNumber++;
                 }
             }
         }

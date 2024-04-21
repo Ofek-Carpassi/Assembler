@@ -580,10 +580,8 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
         free(variable);
         
         hasLabel = 0;
-        printf("addressingMethod: %d\n", addressingMethod);
         operandBinary = operandHandling(operand, symbolTableHead, addressingMethod, isConstant, 1, &hasLabel);
-        printf("hasLabel: %d\n", hasLabel);
-
+        
         result = (char *)calloc(strlen(operandBinary) + 17, sizeof(char));
         if(result == NULL)
             printIntError(ERROR_CODE_10);
@@ -1224,9 +1222,6 @@ void executeFirstPass(char *file, char **outputFileName)
     /* Run through the symbol table */
     current = symbolTable;
 
-    printf("IC: %d\n", IC);
-    printf("DC: %d\n", DC);
-
     /* IC will be wrong - it should be IC - 1 because the first line is 0 */
 
     while (current != NULL)
@@ -1236,8 +1231,6 @@ void executeFirstPass(char *file, char **outputFileName)
         /* Move to the next node */
         current = current->next;
     }
-
-    printList(symbolTable);
 
     executeSecondPass(file, *outputFileName, symbolTable);
 }
