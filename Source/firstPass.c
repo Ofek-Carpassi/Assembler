@@ -9,7 +9,7 @@
 #include "../Headers/dataStructures.h" /* Include the header file with the data structures */
 #include "../Headers/secondPass.h" /* Include the header file with the second pass functions */
 
-int IC = 0, DC = 0; /* Initialize the instruction counter and the data counter */
+unsigned int IC = 0, DC = 0; /* Initialize the instruction counter and the data counter */
 int lineNumber = 1; /* Initialize the line number */
 int lineNumberSrcFile = 1; /* Initialize the line number of the source file */
 Node *symbolTable = NULL; /* Create the symbol table */

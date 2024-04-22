@@ -9,6 +9,10 @@
 #include "../Headers/utilities.h"
 #include "../Headers/secondPass.h"
 
+#define MAX_LINE_LENGTH 81
+
+int checkOutput(char *fileName);
+
 int main(int argc, char *argv[])
 {
     int i;
@@ -36,5 +40,29 @@ int main(int argc, char *argv[])
         free(firstPassOutput);
         free(inputFile);
     }
+
+    printf("%d", checkOutput("test.ob"));
+
     return 0;
+}
+
+int checkOutput(char *fileName)
+{
+    FILE *outputFile = fopen(fileName, "r");
+    FILE *exOuput = fopen("expectedOutput.txt", "r");
+    char *line = (char *)calloc(MAX_LINE_LENGTH, sizeof(char)), *expectedLine = (char *)calloc(MAX_LINE_LENGTH, sizeof(char));
+    if(outputFile == NULL)
+        return 0;
+    
+    while(fgets(line, MAX_LINE_LENGTH, outputFile) != NULL)
+    {
+        if(fgets(expectedLine, MAX_LINE_LENGTH, exOuput) == NULL)
+            return 0;
+        if(strcmp(line, expectedLine) != 0)
+            return 0;
+    }
+    if(fgets(expectedLine, MAX_LINE_LENGTH, exOuput) != NULL)
+        return 0;
+
+    return 1;
 }

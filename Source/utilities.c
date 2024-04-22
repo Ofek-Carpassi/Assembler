@@ -157,17 +157,23 @@ char *intToBinary(int num, int bits)
         printIntError(ERROR_CODE_10);
 
     if(num < 0)
+    {
+        num = -num; 
+        num = num - 1;
         for(i = bits-1; i >= 0; i--)
         {
             binary[i] = (num % 2 == 0) ? '1' : '0';
             num /= 2;
         }
+    }
     else
+    {
         for(i = bits-1; i >= 0; i--)
         {
             binary[i] = (num % 2 == 0) ? '0' : '1';
             num /= 2;
         }
+    }
 
     binary[bits] = '\0';
 

@@ -4,7 +4,7 @@
 typedef struct Node {
     char* name;
     char* data;
-    int line;
+    unsigned int line;
     struct Node* next;
 } Node;
 
