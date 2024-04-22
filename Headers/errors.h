@@ -5,12 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "globalVariables.h"
-
-/* Used to represent an error with an ID and a string. */
-typedef struct Error {
-    int errorID;        /* The ID of the error. */
-    char *errorString;  /* The string of the error. */
-} Error;
+#include "dataStructures.h"
 
 /* The error codes. */
 typedef enum ERROR_CODES {

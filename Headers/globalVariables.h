@@ -19,9 +19,4 @@ enum lineType {
     INSTRUCTION
 };
 
-typedef struct location {
-    char *fileName;
-    int line;
-} location;
-
 #endif

@@ -16,12 +16,6 @@ Node *symbolTable = NULL; /* Create the symbol table */
 
 location fileLoc;
 
-typedef struct OPCODE {
-    char *name;
-    char *binary;
-    int arguments;
-} Opcode;
-
 const Opcode opcodes[] = {
     {"mov", "0000", 2},
     {"cmp", "0001", 2},
