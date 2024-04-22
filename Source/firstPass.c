@@ -1235,5 +1235,5 @@ void executeFirstPass(char *file, char **outputFileName)
         current = current->next;
     }
 
-    executeSecondPass(file, *outputFileName, symbolTable);
+    executeSecondPass(file, *outputFileName, symbolTable, IC, DC);
 }

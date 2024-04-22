@@ -165,7 +165,7 @@ void mergeSort(EntryExtern *arr, int l, int r) {
     }
 }
 
-void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead) {
+void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead, int firstPassIC, int firstPassDC) {
     char line[MAX_LINE_LENGTH + 1], tmpLine[MAX_LINE_LENGTH + 1], numbersLine[MAX_LINE_LENGTH + 1];
     int numbers[3], i = 0;
     char *base4 = NULL;
@@ -197,6 +197,8 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead) 
     outputFileName[strlen(outputFileName) - 1] = 'b';
 
     obj = fopen(outputFileName, "w");
+
+    fprintf(obj, "\t%d\t%d", firstPassIC, firstPassDC);
 
     while (fgets(line, MAX_LINE_LENGTH, file) != NULL) {
         /* If the line contains .entry or the line is empty - we'll skip it */
@@ -230,10 +232,8 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead) 
                 for(i = 0; i < numbers[0]; i++) {
                     fgets(tmpLine, MAX_LINE_LENGTH, tmpFile);
                     base4 = convertToEncryptedBase4(tmpLine);
-                    if(objLineNumber == 1)
-                        fprintf(obj, "%s", base4);
-                    else
-                        fprintf(obj, "\n%s", base4);
+                    fprintf(obj, "\n0%d\t", objLineNumber + 99);
+                    fprintf(obj, "%s", base4);
                     free(base4);
                     objLineNumber++;
                 }
@@ -244,10 +244,8 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead) 
                 for(i = 0; i < numbers[1]-1; i++) {
                     fgets(tmpLine, MAX_LINE_LENGTH, tmpFile);
                     base4 = convertToEncryptedBase4(tmpLine);
-                    if(objLineNumber == 1)
-                        fprintf(obj, "%s", base4);
-                    else
-                        fprintf(obj, "\n%s", base4);
+                    fprintf(obj, "\n0%d\t", objLineNumber + 99);
+                    fprintf(obj, "%s", base4);
                     free(base4);
                     objLineNumber++;
                 }
@@ -265,10 +263,8 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead) 
                     else
                         strcat(binaryLine, "10");
                     base4 = convertToEncryptedBase4(binaryLine);
-                    if(objLineNumber == 1)
-                        fprintf(obj, "%s", base4);
-                    else
-                        fprintf(obj, "\n%s", base4);
+                    fprintf(obj, "\n0%d\t", objLineNumber + 99);
+                    fprintf(obj, "%s", base4);
                     free(binaryNumber);
                     free(base4);
                     free(binaryLine);
@@ -287,10 +283,8 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead) 
                 for(i = 0; i < numbers[0] - numbers[1]; i++) {
                     fgets(tmpLine, MAX_LINE_LENGTH, tmpFile);
                     base4 = convertToEncryptedBase4(tmpLine);
-                    if(objLineNumber == 1)
-                        fprintf(obj, "%s", base4);
-                    else
-                        fprintf(obj, "\n%s", base4);
+                    fprintf(obj, "\n0%d\t", objLineNumber + 99);
+                    fprintf(obj, "%s", base4);
                     free(base4);
                     objLineNumber++;
                 }
@@ -301,10 +295,8 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead) 
                 for(i = 0; i < numbers[1]-1; i++) {
                     fgets(tmpLine, MAX_LINE_LENGTH, tmpFile);
                     base4 = convertToEncryptedBase4(tmpLine);
-                    if(objLineNumber == 1)
-                        fprintf(obj, "%s", base4);
-                    else
-                        fprintf(obj, "\n%s", base4);
+                    fprintf(obj, "\n0%d\t", objLineNumber + 99);
+                    fprintf(obj, "%s", base4);
                     free(base4);
                     objLineNumber++;
                 }
@@ -322,10 +314,8 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead) 
                     else
                         strcat(binaryLine, "10");
                     base4 = convertToEncryptedBase4(binaryLine);
-                    if(objLineNumber == 1)
-                        fprintf(obj, "%s", base4);
-                    else
-                        fprintf(obj, "\n%s", base4);
+                    fprintf(obj, "\n0%d\t", objLineNumber + 99);
+                    fprintf(obj, "%s", base4);
                     free(binaryNumber);
                     free(base4);
                     free(binaryLine);
@@ -342,10 +332,8 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead) 
                 for(i = 0; i < numbers[0] - numbers[2] - 1; i++) {
                     fgets(tmpLine, MAX_LINE_LENGTH, tmpFile);
                     base4 = convertToEncryptedBase4(tmpLine);
-                    if(objLineNumber == 1)
-                        fprintf(obj, "%s", base4);
-                    else
-                        fprintf(obj, "\n%s", base4);
+                    fprintf(obj, "\n0%d\t", objLineNumber + 99);
+                    fprintf(obj, "%s", base4);
                     free(base4);
                     objLineNumber++;
                 }
@@ -363,10 +351,8 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead) 
                     else
                         strcat(binaryLine, "10");
                     base4 = convertToEncryptedBase4(binaryLine);
-                    if(objLineNumber == 1)
-                        fprintf(obj, "%s", base4);
-                    else
-                        fprintf(obj, "\n%s", base4);
+                    fprintf(obj, "\n0%d\t", objLineNumber + 99);
+                    fprintf(obj, "%s", base4);
                     free(binaryNumber); 
                     free(base4);
                     free(binaryLine);
@@ -383,10 +369,8 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead) 
                 for(i = 0; i < numbers[0] - numbers[2] - 1; i++) {
                     fgets(tmpLine, MAX_LINE_LENGTH, tmpFile);
                     base4 = convertToEncryptedBase4(tmpLine);
-                    if(objLineNumber == 1)
-                        fprintf(obj, "%s", base4);
-                    else
-                        fprintf(obj, "\n%s", base4);
+                    fprintf(obj, "\n0%d\t", objLineNumber + 99);
+                    fprintf(obj, "%s", base4);
                     free(base4);
                     objLineNumber++;
                 }
