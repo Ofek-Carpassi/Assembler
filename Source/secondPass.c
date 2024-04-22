@@ -358,7 +358,7 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead) 
                     binaryLine = (char *)calloc(15, sizeof(char));
                     binaryNumber = intToBinary(current->line, 12);
                     strcat(binaryLine, binaryNumber);
-                    strcat*(binaryLine, "00");
+                    strcat(binaryLine, "00");
                     base4 = convertToEncryptedBase4(binaryLine);
                     if(objLineNumber == 1)
                         fprintf(obj, "%s", base4);
