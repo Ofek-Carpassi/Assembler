@@ -75,3 +75,37 @@ void printList(Node* head) {
         current = current->next;
     }
 }
+
+lineData *createLineData(int binaryLinesWritten, int firstLabelIndex, int secondLabelIndex) {
+    lineData *newLineData = (lineData*)malloc(sizeof(lineData));
+    if (newLineData == NULL) {
+        return NULL;
+    }
+
+    newLineData->binaryLinesWritten = binaryLinesWritten;
+    newLineData->firstLabelIndex = firstLabelIndex;
+    newLineData->secondLabelIndex = secondLabelIndex;
+    return newLineData;
+}
+
+void addLine(lineData **array, int binaryLinesWritten, int firstLabelIndex, int secondLabelIndex, int *arraySize) {
+    lineData *newLineData = createLineData(binaryLinesWritten, firstLabelIndex, secondLabelIndex);
+    if (newLineData == NULL) {
+        printIntError(ERROR_CODE_10);
+        return;
+    }
+
+    /* Add the newLineData to the array */
+    if(*arraySize == 0) {
+        *array = (lineData*)malloc(sizeof(lineData));
+    } else {
+        *array = (lineData*)realloc(*array, (*arraySize + 1) * sizeof(lineData));
+    }
+    if (*array == NULL) {
+        printIntError(ERROR_CODE_10);
+        return;
+    }
+
+    (*array)[*arraySize] = *newLineData;
+    (*arraySize)++;
+}

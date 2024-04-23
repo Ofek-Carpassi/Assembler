@@ -159,15 +159,13 @@ void mergeSort(EntryExtern *arr, int l, int r) {
     }
 }
 
-void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead, int firstPassIC, int firstPassDC) {
+void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead, int firstPassIC, int firstPassDC, lineData *linesDataArray) {
     char line[MAX_LINE_LENGTH + 1], tmpLine[MAX_LINE_LENGTH + 1], numbersLine[MAX_LINE_LENGTH + 1];
-    int numbers[3], i = 0;
     char *base4 = NULL;
     FILE *obj = NULL;
     char *label = NULL;
     Node *current = NULL;
     int found = 0;
-    char *token = NULL;
     int numbersAmount = 0;
     char *binaryLine = NULL;
     char *binaryNumber = NULL;
@@ -178,11 +176,14 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead, 
     FILE *externFile = NULL;
     int entriesCount = 0;
     int externsCount = 0;
+    int linesDataIndex = 0;
+    int i = 0;
     EntryExtern *entriesArray = NULL;
     EntryExtern *externsArray = (EntryExtern *)calloc(1, sizeof(EntryExtern));
     FILE *file = fopen(srcFile, "r");
     FILE *tmpFile = fopen(tmpFileName, "r");
     FILE *lineNumbers = fopen("lineNumbers.txt", "r");
+    int writtenBinaryLines = 0, firstLabelIndex = 0, secondLabelIndex = 0;
     
     char *outputFileName = (char *)calloc(strlen(srcFile), sizeof(char));
     strcpy(outputFileName, srcFile);
@@ -211,19 +212,18 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead, 
             then we'll convert the label's data from the symbol table to binary and write it in the matching line
             */
             fgets(numbersLine, MAX_LINE_LENGTH, lineNumbers);
-            /* parse the line to numbers - the max amount of numbers is 3 */
-            token = strtok(numbersLine, " ");
-            i = 0;
-            while (token != NULL) {
-                numbers[i] = atoi(token);
-                token = strtok(NULL, " ");
-                i++;
-            }
-            numbersAmount = i;
+            writtenBinaryLines = linesDataArray[linesDataIndex].binaryLinesWritten;
+            firstLabelIndex = linesDataArray[linesDataIndex].firstLabelIndex;
+            secondLabelIndex = linesDataArray[linesDataIndex].secondLabelIndex;
+            if(firstLabelIndex == -1) numbersAmount = 1;
+            else if(secondLabelIndex == -1) numbersAmount = 2;
+            else numbersAmount = 3;
+            linesDataIndex++;
             /* If there are no more numbers, we'll just write the lines to the obj file */
             if (numbersAmount == 1) {
                 /* read numbers[0] lines from the tmp file and write them to the obj file */
-                for(i = 0; i < numbers[0]; i++) {
+                for(i = 0; i < writtenBinaryLines; i++)
+                {
                     fgets(tmpLine, MAX_LINE_LENGTH, tmpFile);
                     base4 = convertToEncryptedBase4(tmpLine);
                     fprintf(obj, "\n0%d ", objLineNumber + 99);
@@ -235,7 +235,8 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead, 
             else if(numbersAmount == 2)
             {
                 /* read numbers[1]-1 lines from the tmp file and write them to the obj file */
-                for(i = 0; i < numbers[1]-1; i++) {
+                for(i = 0; i < firstLabelIndex-1; i++)
+                {
                     fgets(tmpLine, MAX_LINE_LENGTH, tmpFile);
                     base4 = convertToEncryptedBase4(tmpLine);
                     fprintf(obj, "\n0%d ", objLineNumber + 99);
@@ -243,7 +244,7 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead, 
                     free(base4);
                     objLineNumber++;
                 }
-                label = getLabelFromLine(line, numbers[1]-1);
+                label = getLabelFromLine(line, firstLabelIndex-1);
                 if(label[strlen(label)-1] == '\n')
                     label[strlen(label)-1] = '\0';
                 found = 0;
@@ -274,7 +275,7 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead, 
                     }
                 }
                 /* read the rest of the lines from the tmp file and write them to the obj file */
-                for(i = 0; i < numbers[0] - numbers[1]; i++) {
+                for(i = 0; i < writtenBinaryLines - firstLabelIndex; i++){
                     fgets(tmpLine, MAX_LINE_LENGTH, tmpFile);
                     base4 = convertToEncryptedBase4(tmpLine);
                     fprintf(obj, "\n0%d ", objLineNumber + 99);
@@ -286,7 +287,7 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead, 
             else if(numbersAmount == 3)
             {
                 /* read numbers[1]-1 lines from the tmp file and write them to the obj file */
-                for(i = 0; i < numbers[1]-1; i++) {
+                for(i = 0; i < firstLabelIndex-1; i++) {
                     fgets(tmpLine, MAX_LINE_LENGTH, tmpFile);
                     base4 = convertToEncryptedBase4(tmpLine);
                     fprintf(obj, "\n0%d ", objLineNumber + 99);
@@ -294,7 +295,7 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead, 
                     free(base4);
                     objLineNumber++;
                 }
-                label = getLabelFromLine(line, numbers[1]-1);
+                label = getLabelFromLine(line, firstLabelIndex-1);
                 if(label[strlen(label)-1] == '\n')
                     label[strlen(label)-1] = '\0';
                 found = 0;
@@ -323,7 +324,7 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead, 
                     }
                 }
                 /* read numbers[2]-numbers[1]-1 lines from the tmp file and write them to the obj file */
-                for(i = 0; i < numbers[0] - numbers[2] - 1; i++) {
+                for(i = 0; i < writtenBinaryLines - secondLabelIndex-1; i++) {
                     fgets(tmpLine, MAX_LINE_LENGTH, tmpFile);
                     base4 = convertToEncryptedBase4(tmpLine);
                     fprintf(obj, "\n0%d ", objLineNumber + 99);
@@ -331,7 +332,7 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead, 
                     free(base4);
                     objLineNumber++;
                 }
-                label = getLabelFromLine(line, numbers[2]-1);
+                label = getLabelFromLine(line, secondLabelIndex-1);
                 if(label[strlen(label)-1] == '\n')
                     label[strlen(label)-1] = '\0';
                 found = 0;
@@ -360,7 +361,7 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead, 
                     }
                 }
                 /* read the rest of the lines from the tmp file and write them to the obj file */
-                for(i = 0; i < numbers[0] - numbers[2] - 1; i++) {
+                for(i = 0; i < writtenBinaryLines - secondLabelIndex-1; i++) {
                     fgets(tmpLine, MAX_LINE_LENGTH, tmpFile);
                     base4 = convertToEncryptedBase4(tmpLine);
                     fprintf(obj, "\n0%d ", objLineNumber + 99);
@@ -391,7 +392,7 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead, 
     fclose(lineNumbers);
 
     remove(tmpFileName);
-    remove("lineNumbers.txt");
+    /*remove("lineNumbers.txt");*/
 
     free(outputFileName);
 

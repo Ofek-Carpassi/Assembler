@@ -89,7 +89,7 @@ int hasLabel(char *line);
  * @param file - The input file to read from.
  * @param outputFileName - The name of the output file.
  */
-void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead, int firstPassIC, int firstPassDC);
+void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead, int firstPassIC, int firstPassDC, lineData *linesDataArray);
 
 
 #endif

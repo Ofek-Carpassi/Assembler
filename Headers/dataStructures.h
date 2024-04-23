@@ -35,11 +35,20 @@ typedef struct location {
     int line;
 } location;
 
+typedef struct lineData {
+    int binaryLinesWritten;
+    int firstLabelIndex;
+    int secondLabelIndex;
+} lineData;
+
 Node* createNode(char* name, char* data, int line);
 Node* searchNodeInList(Node* head, const char* name, int *found);
 void addNode(Node** head, char* name, char* data, int line);
 void freeNode(Node* node);
 void freeList(Node* head);
 void printList(Node* head);
+
+lineData *createLineData(int binaryLinesWritten, int firstLabelIndex, int secondLabelIndex);
+void addLine(lineData **head, int binaryLinesWritten, int firstLabelIndex, int secondLabelIndex, int *line);
 
 #endif

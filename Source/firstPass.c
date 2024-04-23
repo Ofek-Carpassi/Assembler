@@ -12,7 +12,10 @@
 unsigned int IC = 0, DC = 0; /* Initialize the instruction counter and the data counter */
 int lineNumber = 1; /* Initialize the line number */
 int lineNumberSrcFile = 1; /* Initialize the line number of the source file */
+int linesDataArraySize = 0; /* Initialize the size of the lines data array */
 Node *symbolTable = NULL; /* Create the symbol table */
+
+lineData *linesDataArray;
 
 location fileLoc;
 
@@ -450,8 +453,6 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
     char *operandBinarySrc, *operandBinaryDest, *indexBinarySrc, *indexBinaryDest;
     int i = 0, j = 0, originalLineNumber = lineNumber;
     int hasLabel = 0, srcHasLabel = 0, destHasLabel = 0;
-    
-    FILE *lineNumbers = fopen("lineNumbers.txt", "a");
 
     /* First we'll get the instruction */
     instructionIndex = isInstruction(parsedLine[0]);
@@ -480,8 +481,7 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
         /* IC needs to be incremented by the amount of lines we added */
         IC += (lineNumber - originalLineNumber);
 
-        fprintf(lineNumbers, "1\n");
-        fclose(lineNumbers);
+        addLine(&linesDataArray, 1, -1, -1, &linesDataArraySize);
 
         return result;
     }
@@ -557,8 +557,7 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
             lineNumber += 3;
             IC += (lineNumber - originalLineNumber);
 
-            fprintf(lineNumbers, "3 2\n");
-            fclose(lineNumbers);
+            addLine(&linesDataArray, 3, 2, -1, &linesDataArraySize);
 
             return result;
         }
@@ -599,11 +598,12 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
         lineNumber += 2;
         IC += (lineNumber - originalLineNumber);
 
-        if(hasLabel)
-            fprintf(lineNumbers, "2 2\n");
-        else
-            fprintf(lineNumbers, "2\n");
-        fclose(lineNumbers);
+        if(hasLabel){
+            addLine(&linesDataArray, 2, 2, -1, &linesDataArraySize);
+        }
+        else{
+            addLine(&linesDataArray, 2, -1, -1, &linesDataArraySize);
+        }
 
         return result;
     }
@@ -645,8 +645,7 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
 
             free(regs);
 
-            fprintf(lineNumbers, "2\n");
-            fclose(lineNumbers);
+            addLine(&linesDataArray, 2, -1, -1, &linesDataArraySize);
 
             return result;
         }
@@ -757,8 +756,7 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
             IC += (lineNumber - originalLineNumber);
 
             /* Write the line numbers and the index of the labels to the file */
-            fprintf(lineNumbers, "5 2 3\n");
-            fclose(lineNumbers);
+            addLine(&linesDataArray, 5, 2, 3, &linesDataArraySize);
 
             return result;
         }
@@ -837,8 +835,7 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
             lineNumber += 4;
             IC += (lineNumber - originalLineNumber);
 
-            fprintf(lineNumbers, "4 2\n");
-            fclose(lineNumbers);
+            addLine(&linesDataArray, 4, 2, -1, &linesDataArraySize);
 
             return result;
         }
@@ -917,8 +914,7 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
             lineNumber += 4;
             IC += (lineNumber - originalLineNumber);
 
-            fprintf(lineNumbers, "4 3\n");
-            fclose(lineNumbers);
+            addLine(&linesDataArray, 4, 3, -1, &linesDataArraySize);
 
             return result;
         }
@@ -973,20 +969,22 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
         lineNumber += 3;
         IC += (lineNumber - originalLineNumber);
 
-        if(srcHasLabel && destHasLabel)
-            fprintf(lineNumbers, "3 2 3\n");
-        else if(srcHasLabel)
-            fprintf(lineNumbers, "3 2\n");
-        else if(destHasLabel)
-            fprintf(lineNumbers, "3 3\n");
+        if(srcHasLabel && destHasLabel){
+            addLine(&linesDataArray, 3, 2, 3, &linesDataArraySize);
+        }
+        else if(srcHasLabel){
+            addLine(&linesDataArray, 3, 2, -1, &linesDataArraySize);
+        }
+        else if(destHasLabel){
+            addLine(&linesDataArray, 3, 3, -1, &linesDataArraySize);
+        }
         else
-            fprintf(lineNumbers, "3\n");
-
-        fclose(lineNumbers);
+        {
+            addLine(&linesDataArray, 3, -1, -1, &linesDataArraySize);
+        }
 
         return result;
     }
-    fclose(lineNumbers);
     return "ERROR";
 }
 
@@ -996,7 +994,6 @@ char* handleString(char *line) {
     int i = 0;
     int lengthOfBinaryLine = 0;
     char *binaryNumber, *binaryLine;
-    FILE *lineNumbers = fopen("lineNumbers.txt", "a");
     /* Count the amount of chars in the string not including the "" */
     for (i = 1; i < strlen(line) - 1; i++)
         amountOfChars++;
@@ -1045,8 +1042,7 @@ char* handleString(char *line) {
     lineNumber++;
 
     /* Write the line numbers to the file */
-    fprintf(lineNumbers, "%d\n", amountOfChars);
-    fclose(lineNumbers);
+    addLine(&linesDataArray, amountOfChars, -1, -1, &linesDataArraySize);
 
     /* Return the binary line */
     return binaryLine;
@@ -1060,7 +1056,6 @@ char *handleData(char *parsedLine[], Node **symbolTableHead, int wordAmount)
     int found = 0;
     char *variable;
     char *binaryLine = (char *)calloc(15, sizeof(char)); /* Create a new string to store the binary line */
-    FILE *lineNumbers = fopen("lineNumbers.txt", "a");
     if(binaryLine == NULL)
         printIntError(ERROR_CODE_10);
 
@@ -1118,8 +1113,7 @@ char *handleData(char *parsedLine[], Node **symbolTableHead, int wordAmount)
     }
     lineNumber += wordAmount - 1; /* Increment the line number */
 
-    fprintf(lineNumbers, "%d\n", wordAmount - 1);
-    fclose(lineNumbers);
+    addLine(&linesDataArray, wordAmount - 1, -1, -1, &linesDataArraySize);
 
     /* Add a null terminator to the binary line */
     /* Return the binary line */
@@ -1148,7 +1142,7 @@ void handleLabel(char *label, Node **symbolTableHead, int type)
 /* Purpose is explained in the header file */
 void handleConstant(char **parsedLine, Node **symbolTableHead, int wordAmount)
 {
-    int found = 0;  
+    int found = 0;
     if(wordAmount == 3)
         printExtError(ERROR_CODE_49, fileLoc);
     else if(wordAmount != 4)
@@ -1193,7 +1187,7 @@ void executeFirstPass(char *file, char **outputFileName)
     if (outputFile == NULL)
         printIntError(ERROR_CODE_13);
     
-    fileLoc.fileName = file;
+    fileLoc.fileName = file;    
 
     while(fgets(line, MAX_LINE_LENGTH, inputFile) != NULL) 
     {
@@ -1229,5 +1223,5 @@ void executeFirstPass(char *file, char **outputFileName)
         current = current->next;
     }
 
-    executeSecondPass(file, *outputFileName, symbolTable, IC, DC);
+    executeSecondPass(file, *outputFileName, symbolTable, IC, DC, linesDataArray);
 }
