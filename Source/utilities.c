@@ -292,3 +292,44 @@ char *removeCommas(char *line)
     /* Return the cleaned line */
     return cleanedLine;
 }
+
+void isLegalCommas(char *line, int *noErrors, location *loc)
+{
+    /* Check if there are any commas before the second word, consecutive commas, commas after the last word, or missing commas between words */
+    int currentWord = 0;
+    int hasSeenComma = 0;
+    int wordAmount = countWords(line);
+    int i = 0;
+    /*printf("line: %s\n", line);*/
+    for(i = 0; i < strlen(line); i++)
+    {
+        /*printf("line[%d]: %c\n", i, line[i]);*/
+        if(line[i] == ',')
+        {
+            if(currentWord == 0 || currentWord == wordAmount-1)
+            {
+                printExtError(ERROR_CODE_28, *loc);
+                *noErrors = 0;
+            }
+            if(hasSeenComma)
+            {
+                printExtError(ERROR_CODE_27, *loc);
+                *noErrors = 0;
+            }
+        }
+        if(line[i] != ' ' && line[i] != ',' && i != 0 && (line[i-1] == ' ' || line[i-1] == ','))
+        {
+            if(hasSeenComma)
+            {
+                printExtError(ERROR_CODE_22, *loc);
+                *noErrors = 0;
+                hasSeenComma = 0;
+            }
+            currentWord++;
+        }
+        else
+        {
+            hasSeenComma = 0;
+        }
+    }
+}

@@ -7,6 +7,8 @@
 
 #define BITS_AMOUNT 14
 
+#define MAX_LABEL_LENGTH 31
+
 enum lineType {
     ERROR,
     COMMENT,

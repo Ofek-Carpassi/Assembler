@@ -85,4 +85,6 @@ char *getAddressingMethod(char *operand, Node *symbolTable, int *addressingMetho
  */
 char *removeCommas(char *line);
 
+void isLegalCommas(char *line, int *noErrors, location *loc);
+
 #endif

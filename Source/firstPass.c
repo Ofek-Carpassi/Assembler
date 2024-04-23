@@ -143,6 +143,13 @@ char *checkLineType(char *line)
             parsedLine[i] = parsedLine[i+1];
         /* Decrement the word amount */
         wordAmount--;
+        /* Check if the length of the label is legal */
+        if(strlen(label) > MAX_LABEL_LENGTH)
+        {
+            printExtError(ERROR_CODE_30, fileLoc);
+            noErrors = 0;
+            return "";
+        }
     }
 
     /* Check if the first word in the line is .data - data declaration */
@@ -173,6 +180,17 @@ char *checkLineType(char *line)
             handleLabel(label, &symbolTable, STRING);
         }
 
+        if(wordAmount > 2){
+            printExtError(ERROR_CODE_38, fileLoc);
+            noErrors = 0;
+            return "";
+        }
+        if(wordAmount == 1){
+            printExtError(ERROR_CODE_17, fileLoc);
+            noErrors = 0;
+            return "";
+        }
+
         /* Use handleString to translate the string to binary */
         binaryLine = handleString(parsedLine[1]);
 
@@ -192,6 +210,10 @@ char *checkLineType(char *line)
         free(parsedLine);
         return "";
     }
+    else if(strcmp(parsedLine[0], ".entry") == 0)
+    {
+        return "";
+    }
 
     if(isLabel)
         handleLabel(label, &symbolTable, INSTRUCTION);
@@ -208,7 +230,10 @@ char *checkLineType(char *line)
         free(parsedLine);
         return binaryLine;
     }
-    return "ERROR";
+    printExtError(ERROR_CODE_26, fileLoc);
+    noErrors = 0;
+    free(parsedLine);
+    return "";
 }
 
 char *operandHandling(char *operand, Node **symbolTableHead, int addressingMethod, int isConstant, int isSource, int *hasLabel)
@@ -270,6 +295,7 @@ char *operandHandling(char *operand, Node **symbolTableHead, int addressingMetho
             else{
                 printExtError(ERROR_CODE_46, fileLoc);
                 noErrors = 0;
+                return "";
             }
         }
     }
@@ -321,12 +347,26 @@ char *operandHandling(char *operand, Node **symbolTableHead, int addressingMetho
     else if (operand[0] == 'r' && addressingMethod == 3)
     {
         /* Get the register number */
-        int registerNumber = operand[1] - '0';
+        int registerNumber = 0;
+        int i = 0;
+        if(operand[strlen(operand)-1] == '\n')
+            operand[strlen(operand)-1] = '\0';
+        for(i = 1; i < strlen(operand); i++)
+        {
+            if(!isdigit(operand[i]))
+            {
+                printExtError(ERROR_CODE_32, fileLoc);
+                noErrors = 0;
+                return "";
+            }
+            registerNumber = registerNumber * 10 + (operand[i] - '0');
+        }
         /* Convert the register number to a binary string */
         if(registerNumber < 0 || registerNumber > 7 || strlen(operand) != 2)
         {
             printExtError(ERROR_CODE_32, fileLoc);
             noErrors = 0;
+            return "";
         }
         binaryNumber = intToBinary(registerNumber, 3);
         /* Add the binary number to the binary line */
@@ -397,6 +437,7 @@ char *operandHandling(char *operand, Node **symbolTableHead, int addressingMetho
             {
                 printExtError(ERROR_CODE_46, fileLoc);
                 noErrors = 0;
+                return "";
             }
         }
     }
@@ -443,11 +484,13 @@ char *handleTwoRegisters(char *soruceRegister, char *destinationRegister)
     if(sourceRegisterNumber < 0 || sourceRegisterNumber > 7){
         printExtError(ERROR_CODE_32, fileLoc);
         noErrors = 0;
+        return "";
     }
 
     if(destinationRegisterNumber < 0 || destinationRegisterNumber > 7){
         printExtError(ERROR_CODE_32, fileLoc);
         noErrors = 0;
+        return "";
     }
 
     sourceBinary = intToBinary(sourceRegisterNumber, 3);
@@ -494,8 +537,9 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
         {
             printExtError(ERROR_CODE_47, fileLoc);
             noErrors = 0;
+            return "";
         }
-
+        
         result = (char *)calloc(16, sizeof(char));
         if (result == NULL)
             printIntError(ERROR_CODE_10);
@@ -519,6 +563,7 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
         {
             printExtError(ERROR_CODE_47, fileLoc);
             noErrors = 0;
+            return "";
         }
 
         operand = parsedLine[1];
@@ -652,6 +697,7 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
         {
             printExtError(ERROR_CODE_47, fileLoc);
             noErrors = 0;
+            return "";
         }
 
         sourceOperand = parsedLine[1];
@@ -1062,6 +1108,7 @@ char* handleString(char *line) {
     int i = 0;
     int lengthOfBinaryLine = 0;
     char *binaryNumber, *binaryLine;
+    int hasClosingQuotation = 0;
     /* Count the amount of chars in the string not including the "" */
     for (i = 1; i < strlen(line) - 1; i++)
         amountOfChars++;
@@ -1078,12 +1125,15 @@ char* handleString(char *line) {
     Loop through the string
     The first char is " and the last char is ", the loop should run from 1 to amountOfChars 
     */
-    for (i = 1; i < amountOfChars; i++)
+    for (i = 1; i < amountOfChars + 1; i++)
     {
         /* Convert the character to ascii and then to binary */
         int number = line[i];
         /* Convert the number to a binary string */
         char *binaryNumber = intToBinary(number, BITS_AMOUNT);
+
+        if(line[i] == '"')
+            hasClosingQuotation = 1;
 
         /* Add the binary number to the binary line */
         if(lineNumber == 1)
@@ -1095,6 +1145,12 @@ char* handleString(char *line) {
 
         free(binaryNumber);
         lineNumber++;
+    }
+    if(hasClosingQuotation == 0)
+    {
+        printExtError(ERROR_CODE_37, fileLoc);
+        noErrors = 0;
+        return "";
     }
     /* Code the null terminator */
     binaryNumber = intToBinary(0, 14);
@@ -1185,6 +1241,7 @@ char *handleData(char *parsedLine[], Node **symbolTableHead, int wordAmount)
             {
                 printExtError(ERROR_CODE_46, fileLoc);
                 noErrors = 0;
+                return "";
             }
         }
     }
@@ -1200,6 +1257,23 @@ char *handleData(char *parsedLine[], Node **symbolTableHead, int wordAmount)
 /* Purpose is explained in the header file */
 void handleLabel(char *label, Node **symbolTableHead, int type)
 {
+    /* Check if the label's name is valid */
+    int i = 0;
+    if(!isalpha(label[0]))
+    {
+        printExtError(ERROR_CODE_30, fileLoc);
+        noErrors = 0;
+        return;
+    }
+    for(i = 1; i < strlen(label); i++)
+    {
+        if(!isalpha(label[i]) && !isdigit(label[i]))
+        {
+            printExtError(ERROR_CODE_30, fileLoc);
+            noErrors = 0;
+            return;
+        }
+    }
     switch (type)
     {
         /* If the type is an instruction */
@@ -1224,11 +1298,13 @@ void handleConstant(char **parsedLine, Node **symbolTableHead, int wordAmount)
     {
         printExtError(ERROR_CODE_49, fileLoc);
         noErrors = 0;
+        return;
     }
     else if(wordAmount != 4)
     {
         printExtError(ERROR_CODE_50, fileLoc);
         noErrors = 0;
+        return;
     }
     /* Check if the constant is a number */
     if (isNumber(parsedLine[3]) == 0)
@@ -1244,6 +1320,7 @@ void handleConstant(char **parsedLine, Node **symbolTableHead, int wordAmount)
     {
         printExtError(ERROR_CODE_48, fileLoc);
         noErrors = 0;
+        return;
     }
     /* Add the constant to the symbol table */
     else
@@ -1286,6 +1363,7 @@ void executeFirstPass(char *file, char **outputFileName)
     while(fgets(line, MAX_LINE_LENGTH, inputFile) != NULL) 
     {
         cleanedLine = removeCommas(cleanLine(line));
+        isLegalCommas(line, &noErrors, &fileLoc);
         binaryLine = checkLineType(cleanedLine);
 
         if (strcmp(binaryLine, "ERROR") != 0 && strcmp(binaryLine, "CONSTANT") != 0)
@@ -1318,5 +1396,8 @@ void executeFirstPass(char *file, char **outputFileName)
 
     if(noErrors)
         executeSecondPass(file, *outputFileName, symbolTable, IC, DC, linesDataArray);
-    else(exit(1));
+    else {
+        remove(*outputFileName);
+        free(*outputFileName);
+    }
 }
