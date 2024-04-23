@@ -16,7 +16,7 @@ Error errors[] = {
     {ERROR_CODE_5, "Failed to copy file during macro expansion"},
     {ERROR_CODE_6, "Macro expansion in an .as file failed"},
     {ERROR_CODE_7, "Macro call before declaration"},
-    {ERROR_CODE_8, ".as files name is missing"},
+    {ERROR_CODE_8, "input file doesn't end with .as"},
     {ERROR_CODE_9, ".am file is missing"},
     {ERROR_CODE_10, "Failed to dynamically allocate memory"},
     {ERROR_CODE_11, "The provided file name doesn't exist"},
