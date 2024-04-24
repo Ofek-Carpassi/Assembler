@@ -16,10 +16,8 @@ int checkOutput(char *fileName);
 int main(int argc, char *argv[])
 {
     int i;
-    char *inputFile;
-    char *preAssemblerOutput;
-    char *firstPassOutput;
     location tmpLocation;
+    char *inputFile, *preAssemblerOutput, *firstPassOutput;
     /* We need to translate all the given files
     We need to make sure every file exists and ends with ".as" */
     if(argc < 2)
@@ -27,7 +25,7 @@ int main(int argc, char *argv[])
     for(i = 1; i < argc; i++)
     {
         /* Open the input file */
-        inputFile = (char *)calloc(strlen(argv[i]) + 1, sizeof(char));
+        inputFile = (char *)calloc(strlen(argv[i]) + 2, sizeof(char));
         if(inputFile == NULL)
         {
             printIntError(ERROR_CODE_10);
@@ -40,19 +38,17 @@ int main(int argc, char *argv[])
         {
             printExtError(ERROR_CODE_8, tmpLocation);
             free(inputFile);
-            free(tmpLocation.fileName);
             continue;
         }
         /* Allocate memory for the output files */
-        preAssemblerOutput = (char *)malloc(strlen(inputFile));
-        firstPassOutput = (char *)malloc(strlen(inputFile));
+        preAssemblerOutput = (char *)malloc(strlen(inputFile)+1);
+        firstPassOutput = (char *)malloc(strlen(inputFile)+1);
         if(preAssemblerOutput == NULL || firstPassOutput == NULL)
         {
             printIntError(ERROR_CODE_10);
             free(inputFile);
             free(preAssemblerOutput);
             free(firstPassOutput);
-            free(tmpLocation.fileName);
             continue;
         }
         /* Execute the pre assembler and the first pass - the first pass will execute the second pass if no errors were found */
@@ -61,8 +57,11 @@ int main(int argc, char *argv[])
 
         /* Free the allocated memory */
         free(preAssemblerOutput);
-        free(firstPassOutput);
+        preAssemblerOutput = NULL;
         free(inputFile);
+        inputFile = NULL;
+        free(firstPassOutput);
+        firstPassOutput = NULL;
     }
 
     printf("%d", checkOutput("tests/courseExamples/2/2.ob"));
@@ -76,17 +75,34 @@ int checkOutput(char *fileName)
     FILE *exOuput = fopen("tests/courseExamples/2/2.ob", "r");
     char *line = (char *)calloc(MAX_LINE_LENGTH, sizeof(char)), *expectedLine = (char *)calloc(MAX_LINE_LENGTH, sizeof(char));
     if(outputFile == NULL)
+    {
+        free(line);
+        free(expectedLine);
         return 0;
+    }
     
     while(fgets(line, MAX_LINE_LENGTH, outputFile) != NULL)
     {
         if(fgets(expectedLine, MAX_LINE_LENGTH, exOuput) == NULL)
+        {
+            free(line);
+            free(expectedLine);
             return 0;
+        }
         if(strcmp(line, expectedLine) != 0)
+        {
+            free(line);
+            free(expectedLine);
             return 0;
+        }
     }
     if(fgets(expectedLine, MAX_LINE_LENGTH, exOuput) != NULL)
+    {
+        free(line);
+        free(expectedLine);
         return 0;
-
+    }
+    free(line);
+    free(expectedLine);
     return 1;
 }

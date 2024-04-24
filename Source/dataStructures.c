@@ -10,26 +10,35 @@ Node* createNode(char* name, char* data, int line) {
         return NULL;
     }
 
-    newNode->name = name;
+    newNode->name = (char*)malloc(strlen(name) + 1); 
     if (newNode->name == NULL) {
         free(newNode);
+        printIntError(ERROR_CODE_10);
+        exit(1);
         return NULL;
     }
+    strcpy(newNode->name, name);
 
-    newNode->data = data;
+    newNode->data = (char*)malloc(strlen(data) + 1); 
     if (newNode->data == NULL) {
         free(newNode->name);
         free(newNode);
+        printIntError(ERROR_CODE_10);
+        exit(1);
         return NULL;
     }
+    strcpy(newNode->data, data);
 
     newNode->line = line;
     newNode->next = NULL;
     return newNode;
 }
 
-Node* searchNodeInList(Node* head, const char* name, int *found) {
+Node* searchNodeInList(Node* head, char* name, int *found) {
     Node* current = head;
+    if(name[strlen(name) - 1] == ':' || name[strlen(name) - 1] == '\n') {
+        name[strlen(name) - 1] = '\0';
+    }
     while (current != NULL) {
         if (strcmp(current->name, name) == 0) {
             *found = 1;
@@ -96,16 +105,28 @@ void addLine(lineData **array, int binaryLinesWritten, int firstLabelIndex, int 
     }
 
     /* Add the newLineData to the array */
-    if(*arraySize == 0) {
-        *array = (lineData*)malloc(sizeof(lineData));
-    } else {
-        *array = (lineData*)realloc(*array, (*arraySize + 1) * sizeof(lineData));
+    if(*arraySize != 0) {
+        lineData* temp = (lineData*)realloc(*array, (*arraySize + 1) * sizeof(lineData));
+        if (temp == NULL) {
+            printIntError(ERROR_CODE_10);
+            free(newLineData);
+            return;
+        }
+        *array = temp;
     }
     if (*array == NULL) {
         printIntError(ERROR_CODE_10);
+        free(newLineData);
         return;
     }
 
-    (*array)[*arraySize] = *newLineData;
-    (*arraySize)++;
+    if(arraySize!=0)
+    {
+        (*array)[*arraySize] = *newLineData;
+        (*arraySize)++;
+    }
+    else
+        (*array)[*arraySize] = *newLineData;
+
+    free(newLineData);
 }

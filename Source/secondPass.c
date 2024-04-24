@@ -5,7 +5,7 @@
 #include "../Headers/dataStructures.h"
 #include "../Headers/utilities.h"
 #include "../Headers/secondPass.h"
-#include "../Headers/Errors.h"
+#include "../Headers/errors.h"
 #include "../Headers/globalVariables.h"
 
 int InstructionCounter = 0;
@@ -93,7 +93,8 @@ char *getLabelFromLine(char *line, int index) {
     int wordAmount = getWordCount(line);
     int i;
     parsedLine = parseLine(cleanLine(removeCommas(line)), wordAmount, NULL, NULL);
-    label = parsedLine[index];
+    label = (char *)calloc(strlen(parsedLine[index]) + 1, sizeof(char));
+    strcpy(label, parsedLine[index]);
     if(parsedLine[0][strlen(parsedLine[0])-1] == ':') {
         label = parsedLine[index+1];
     }

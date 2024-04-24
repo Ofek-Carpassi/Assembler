@@ -217,7 +217,7 @@ char *getAddressingMethod(char *operand, Node *symbolTable, int *addressingMetho
     if(openingBracket != -1 && closingBracket != -1 && closingBracket > openingBracket)
     {
         /* Parse the operand from the brackets */
-        inBrackets = (char *)calloc(closingBracket-openingBracket, sizeof(char));
+        inBrackets = (char *)calloc(closingBracket-openingBracket+1, sizeof(char));
         if(inBrackets == NULL)
             printIntError(ERROR_CODE_10);
         for(i = openingBracket+1; i < closingBracket; i++)

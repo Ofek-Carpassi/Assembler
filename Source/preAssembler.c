@@ -110,9 +110,9 @@ void saveMacroToList(char *file, Node **head, char *name)
         lineNumberSrc++;
         /* Update the location */
         loc.line = lineNumberSrc;
+
+        free(cleanedLine);
     }
-    free(cleanedLine);
-    free(line);
 
     /* Close the file */
     fclose(inputFile);
@@ -216,7 +216,7 @@ void executePreAssembler(char *file, char **outputFileName)
     }
 
     /* Create an output file with the same name but with the extension .am */
-    *outputFileName = calloc(strlen(file), sizeof(char));
+    *outputFileName = calloc(strlen(file)+1, sizeof(char));
     if(*outputFileName == NULL)
     {
         printIntError(ERROR_CODE_10);
