@@ -301,7 +301,7 @@ void isLegalCommas(char *line, int *noErrors, location *loc, char **parsedLine, 
     int firstWord = 0;
     int i = 0;
     int startingIndex = 0;
-    if(strstr(line, ".string"))
+    if(strstr(line, ".string") || strstr(line, ".define"))
     {
         if(strstr(line, ","))
         {

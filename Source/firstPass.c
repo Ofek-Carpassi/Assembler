@@ -247,9 +247,15 @@ char *checkLineType(char *line, char *originalLine)
             noErrors = 0;
             return "";
         }
-        if(parsedLine[0][strlen(parsedLine[0])-1] == '\n')
-            parsedLine[0][strlen(parsedLine[0])-1] = '\0';
-        addNode(&symbolTable, parsedLine[0], "external", 0);
+        label = (char *)calloc(strlen(parsedLine[1]), sizeof(char));
+        if(label == NULL){
+            printIntError(ERROR_CODE_10);
+            exit(1);
+        }
+        strcpy(label, parsedLine[1]);
+        if(label[strlen(label)-1] == '\n')
+            label[strlen(label)-1] = '\0';
+        addNode(&symbolTable, label, "external", 0);
         free(parsedLine);
         return "";
     }
@@ -377,22 +383,6 @@ char *operandHandling(char *operand, Node **symbolTableHead, int addressingMetho
             strcat(result, "10\n");
             free(binaryNumber);
             
-            return result;
-        }
-        else if (found == 1 && strcmp(node->data, "external") == 0)
-        {
-            /* Convert the label to a binary string */
-            char *binaryNumber = intToBinary(node->line, 12);
-            /* Add the binary number to the binary line */
-            char *result = (char *)calloc(15, sizeof(char));
-            if (result == NULL){
-                printIntError(ERROR_CODE_10);
-                exit(1);
-            }
-            strcat(result, binaryNumber);
-            strcat(result, "01\n");
-            free(binaryNumber);
-
             return result;
         }
         else
@@ -1192,8 +1182,10 @@ char* handleString(char *line) {
         /* Convert the number to a binary string */
         char *binaryNumber = intToBinary(number, BITS_AMOUNT);
 
-        if(line[i] == '"')
+        if(line[i] == '"'){
             hasClosingQuotation = 1;
+            break;
+        }
 
         /* Add the binary number to the binary line */
         if(lineNumber == 1)
