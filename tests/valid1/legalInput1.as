@@ -19,4 +19,4 @@ L1:  inc K
     .entry LOOP
 
 
-END: stop
+END: hlt

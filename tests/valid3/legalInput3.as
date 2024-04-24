@@ -1,20 +1,20 @@
 .entry START
     .extern EXTERN
-MAIN:   mov @r1, @r2
-    LOOP:   cmp -5, @r3
+MAIN:   mov r1, r2
+    LOOP:   cmp -5, r3
 bne ENDLOOP
 add @r4, R0
 jsr SUBROUTINE
 prn STR
 lea ARR, @r5
 SUBROUTINE: bne EXTERNVAR
-stop
+hlt
 ENDLOOP: dec K
 jmp LOOP
-START:  sub @r2, @r7
+START:  sub r2, r7
     clr STR
-red @r7
-    not @r2
+red r7
+    not r2
     inc R0
 bne MAIN
 EXTERNVAR: .data 100

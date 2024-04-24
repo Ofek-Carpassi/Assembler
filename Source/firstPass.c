@@ -283,7 +283,6 @@ char *checkLineType(char *line, char *originalLine)
     
     if(parsedLine[0][strlen(parsedLine[0])-1] == '\n')
         parsedLine[0][strlen(parsedLine[0])-1] = '\0';
-
     instructionIndex = isInstruction(parsedLine[0]);
     if(instructionIndex != -1)
     {
