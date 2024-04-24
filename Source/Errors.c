@@ -33,7 +33,7 @@ Error errors[] = {
     {ERROR_CODE_22, "Missing comma between arguments"},
     {ERROR_CODE_23, "Label not defined in the assembly file"},
     {ERROR_CODE_24, "Illegal label after .entry or .extern directive"},
-    {ERROR_CODE_25, "Illegal character"},
+    {ERROR_CODE_25, "String has illegal characters"},
     {ERROR_CODE_26, "Unrecognized line type"},
     {ERROR_CODE_27, "Consecutive commas"},
     {ERROR_CODE_28, "Illegal comma"},

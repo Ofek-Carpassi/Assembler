@@ -1,25 +1,43 @@
-.entry START
-.extern EXTERN
-MAIN: mov @r1,@r2
-LOOP: cmp -5,@r3
-bne ENDLOOP1
-add @r10,R0
-jsr SUBROUTINE
-prn STR
-lea ARR,@r5
-SUBROUTINE: bne EXTERNVAR
-stop
-ENDLOOP: dec K
-jmp LOOP
-STA$RT: sub @r2,@r7
-clr STR
-red @r7
-stoppp
-not @r2
-inc R0
-bne MAIN
-EXTERNVAR: .data 100
-STR: .string "Hello,World!"
-ARR: .data 1,2,3,4,5
-K: .data 10,gg
-R0: .data 15,17
+.extern XYZ
+    .entry MAIN
+
+KINITIALVALUE: sub r4   ,    r3
+
+MAIN:   mov r3, LENGTH
+
+LOOP:   jmp L1
+
+    mcr M1
+sub r1, r9
+    bne END
+    endmcr
+
+    .entry GGG
+prn -5
+bne LOOP
+
+XYZ: mov r4, r2
+
+M1
+
+L1:     inc K
+bne LOOP
+
+stopp
+
+STR:    .string "666"abcdef"
+
+LENGTH: .data 6, -9, 15
+
+K:      .data 4    ,  ,  -55,4,4,4,6
+
+    mcr M2
+mov reg1, val
+add reg2, reg1
+    endmcrdsa
+
+M2
+ABC: mov XYZ, r3
+reg1: .data 6,5,-555,66
+reg2: .data 6,5,-555,66
+val: .string "asfas   %%dfjk"

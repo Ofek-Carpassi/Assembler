@@ -79,6 +79,9 @@ void saveMacroToList(char *file, Node **head, int lineNumberSrc, char *name)
         exit(1);
     }
 
+    lineNumberSrc++;
+    loc.line = lineNumberSrc;
+
     /* Loop through the file */
     while(fgets(line, MAX_LINE_LENGTH, inputFile) != NULL)
     {
@@ -105,6 +108,8 @@ void saveMacroToList(char *file, Node **head, int lineNumberSrc, char *name)
 
         /* Increment the line number */
         lineNumberSrc++;
+        /* Update the location */
+        loc.line = lineNumberSrc;
     }
 
     free(cleanedLine);
@@ -245,6 +250,7 @@ void executePreAssembler(char *file, char **outputFileName)
 
         /* Clean the line from white spaces */
         cleanedLine = cleanLine(line);
+        
 
         if(cleanedLine == NULL)
         {

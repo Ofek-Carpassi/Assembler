@@ -22,7 +22,7 @@ char *cleanLine(char *line);
  * @param line - a string containing the line to parse.
  * @param parsedOutput - an array to update with the parsed output.
  */
-char **parseLine(char *line, int wordAmount);
+char **parseLine(char *line, int wordAmount, location *loc, int *noErrors);
 
 /**
  * @brief This function is used to check if a string is a number.

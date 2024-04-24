@@ -59,11 +59,12 @@ char *cleanLine(char *line)
 }
 
 /* Explained in the header file */
-char **parseLine(char *line, int wordAmount)
+char **parseLine(char *line, int wordAmount, location *loc, int *noErrors)
 {
     /* Initialize all needed variables */
     int wordIndex = 0, lineIndex = 0, wordLength = 0, i = 0;
-    char **parsedLine;
+    char **parsedLine, charsToParseBy[] = " ,\t";
+    int insideQuotes = 0;
     /* Parse the line by spaces, commas, tabs */
     parsedLine = (char **)calloc(wordAmount+1, sizeof(char *));
     if (parsedLine == NULL)
@@ -74,15 +75,28 @@ char **parseLine(char *line, int wordAmount)
     /* Loop through the line */
     while (line[lineIndex] != '\0')
     {
+        /* If the current character is a quote, toggle insideQuotes */
+        if (line[lineIndex] == '"')
+        {
+            insideQuotes = !insideQuotes;
+        }
+
         /* If the current character is a space, comma or tab, skip it */
-        if (line[lineIndex] == ' ' || line[lineIndex] == ',' || line[lineIndex] == '\t')
+        if (!insideQuotes && strchr(charsToParseBy, line[lineIndex]) != NULL)
         {
             lineIndex++;
             continue;
         }
 
+        if(insideQuotes && line[lineIndex] == '"' && line[lineIndex-1] != '\\' && line[lineIndex+1] != ' ' && line[lineIndex+1] != '\t' && line[lineIndex+1] != '\0' && line[lineIndex-1] != ' ' && line[lineIndex-1] != '\t')
+        {
+            printExtError(ERROR_CODE_25, *loc);
+            *noErrors = 0;
+            return NULL;
+        } 
+
         /* Count the length of the word */
-        while (line[lineIndex] != ' ' && line[lineIndex] != ',' && line[lineIndex] != '\t' && line[lineIndex] != '\0')
+        while ((insideQuotes || strchr(charsToParseBy, line[lineIndex]) == NULL) && line[lineIndex] != '\0')
         {
             wordLength++;
             lineIndex++;
@@ -301,9 +315,18 @@ void isLegalCommas(char *line, int *noErrors, location *loc, char **parsedLine, 
     int firstWord = 0;
     int i = 0;
     int startingIndex = 0;
-    if(strstr(line, ".string") || strstr(line, ".define"))
+    if(strstr(line, ".define"))
     {
         if(strstr(line, ","))
+        {
+            printExtError(ERROR_CODE_27, *loc);
+            *noErrors = 0;
+        }
+        return;
+    }
+    if(strstr(line, ".string"))
+    {
+        if(strstr(parsedLine[0], ","))
         {
             printExtError(ERROR_CODE_27, *loc);
             *noErrors = 0;

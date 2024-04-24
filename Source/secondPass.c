@@ -92,7 +92,7 @@ char *getLabelFromLine(char *line, int index) {
     char *label;
     int wordAmount = getWordCount(line);
     int i;
-    parsedLine = parseLine(cleanLine(removeCommas(line)), wordAmount);
+    parsedLine = parseLine(cleanLine(removeCommas(line)), wordAmount, NULL, NULL);
     label = parsedLine[index];
     if(parsedLine[0][strlen(parsedLine[0])-1] == ':') {
         label = parsedLine[index+1];

@@ -81,7 +81,7 @@ int isInstruction(char *word)
 /* Purpose is explained in the header file */
 char *checkLineType(char *line, char *originalLine)
 {
-    int wordAmount, i = 0, j = 0, instructionIndex, isLabel;
+    int wordAmount, i = 0, j = 0, instructionIndex, isLabel, lineErrors = 1;
     char **parsedLine, *label, *restOfLine, *binaryLine;
     /* Return an empty string if the line is empty - the executer will write nothing to the output file */
     if (line[0] == ';' || line[0] == '\n')
@@ -96,7 +96,10 @@ char *checkLineType(char *line, char *originalLine)
     }
 
     /* Parse the line */
-    parsedLine = parseLine(line, wordAmount);
+    
+    parsedLine = parseLine(line, wordAmount, &fileLoc, &lineErrors);
+    if(lineErrors == 0)
+        return "";
     isLegalCommas(originalLine, &noErrors, &fileLoc, parsedLine, wordAmount);
     /* run on the first word and check if there's a : in it - not at the end of the word 
     this means the line looks like <label>:<word> and we need to split it to two words */
@@ -210,20 +213,19 @@ char *checkLineType(char *line, char *originalLine)
     {   
         /* If the first word is a label - add the label to the symbol table */
         if(isLabel){
+            wordAmount--;
             handleLabel(label, &symbolTable, STRING);
-        }
-
+        } 
         if(wordAmount > 2){
             printExtError(ERROR_CODE_38, fileLoc);
             noErrors = 0;
             return "";
         }
-        if(wordAmount == 1){
+        if(wordAmount < 2){
             printExtError(ERROR_CODE_17, fileLoc);
             noErrors = 0;
             return "";
         }
-
         /* Use handleString to translate the string to binary */
         binaryLine = handleString(parsedLine[1]);
 
@@ -1175,7 +1177,7 @@ char* handleString(char *line) {
     Loop through the string
     The first char is " and the last char is ", the loop should run from 1 to amountOfChars 
     */
-    for (i = 1; i < amountOfChars + 1; i++)
+    for (i = 1; i <= amountOfChars + 1; i++)
     {
         /* Convert the character to ascii and then to binary */
         int number = line[i];
@@ -1414,7 +1416,10 @@ void executeFirstPass(char *file, char **outputFileName)
 
     while(fgets(line, MAX_LINE_LENGTH, inputFile) != NULL) 
     {
-        cleanedLine = removeCommas(cleanLine(line));
+        if(!strstr(line, ".string"))
+            cleanedLine = removeCommas(cleanLine(line));
+        else 
+            cleanedLine = cleanLine(line);
         binaryLine = checkLineType(cleanedLine, line);
 
         if (strcmp(binaryLine, "ERROR") != 0 && strcmp(binaryLine, "CONSTANT") != 0)
