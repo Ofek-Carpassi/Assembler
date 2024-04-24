@@ -39,6 +39,31 @@ const Opcode opcodes[] = {
     {"hlt", "1111", 0}
 };
 
+int isOperandIllegal(char *operand)
+{
+    /* Check if the operand doesn't contain any illegal characters */
+    int i;
+    if(operand[strlen(operand)-1] == '\n')
+        operand[strlen(operand)-1] = '\0';
+    if(isdigit(operand[0]))
+        return 1;
+    for(i = 0; i < strlen(operand); i++)
+    {
+        if(!isalpha(operand[i]) && !isdigit(operand[i]) && operand[i] != '[' && operand[i] != ']' && operand[i] != '#' && operand[i] != '-' && operand[i] != '+')
+            return 1;
+    }
+    return 0;
+}
+
+int isLabelNameLegal(char *label)
+{
+    if(isdigit(label[0]))
+        return 0;
+    if(strlen(label) > MAX_LABEL_LENGTH)
+        return 0;
+    return 1;
+}
+
 /* Purpose is explained in the header file */
 int isInstruction(char *word)
 {
@@ -54,7 +79,7 @@ int isInstruction(char *word)
 }
 
 /* Purpose is explained in the header file */
-char *checkLineType(char *line)
+char *checkLineType(char *line, char *originalLine)
 {
     int wordAmount, i = 0, j = 0, instructionIndex, isLabel;
     char **parsedLine, *label, *restOfLine, *binaryLine;
@@ -72,6 +97,7 @@ char *checkLineType(char *line)
 
     /* Parse the line */
     parsedLine = parseLine(line, wordAmount);
+    isLegalCommas(originalLine, &noErrors, &fileLoc, parsedLine, wordAmount);
     /* run on the first word and check if there's a : in it - not at the end of the word 
     this means the line looks like <label>:<word> and we need to split it to two words */
     for(i = 0; i < strlen(parsedLine[0])-1; i++)
@@ -132,6 +158,13 @@ char *checkLineType(char *line)
     /* Remove the : from the label */
     strcpy(label, parsedLine[0]);
     label[strlen(label)-1] = '\0';
+
+    if(isLabelNameLegal(label) == 0)
+    {
+        printExtError(ERROR_CODE_30, fileLoc);
+        noErrors = 0;
+        return "";
+    }
 
     /* Create isLabel flag */
     isLabel = 0;
@@ -202,16 +235,38 @@ char *checkLineType(char *line)
     else if(strcmp(parsedLine[0], ".extern") == 0)
     {
         i = 0;
-        for(i = 1; i < wordAmount; i++){
-            if(parsedLine[i][strlen(parsedLine[i])-1] == '\n')
-                parsedLine[i][strlen(parsedLine[i])-1] = '\0';
-            addNode(&symbolTable, parsedLine[i], "external", 0);
+        if(wordAmount != 2)
+        {
+            printExtError(ERROR_CODE_24, fileLoc);
+            noErrors = 0;
+            return "";
         }
+        if(isLabelNameLegal(parsedLine[1]) == 0)
+        {
+            printExtError(ERROR_CODE_30, fileLoc);
+            noErrors = 0;
+            return "";
+        }
+        if(parsedLine[0][strlen(parsedLine[0])-1] == '\n')
+            parsedLine[0][strlen(parsedLine[0])-1] = '\0';
+        addNode(&symbolTable, parsedLine[0], "external", 0);
         free(parsedLine);
         return "";
     }
     else if(strcmp(parsedLine[0], ".entry") == 0)
     {
+        if(wordAmount != 2)
+        {
+            printExtError(ERROR_CODE_24, fileLoc);
+            noErrors = 0;
+            return "";
+        }
+        if(isLabelNameLegal(parsedLine[1]) == 0)
+        {
+            printExtError(ERROR_CODE_30, fileLoc);
+            noErrors = 0;
+            return "";
+        }
         return "";
     }
 
@@ -567,6 +622,11 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
         }
 
         operand = parsedLine[1];
+        if(isOperandIllegal(operand)){
+            printExtError(ERROR_CODE_21, fileLoc);
+            noErrors = 0;
+            return "";
+        }
         addressingMethod = -1;
         addressing = getAddressingMethod(operand, *symbolTableHead, &addressingMethod);
 
@@ -1363,8 +1423,7 @@ void executeFirstPass(char *file, char **outputFileName)
     while(fgets(line, MAX_LINE_LENGTH, inputFile) != NULL) 
     {
         cleanedLine = removeCommas(cleanLine(line));
-        isLegalCommas(line, &noErrors, &fileLoc);
-        binaryLine = checkLineType(cleanedLine);
+        binaryLine = checkLineType(cleanedLine, line);
 
         if (strcmp(binaryLine, "ERROR") != 0 && strcmp(binaryLine, "CONSTANT") != 0)
         {

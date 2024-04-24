@@ -153,7 +153,7 @@ void handleConstant(char **parsedLine, Node **symbolTableHead, int wordAmount);
  *          8 if the line is an instruction
  *          0 if the line is illegal - an error
  */
-char *checkLineType(char *line);
+char *checkLineType(char *line, char *originalLine);
 
 char *operandHandling(char *operand, Node **symbolTableHead, int addressingMethod, int isConstant, int isSource, int *hasLabel);
 

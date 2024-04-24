@@ -293,42 +293,62 @@ char *removeCommas(char *line)
     return cleanedLine;
 }
 
-void isLegalCommas(char *line, int *noErrors, location *loc)
+void isLegalCommas(char *line, int *noErrors, location *loc, char **parsedLine, int wordAmount)
 {
-    /* Check if there are any commas before the second word, consecutive commas, commas after the last word, or missing commas between words */
-    int currentWord = 0;
     int hasSeenComma = 0;
-    int wordAmount = countWords(line);
+    int hasSeperatingComma = 0;
+    int currentWord = 0;
+    int firstWord = 0;
     int i = 0;
-    /*printf("line: %s\n", line);*/
-    for(i = 0; i < strlen(line); i++)
+    int startingIndex = 0;
+    if(strstr(line, ".string"))
     {
-        /*printf("line[%d]: %c\n", i, line[i]);*/
-        if(line[i] == ',')
+        if(strstr(line, ","))
         {
-            if(currentWord == 0 || currentWord == wordAmount-1)
-            {
+            printExtError(ERROR_CODE_27, *loc);
+            *noErrors = 0;
+        }
+        return;
+    }
+    if(parsedLine[0][strlen(parsedLine[0])-1] == ':')
+    {
+        /* Start from the second word - there could be spaces after the label - calculate i */
+        i = strlen(parsedLine[0]);
+        while(line[i] == ' ' || line[i] == '\t')
+        {
+            i++;
+        }
+        firstWord = 1;
+        currentWord = 1;
+        startingIndex = i;
+    }
+    /*printf("line: %s\n", line);*/
+    for(; i < strlen(line); i++) {
+        /*printf("line[%d]: %c\n", i, line[i]);*/
+        
+        if(line[i] == ',') {
+            if(hasSeenComma) {
+                printExtError(ERROR_CODE_27, *loc);
+                *noErrors = 0;
+            } else if(currentWord == firstWord) {
+                printExtError(ERROR_CODE_28, *loc);
+                *noErrors = 0;
+            } else if(currentWord == wordAmount) {
                 printExtError(ERROR_CODE_28, *loc);
                 *noErrors = 0;
             }
-            if(hasSeenComma)
-            {
-                printExtError(ERROR_CODE_27, *loc);
-                *noErrors = 0;
-            }
-        }
-        if(line[i] != ' ' && line[i] != ',' && i != 0 && (line[i-1] == ' ' || line[i-1] == ','))
-        {
-            if(hasSeenComma)
-            {
+            hasSeenComma = 1;
+            hasSeperatingComma = 1;
+        } else if(line[i] != ' ' && line[i] != ',' && i > 0 && (line[i-1] == ' ' || line[i-1] == ',')) {
+            if(hasSeperatingComma == 0 && currentWord != firstWord) {
                 printExtError(ERROR_CODE_22, *loc);
                 *noErrors = 0;
-                hasSeenComma = 0;
             }
-            currentWord++;
-        }
-        else
-        {
+            if(i != startingIndex) {
+                currentWord++;
+            }
+            hasSeenComma = 0;
+        } else {
             hasSeenComma = 0;
         }
     }
