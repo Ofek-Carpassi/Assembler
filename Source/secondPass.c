@@ -417,7 +417,7 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead, 
     fclose(tmpFile);
     fclose(lineNumbers);
 
-    /*remove(tmpFileName);*/
+    remove(tmpFileName);
     /*remove("lineNumbers.txt");*/
 
     free(outputFileName);

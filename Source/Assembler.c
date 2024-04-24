@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
         free(inputFile);
     }
 
-    printf("%d", checkOutput("test.ob"));
+    printf("%d", checkOutput("tests/courseExamples/2/2.ob"));
 
     return 0;
 }
@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
 int checkOutput(char *fileName)
 {
     FILE *outputFile = fopen(fileName, "r");
-    FILE *exOuput = fopen("expectedOutput.txt", "r");
+    FILE *exOuput = fopen("tests/courseExamples/2/2.ob", "r");
     char *line = (char *)calloc(MAX_LINE_LENGTH, sizeof(char)), *expectedLine = (char *)calloc(MAX_LINE_LENGTH, sizeof(char));
     if(outputFile == NULL)
         return 0;

@@ -221,7 +221,7 @@ char *checkLineType(char *line, char *originalLine)
             noErrors = 0;
             return "";
         }
-        if(wordAmount < 2){
+        if(wordAmount < 1){
             printExtError(ERROR_CODE_17, fileLoc);
             noErrors = 0;
             return "";

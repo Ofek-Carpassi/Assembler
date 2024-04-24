@@ -52,7 +52,7 @@ char *getMacroName(char *line);
  * @param lineNumber - an integer containing the line number of the macro's declaration.
  * @param name - a string containing the name of the macro.
  */
-void saveMacroToList(char *file, Node **head, int lineNumber, char *name);
+void saveMacroToList(char *file, Node **head,char *name);
 
 /**
  * @brief This function is used to check if a macro's name is valid.

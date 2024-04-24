@@ -50,7 +50,7 @@ char *getMacroName(char *line)
 }
 
 /* Function used to save a macro to the macro list */
-void saveMacroToList(char *file, Node **head, int lineNumberSrc, char *name)
+void saveMacroToList(char *file, Node **head, char *name)
 {
     /* Initialize all needed variables */
     int i = 0, j = 0;
@@ -111,7 +111,6 @@ void saveMacroToList(char *file, Node **head, int lineNumberSrc, char *name)
         /* Update the location */
         loc.line = lineNumberSrc;
     }
-
     free(cleanedLine);
     free(line);
 
@@ -294,7 +293,7 @@ void executePreAssembler(char *file, char **outputFileName)
             int originalLineNumberSrc = lineNumberSrc, i = 0;
             /* Get the name of the macro */
             char *name = getMacroName(line);
-
+            
             /* Check if the name is valid */
             if(!isValidMacroName(name))
             {
@@ -302,7 +301,8 @@ void executePreAssembler(char *file, char **outputFileName)
             }
 
             /* Save the macro to the linked list */
-            saveMacroToList(file, &macroList, lineNumberSrc, name);
+            saveMacroToList(file, &macroList, name);
+            
             /* Skip the lines of the macro */
             for(i = originalLineNumberSrc; i <= lineNumberSrc; i++)
                 fgets(line, MAX_LINE_LENGTH, inputFile);
