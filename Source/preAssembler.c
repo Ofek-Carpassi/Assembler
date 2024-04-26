@@ -87,13 +87,16 @@ void saveMacroToList(char *file, Node **head, char *name)
     {
         /* Clean the line from white spaces */
         cleanedLine = cleanLine(line);
-
         /* Check if the line is the end of the macro */
         if(strncmp(cleanedLine, "endmcr", 6) == 0)
         {
+			if(cleanedLine[strlen(cleanedLine)-1] == '\n')
+				cleanedLine[strlen(cleanedLine)-1] = '\0';
             /* If the line has more than 7 characters, print an error */
             if(strlen(cleanedLine) > 7)
                 printExtError(ERROR_CODE_4, loc);
+
+            free(cleanedLine);
             break;
         }
 
@@ -102,6 +105,7 @@ void saveMacroToList(char *file, Node **head, char *name)
         if(macroDefinition == NULL)
         {
             printIntError(ERROR_CODE_10);
+            free(cleanedLine);
             exit(1);
         }
         strcat(macroDefinition, cleanedLine);
@@ -122,17 +126,17 @@ void saveMacroToList(char *file, Node **head, char *name)
         - Empty lines (two new lines in a row)
         - Spaces at the beginning of the line
     */
-    for(i = 0; i < strlen(macroDefinition); i++)
+    for(i = 0; (unsigned)i < strlen(macroDefinition); i++)
     {
         /* Remove the new lines and spaces */
         if(macroDefinition[i] == '\n' && macroDefinition[i+1] == '\n')
             /* Remove the new line */
-            for(j = i; j < strlen(macroDefinition); j++)
+            for(j = i; (unsigned)j < strlen(macroDefinition); j++)
                 macroDefinition[j] = macroDefinition[j+1];
         /* Remove the spaces at the beginning of the line */
         if(macroDefinition[i] == ' ' && macroDefinition[i-1] == '\n')
             /* Remove the space */
-            for(j = i; j < strlen(macroDefinition); j++)
+            for(j = i; (unsigned)j < strlen(macroDefinition); j++)
                 macroDefinition[j] = macroDefinition[j+1];
     }
 
@@ -142,6 +146,11 @@ void saveMacroToList(char *file, Node **head, char *name)
 
     /* Create a new node containing the macro */
     addNode(head, name, macroDefinition, lineNumberSrc);
+
+    /* Free the macro definition */
+    free(macroDefinition);
+    /* Free the line */
+    free(line);
 }
 
 /* Function used to search for a node in the list */
@@ -164,33 +173,23 @@ int isCallToMacro(char *line, Node **head)
 {
     /* Initialize all needed variables */
     int found = 0; /* Used to know if the macro is found */
-    char *lineCopy = calloc(strlen(line) + 1, sizeof(char)); /* Used to copy the line */
-    if(lineCopy == NULL)
-    {
-        printIntError(ERROR_CODE_10);
-        exit(1);
-    }
-    /* Copy the line */
-    strcpy(lineCopy, line);
 
     /* Check if the line has only one word */
-    if(countWords(lineCopy) == 1)
+    if(countWords(line) == 1)
     {
         /* Reset the found variable */
         found = 0;
         /* Make sure the lineCopy doesn't end with a new line */
-        if(lineCopy[strlen(lineCopy) - 1] == '\n')
-            lineCopy[strlen(lineCopy) - 1] = '\0';
+        if(line[strlen(line) - 1] == '\n')
+            line[strlen(line) - 1] = '\0';
         /* Search for the macro in the list */
-        searchNodeInList(*head, lineCopy, &found);
+        searchNodeInList(*head, line, &found);
         /* If the macro was found, return true */
         if(found)
         {
-            free(lineCopy);
             return 1;
         }
     }
-    free(lineCopy);
     return 0;
 }
 
@@ -304,8 +303,10 @@ void executePreAssembler(char *file, char **outputFileName)
             saveMacroToList(file, &macroList, name);
             
             /* Skip the lines of the macro */
-            for(i = originalLineNumberSrc; i <= lineNumberSrc; i++)
+            for(i = originalLineNumberSrc; i < lineNumberSrc; i++)
                 fgets(line, MAX_LINE_LENGTH, inputFile);
+
+            free(name);
         }
 
         /* Increment the line number */

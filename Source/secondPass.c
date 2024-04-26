@@ -90,18 +90,50 @@ char *getLabelFromLine(char *line, int index) {
     /* Parse the line to get the label */
     char **parsedLine;
     char *label;
-    int wordAmount = getWordCount(line);
+    int wordAmount = countWords(line);
     int i;
-    parsedLine = parseLine(cleanLine(removeCommas(line)), wordAmount, NULL, NULL);
-    label = (char *)calloc(strlen(parsedLine[index]) + 1, sizeof(char));
+    size_t len;
+    char *noCommas = removeCommas(line);
+    char *cleanedLine = cleanLine(noCommas);
+    free(noCommas);
+    parsedLine = parseLine(cleanedLine, wordAmount, NULL, NULL);
+    free(cleanedLine);
+    if(index > wordAmount) {
+        for(i = 0; i < wordAmount; i++)
+            free(parsedLine[i]);
+        free(parsedLine);
+        printIntError(ERROR_CODE_45);
+        exit(1);
+    }
+    len = strlen(parsedLine[index]) + 1;
+    label = (char *)calloc(len, sizeof(char));
+    if(label == NULL) {
+        free(parsedLine);
+        printIntError(ERROR_CODE_10);
+        exit(1);
+    }
     strcpy(label, parsedLine[index]);
-    if(parsedLine[0][strlen(parsedLine[0])-1] == ':') {
-        label = parsedLine[index+1];
+    len = strlen(parsedLine[0]);
+    if(parsedLine[0][len-1] == ':' && index+1 < wordAmount) {
+        free(label);
+        len = strlen(parsedLine[index+1]) + 1;
+        label = (char *)calloc(len, sizeof(char));
+        if(label == NULL) {
+            for(i = 0; i < index; i++)
+                free(parsedLine[i]);
+            free(parsedLine);
+            printIntError(ERROR_CODE_10);
+            exit(1);
+        }
+        strcpy(label, parsedLine[index+1]);
     }
     for(i = 0; i < strlen(label); i++) {
         if(label[i] == '[')
             label[i] = '\0';
     }
+    for(i = 0; i < wordAmount; i++)
+        free(parsedLine[i]);
+    free(parsedLine);
     return label;
 }
 
@@ -161,7 +193,7 @@ void mergeSort(EntryExtern *arr, int l, int r) {
 }
 
 void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead, int firstPassIC, int firstPassDC, lineData *linesDataArray) {
-    char line[MAX_LINE_LENGTH + 1], tmpLine[MAX_LINE_LENGTH + 1], numbersLine[MAX_LINE_LENGTH + 1];
+    char line[MAX_LINE_LENGTH + 1], tmpLine[MAX_LINE_LENGTH + 1];
     char *base4 = NULL;
     FILE *obj = NULL;
     char *label = NULL;
@@ -170,6 +202,7 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead, 
     int numbersAmount = 0;
     char *binaryLine = NULL;
     char *binaryNumber = NULL;
+    char *newBinaryLine = NULL;
     int entryFileCreated = 0;
     char *entryFileName = NULL;
     char *externFileName = NULL;
@@ -183,14 +216,14 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead, 
     EntryExtern *externsArray = (EntryExtern *)calloc(1, sizeof(EntryExtern));
     FILE *file = fopen(srcFile, "r");
     FILE *tmpFile = fopen(tmpFileName, "r");
-    FILE *lineNumbers = fopen("lineNumbers.txt", "r");
     int writtenBinaryLines = 0, firstLabelIndex = 0, secondLabelIndex = 0;
     
-    char *outputFileName = (char *)calloc(strlen(srcFile), sizeof(char));
+    char *outputFileName = (char *)calloc(strlen(srcFile) + 1, sizeof(char));
     strcpy(outputFileName, srcFile);
     /* Output file name would be <name>.ob\0 instead of <name>.as\0 */
     outputFileName[strlen(outputFileName) - 2] = 'o';
     outputFileName[strlen(outputFileName) - 1] = 'b';
+    outputFileName[strlen(outputFileName)] = '\0';
 
     obj = fopen(outputFileName, "w");
 
@@ -212,7 +245,6 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead, 
             If there are more numbers, we'll read n lines from the tmp file and write them to the obj file
             then we'll convert the label's data from the symbol table to binary and write it in the matching line
             */
-            fgets(numbersLine, MAX_LINE_LENGTH, lineNumbers);
             writtenBinaryLines = linesDataArray[linesDataIndex].binaryLinesWritten;
             firstLabelIndex = linesDataArray[linesDataIndex].firstLabelIndex;
             secondLabelIndex = linesDataArray[linesDataIndex].secondLabelIndex;
@@ -270,11 +302,13 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead, 
                     /* If the label is external - we'll add it to the externs array
                     it's value will be the line number + 100 and it's label will be the label */
                     if(strcmp(current->data, "external") == 0) {
-                        strcpy(tmpLine, "00000000000001");
-                        base4 = convertToEncryptedBase4(tmpLine);
+                        newBinaryLine = (char *)calloc(strlen("00000000000001\0") + 1, sizeof(char));
+                        strcpy(newBinaryLine, "00000000000001");
+                        base4 = convertToEncryptedBase4(newBinaryLine);
                         fprintf(obj, "\n0%d ", objLineNumber + 99);
                         fprintf(obj, "%s", base4);
                         free(base4);
+                        free(newBinaryLine);
                         objLineNumber++;
                         externsArray = (EntryExtern *)realloc(externsArray, (sizeof(EntryExtern) * (externsCount + 1)));
                         externsArray[externsCount].label = current -> name;
@@ -291,6 +325,8 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead, 
                     free(base4);
                     objLineNumber++;
                 }
+
+                free(label);
             }
             else if(numbersAmount == 3)
             {
@@ -329,11 +365,13 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead, 
                     /* If the label is external - we'll add it to the externs array
                     it's value will be the line number + 100 and it's label will be the label */
                     if(strcmp(current->data, "external") == 0) {
-                        strcpy(tmpLine, "00000000000001");
-                        base4 = convertToEncryptedBase4(tmpLine);
+                        newBinaryLine = (char *)calloc(strlen("00000000000001\0") + 1, sizeof(char));
+                        strcpy(newBinaryLine, "00000000000001");
+                        base4 = convertToEncryptedBase4(newBinaryLine);
                         fprintf(obj, "\n0%d ", objLineNumber + 99);
                         fprintf(obj, "%s", base4);
                         free(base4);
+                        free(newBinaryLine);
                         objLineNumber++;
                         externsArray = (EntryExtern *)realloc(externsArray, (sizeof(EntryExtern) * (externsCount + 1)));
                         externsArray[externsCount].label = current -> name;
@@ -350,6 +388,7 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead, 
                     free(base4);
                     objLineNumber++;
                 }
+                free(label);
                 label = getLabelFromLine(line, secondLabelIndex-1);
                 if(label[strlen(label)-1] == '\n')
                     label[strlen(label)-1] = '\0';
@@ -375,11 +414,13 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead, 
                     /* If the label is external - we'll add it to the externs array
                     it's value will be the line number + 100 and it's label will be the label */
                     if(strcmp(current->data, "external") == 0) {
-                        strcpy(tmpLine, "00000000000001");
-                        base4 = convertToEncryptedBase4(tmpLine);
+                        newBinaryLine = (char *)calloc(strlen("00000000000001\0") + 1, sizeof(char));
+                        strcpy(newBinaryLine, "00000000000001");
+                        base4 = convertToEncryptedBase4(newBinaryLine);
                         fprintf(obj, "\n0%d ", objLineNumber + 99);
                         fprintf(obj, "%s", base4);
                         free(base4);
+                        free(newBinaryLine);
                         objLineNumber++;
                         externsArray = (EntryExtern *)realloc(externsArray, (sizeof(EntryExtern) * (externsCount + 1)));
                         externsArray[externsCount].label = current -> name;
@@ -396,6 +437,7 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead, 
                     free(base4);
                     objLineNumber++;
                 }
+                free(label);
             }
         }
         else if(isEntry(line) == 1)
@@ -416,7 +458,6 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead, 
     fclose(file);
     fclose(obj);
     fclose(tmpFile);
-    fclose(lineNumbers);
 
     remove(tmpFileName);
     /*remove("lineNumbers.txt");*/

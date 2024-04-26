@@ -6,6 +6,14 @@
 #include "../Headers/dataStructures.h"
 #include "../Headers/utilities.h"
 
+void freeStringArray(char **array, int size)
+{
+    int i = 0;
+    for(i = 0; i < size; i++)
+        free(array[i]);
+    free(array);
+}
+
 /* Explained in the header file */
 char *cleanLine(char *line)
 {
@@ -15,7 +23,10 @@ char *cleanLine(char *line)
     /* Allocate memory for the cleaned line - same size + 1 for the null character */
     cleanedLine = (char *)calloc(strlen(line) + 2, sizeof(char));
     if (cleanedLine == NULL)
+    {
         printIntError(ERROR_CODE_10);
+        exit(1);
+    }
 
     /* Loop through the original line */
     while (line[originalIndex] != '\0')
@@ -59,78 +70,62 @@ char *cleanLine(char *line)
 }
 
 /* Explained in the header file */
-char **parseLine(char *line, int wordAmount, location *loc, int *noErrors)
-{
-    /* Initialize all needed variables */
-    int wordIndex = 0, lineIndex = 0, wordLength = 0, i = 0;
-    char **parsedLine, charsToParseBy[] = " ,\t";
-    int insideQuotes = 0;
-    /* Parse the line by spaces, commas, tabs */
-    parsedLine = (char **)calloc(wordAmount+1, sizeof(char *));
-    if (parsedLine == NULL)
-    {
-        printIntError(ERROR_CODE_10);
+char** parseLine(char* input, int numWords, location* loc, int* noErrors) {
+    char** result = NULL;
+    char* token;
+    int i = 0, j = 0, wordCount = 0;
+
+    if (input == NULL) {
+        printIntError(45);
+        *noErrors = 0;
+        return NULL;
     }
 
-    /* Loop through the line */
-    while (line[lineIndex] != '\0')
-    {
-        /* If the current character is a quote, toggle insideQuotes */
-        if (line[lineIndex] == '"')
-        {
-            insideQuotes = !insideQuotes;
-        }
+    result = (char**)calloc(numWords, sizeof(char*));
+    if (result == NULL) {
+        printIntError(10);
+        *noErrors = 0;
+        return NULL;
+    }
 
-        /* If the current character is a space, comma or tab, skip it */
-        if (!insideQuotes && strchr(charsToParseBy, line[lineIndex]) != NULL)
-        {
-            lineIndex++;
-            continue;
-        }
+    token = strtok(input, " ,\t");
 
-        if(insideQuotes && line[lineIndex] == '"' && line[lineIndex-1] != '\\' && line[lineIndex+1] != ' ' && line[lineIndex+1] != '\t' && line[lineIndex+1] != '\0' && line[lineIndex-1] != ' ' && line[lineIndex-1] != '\t')
-        {
-            printExtError(ERROR_CODE_25, *loc);
+    while (token != NULL && wordCount < numWords) {
+        result[wordCount] = (char*)calloc(strlen(token) + 1, sizeof(char));
+        if (result[wordCount] == NULL) {
+            printIntError(10);
             *noErrors = 0;
+            for (j = 0; j < wordCount; j++) {
+                free(result[j]);
+            }
+            free(result);
             return NULL;
-        } 
-
-        /* Count the length of the word */
-        while ((insideQuotes || strchr(charsToParseBy, line[lineIndex]) == NULL) && line[lineIndex] != '\0')
-        {
-            wordLength++;
-            lineIndex++;
         }
-
-        /* Allocate memory for the word */
-        parsedLine[wordIndex] = (char *)calloc(wordLength + 1, sizeof(char));
-        if (parsedLine[wordIndex] == NULL)
-        {
-            printIntError(ERROR_CODE_10);
-        }
-
-        /* Copy the word to the parsed line */
-        for (i = 0; i < wordLength; i++)
-        {
-            parsedLine[wordIndex][i] = line[lineIndex - wordLength + i];
-        }
-
-        /* Add the null character at the end of the word */
-        parsedLine[wordIndex][wordLength] = '\0';
-
-        /* Increment the indexes */
-        wordIndex++;
-        wordLength = 0;
+        strcpy(result[wordCount], token);
+        token = strtok(NULL, " ,\t");
+        wordCount++;
     }
 
-    /* Return the parsed line */
-    return parsedLine;
+    if (wordCount != numWords) {
+        printIntError(45);
+        *noErrors = 0;
+        for (j = 0; j < wordCount; j++) {
+            free(result[j]);
+        }
+        free(result);
+        return NULL;
+    }
+
+    return result;
 }
 
 /* Explained in the header file */
 int isNumber(char *str)
 {
     int i = 0;
+	if(str[strlen(str)-1] == '\n')
+		str[strlen(str)-1] = '\0';
+
     /* Loop through the string, allow for - or + at the beginning */
     for(i = 0; i < strlen(str)-1; i++)
     {
@@ -168,7 +163,10 @@ char *intToBinary(int num, int bits)
     int i = 0;
     char *binary = (char *)calloc(bits + 1, sizeof(char));
     if(binary == NULL)
+    {
         printIntError(ERROR_CODE_10);
+        exit(1);
+    }
 
     if(num < 0)
     {
@@ -219,7 +217,10 @@ char *getAddressingMethod(char *operand, Node *symbolTable, int *addressingMetho
         /* Parse the operand from the brackets */
         inBrackets = (char *)calloc(closingBracket-openingBracket+1, sizeof(char));
         if(inBrackets == NULL)
+        {
             printIntError(ERROR_CODE_10);
+            exit(1);
+        }
         for(i = openingBracket+1; i < closingBracket; i++)
         {
             inBrackets[i-openingBracket-1] = operand[i];
@@ -248,7 +249,7 @@ char *getAddressingMethod(char *operand, Node *symbolTable, int *addressingMetho
         *addressingMethod = 2;
 
         /* No need to check if the label is defined because label translation is in second pass */
-
+        free(inBrackets);
         return "10";
     }
 
@@ -274,6 +275,7 @@ char *removeCommas(char *line)
     if (cleanedLine == NULL)
     {
         printIntError(ERROR_CODE_10);
+        exit(1);
     }
 
     /* Loop through the original line */
@@ -371,6 +373,7 @@ void isLegalCommas(char *line, int *noErrors, location *loc, char **parsedLine, 
                 currentWord++;
             }
             hasSeenComma = 0;
+            hasSeperatingComma = 0;
         } else {
             hasSeenComma = 0;
         }

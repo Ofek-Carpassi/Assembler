@@ -17,6 +17,7 @@ Node* createNode(char* name, char* data, int line) {
         exit(1);
         return NULL;
     }
+	if(name[strlen(name)-1] == '\n') name[strlen(name)-1] = '\0';
     strcpy(newNode->name, name);
 
     newNode->data = (char*)malloc(strlen(data) + 1); 
@@ -36,14 +37,19 @@ Node* createNode(char* name, char* data, int line) {
 
 Node* searchNodeInList(Node* head, char* name, int *found) {
     Node* current = head;
+	int i = 0;
     if(name[strlen(name) - 1] == ':' || name[strlen(name) - 1] == '\n') {
         name[strlen(name) - 1] = '\0';
     }
     while (current != NULL) {
-        if (strcmp(current->name, name) == 0) {
-            *found = 1;
-            return current;
-        }
+        for(i = 0; i<strlen(current->name); i++)
+			if(name[i] != (current->name)[i])
+				break;
+		if(i == strlen(current->name))
+		{
+			*found = 1;
+			return current;
+		}
         current = current->next;
     }
     *found = 0;

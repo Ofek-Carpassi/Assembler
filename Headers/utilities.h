@@ -24,6 +24,8 @@ char *cleanLine(char *line);
  */
 char **parseLine(char *line, int wordAmount, location *loc, int *noErrors);
 
+void freeStringArray(char **array, int size);
+
 /**
  * @brief This function is used to check if a string is a number.
  * 

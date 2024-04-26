@@ -5,10 +5,10 @@ CC = gcc
 CFLAGS = -Wall -Wextra -pedantic
 
 # Source files
-SOURCES = Source/dataStructures.c Source/Erros.c Source/firstPass.c Source/preAssembler.c Source/testing.c Source/utilities.c
+SOURCES = Source/dataStructures.c Source/Errors.c Source/firstPass.c Source/preAssembler.c Source/Assembler.c Source/utilities.c Source/secondPass.c 
 
 # Header files
-HEADERS = Header/dataStructures.h Header/erros.h Header/firstPass.h Header/globalVariables.h Header/preAssembler.h Header/utilities.h Header/secondPass.h
+HEADERS = Header/dataStructures.h Header/errors.h Header/firstPass.h Header/globalVariables.h Header/preAssembler.h Header/utilities.h Header/secondPass.h
 
 # Object files
 OBJECTS = $(SOURCES:.c=.o)
@@ -33,4 +33,4 @@ clean:
 
 # Run testing
 run:
-	./$(TARGET)
+	valgrind --leak-check=full ./$(TARGET)

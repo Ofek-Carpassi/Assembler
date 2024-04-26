@@ -40,28 +40,14 @@ int main(int argc, char *argv[])
             free(inputFile);
             continue;
         }
-        /* Allocate memory for the output files */
-        preAssemblerOutput = (char *)malloc(strlen(inputFile)+1);
-        firstPassOutput = (char *)malloc(strlen(inputFile)+1);
-        if(preAssemblerOutput == NULL || firstPassOutput == NULL)
-        {
-            printIntError(ERROR_CODE_10);
-            free(inputFile);
-            free(preAssemblerOutput);
-            free(firstPassOutput);
-            continue;
-        }
         /* Execute the pre assembler and the first pass - the first pass will execute the second pass if no errors were found */
         executePreAssembler(inputFile, &preAssemblerOutput);
         executeFirstPass(preAssemblerOutput, &firstPassOutput);
 
         /* Free the allocated memory */
         free(preAssemblerOutput);
-        preAssemblerOutput = NULL;
         free(inputFile);
-        inputFile = NULL;
         free(firstPassOutput);
-        firstPassOutput = NULL;
     }
 
     printf("%d", checkOutput("tests/courseExamples/2/2.ob"));
@@ -104,5 +90,8 @@ int checkOutput(char *fileName)
     }
     free(line);
     free(expectedLine);
+    fclose(outputFile);
+    fclose(exOuput);
+    
     return 1;
 }
