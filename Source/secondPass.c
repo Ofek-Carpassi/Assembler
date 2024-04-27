@@ -232,7 +232,7 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead, 
 
     while (fgets(line, MAX_LINE_LENGTH, file) != NULL) {
         /* If the line contains .entry or the line is empty - we'll skip it */
-        if (strstr(line, ".extern") != NULL || strlen(line) == 1)
+        if (strstr(line, ".extern") != NULL || strlen(line) == 1 || line[strlen(line) - 1] == '\n' || line[strlen(line) - 1] == '\r' || line[strlen(line)-1] == '\0')
             continue;
         /* If the line doesn't have .entry - we'll do the if statement */
         if (isEntry(line) == 0 && !strstr(line, ".define")) {
@@ -536,4 +536,5 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead, 
     if(externsCount > 0)
         fclose(externFile);
 }
+
 

@@ -21,7 +21,7 @@ all: $(TARGET)
 
 # Build the target
 $(TARGET): $(OBJECTS)
-	$(CC) $(CFLAGS) -g -o $(TARGET) $(OBJECTS)
+	$(CC) $(CFLAGS) =.-o $(TARGET) $(OBJECTS)
 
 # Build object files
 %.o: %.c $(HEADERS)

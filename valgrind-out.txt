@@ -1,284 +1,103 @@
-==10206== Memcheck, a memory error detector
-==10206== Copyright (C) 2002-2015, and GNU GPL'd, by Julian Seward et al.
-==10206== Using Valgrind-3.11.0 and LibVEX; rerun with -h for copyright info
-==10206== Command: ./assembler tests/invalid4/illegalInput4.as
-==10206== Parent PID: 4546
-==10206== 
---10206-- 
---10206-- Valgrind options:
---10206--    --leak-check=full
---10206--    --show-leak-kinds=all
---10206--    --track-origins=yes
---10206--    --verbose
---10206--    --log-file=valgrind-out.txt
---10206-- Contents of /proc/version:
---10206--   Linux version 4.4.0-21-generic (buildd@lgw01-06) (gcc version 5.3.1 20160413 (Ubuntu 5.3.1-14ubuntu2) ) #37-Ubuntu SMP Mon Apr 18 18:34:49 UTC 2016
---10206-- 
---10206-- Arch and hwcaps: X86, LittleEndian, x86-mmxext-sse1-sse2-sse3
---10206-- Page sizes: currently 4096, max supported 4096
---10206-- Valgrind library directory: /usr/lib/valgrind
---10206-- Reading syms from /lib/i386-linux-gnu/ld-2.23.so
---10206--   Considering /lib/i386-linux-gnu/ld-2.23.so ..
---10206--   .. CRC mismatch (computed c63914e9 wanted 16e97b4f)
---10206--   Considering /usr/lib/debug/lib/i386-linux-gnu/ld-2.23.so ..
---10206--   .. CRC is valid
---10206-- Reading syms from /home/user/Desktop/ממן 14/assembler
---10206-- Reading syms from /usr/lib/valgrind/memcheck-x86-linux
---10206--   Considering /usr/lib/valgrind/memcheck-x86-linux ..
---10206--   .. CRC mismatch (computed 6036da3f wanted 652e483f)
---10206--    object doesn't have a symbol table
---10206--    object doesn't have a dynamic symbol table
---10206-- Scheduler: using generic scheduler lock implementation.
---10206-- Reading suppressions file: /usr/lib/valgrind/default.supp
-==10206== embedded gdbserver: reading from /tmp/vgdb-pipe-from-vgdb-to-10206-by-user-on-???
-==10206== embedded gdbserver: writing to   /tmp/vgdb-pipe-to-vgdb-from-10206-by-user-on-???
-==10206== embedded gdbserver: shared mem   /tmp/vgdb-pipe-shared-mem-vgdb-10206-by-user-on-???
-==10206== 
-==10206== TO CONTROL THIS PROCESS USING vgdb (which you probably
-==10206== don't want to do, unless you know exactly what you're doing,
-==10206== or are doing some strange experiment):
-==10206==   /usr/lib/valgrind/../../bin/vgdb --pid=10206 ...command...
-==10206== 
-==10206== TO DEBUG THIS PROCESS USING GDB: start GDB like this
-==10206==   /path/to/gdb ./assembler
-==10206== and then give GDB the following command
-==10206==   target remote | /usr/lib/valgrind/../../bin/vgdb --pid=10206
-==10206== --pid is optional if only one valgrind process is running
-==10206== 
---10206-- REDIR: 0x4018e70 (ld-linux.so.2:strlen) redirected to 0x380490f2 (???)
---10206-- REDIR: 0x4018c30 (ld-linux.so.2:index) redirected to 0x380490cd (???)
---10206-- Reading syms from /usr/lib/valgrind/vgpreload_core-x86-linux.so
---10206--   Considering /usr/lib/valgrind/vgpreload_core-x86-linux.so ..
---10206--   .. CRC mismatch (computed 5b95c0c4 wanted 39e79efa)
---10206--    object doesn't have a symbol table
---10206-- Reading syms from /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so
---10206--   Considering /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so ..
---10206--   .. CRC mismatch (computed 4d5a1526 wanted 33571d5b)
---10206--    object doesn't have a symbol table
-==10206== WARNING: new redirection conflicts with existing -- ignoring it
---10206--     old: 0x04018e70 (strlen              ) R-> (0000.0) 0x380490f2 ???
---10206--     new: 0x04018e70 (strlen              ) R-> (2007.0) 0x04030410 strlen
---10206-- Reading syms from /lib/i386-linux-gnu/libc-2.23.so
---10206--   Considering /lib/i386-linux-gnu/libc-2.23.so ..
---10206--   .. CRC mismatch (computed cdf598bf wanted efd88871)
---10206--   Considering /usr/lib/debug/lib/i386-linux-gnu/libc-2.23.so ..
---10206--   .. CRC is valid
---10206-- REDIR: 0x40c74b0 (libc.so.6:strncasecmp) redirected to 0x4027560 (_vgnU_ifunc_wrapper)
---10206-- REDIR: 0x40ce140 (libc.so.6:memrchr) redirected to 0x4027560 (_vgnU_ifunc_wrapper)
---10206-- REDIR: 0x40e0b20 (libc.so.6:wcslen) redirected to 0x4027560 (_vgnU_ifunc_wrapper)
---10206-- REDIR: 0x40c57e0 (libc.so.6:__GI_strrchr) redirected to 0x402fe00 (__GI_strrchr)
---10206-- REDIR: 0x40c5580 (libc.so.6:strlen) redirected to 0x4027560 (_vgnU_ifunc_wrapper)
---10206-- REDIR: 0x40ce440 (libc.so.6:__strlen_sse2_bsf) redirected to 0x4030370 (strlen)
---10206-- REDIR: 0x40c1810 (libc.so.6:calloc) redirected to 0x402f010 (calloc)
---10206-- REDIR: 0x40c4f90 (libc.so.6:strcpy) redirected to 0x4027560 (_vgnU_ifunc_wrapper)
---10206-- REDIR: 0x40ce570 (libc.so.6:__strcpy_ssse3) redirected to 0x4030450 (strcpy)
---10206-- REDIR: 0x40c6350 (libc.so.6:strstr) redirected to 0x4034700 (strstr)
---10206-- REDIR: 0x40c0f00 (libc.so.6:malloc) redirected to 0x402d110 (malloc)
---10206-- REDIR: 0x40c6a30 (libc.so.6:__GI_memchr) redirected to 0x40316d0 (__GI_memchr)
---10206-- REDIR: 0x40c7680 (libc.so.6:__GI_memcpy) redirected to 0x4031fb0 (__GI_memcpy)
---10206-- REDIR: 0x40c5700 (libc.so.6:strncmp) redirected to 0x4027560 (_vgnU_ifunc_wrapper)
---10206-- REDIR: 0x4185560 (libc.so.6:__strncmp_ssse3) redirected to 0x4030ab0 (strncmp)
---10206-- REDIR: 0x40c55c0 (libc.so.6:__GI_strlen) redirected to 0x4030390 (__GI_strlen)
---10206-- REDIR: 0x40c1470 (libc.so.6:free) redirected to 0x402e2f0 (free)
---10206-- REDIR: 0x40c9280 (libc.so.6:strchrnul) redirected to 0x40340b0 (strchrnul)
---10206-- REDIR: 0x40c70d0 (libc.so.6:__GI_mempcpy) redirected to 0x40342c0 (__GI_mempcpy)
---10206-- REDIR: 0x40c91b0 (libc.so.6:__GI___rawmemchr) redirected to 0x4034110 (__GI___rawmemchr)
---10206-- REDIR: 0x40c4ee0 (libc.so.6:strcmp) redirected to 0x4027560 (_vgnU_ifunc_wrapper)
---10206-- REDIR: 0x41840f0 (libc.so.6:__strcmp_ssse3) redirected to 0x4031450 (strcmp)
---10206-- REDIR: 0x40c1520 (libc.so.6:realloc) redirected to 0x402f250 (realloc)
---10206-- REDIR: 0x40c4ae0 (libc.so.6:strcat) redirected to 0x4027560 (_vgnU_ifunc_wrapper)
---10206-- REDIR: 0x40d9b30 (libc.so.6:__strcat_ssse3) redirected to 0x4030030 (strcat)
---10206-- REDIR: 0x40c7610 (libc.so.6:memcpy) redirected to 0x4027560 (_vgnU_ifunc_wrapper)
---10206-- REDIR: 0x4177b10 (libc.so.6:__memcpy_ssse3) redirected to 0x4031cc0 (memcpy)
---10206-- REDIR: 0x40c4ce0 (libc.so.6:index) redirected to 0x4027560 (_vgnU_ifunc_wrapper)
---10206-- REDIR: 0x40df420 (libc.so.6:__strchr_sse2_bsf) redirected to 0x402fff0 (index)
-==10206== Use of uninitialised value of size 4
-==10206==    at 0x4030378: strlen (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10206==    by 0x804D042: checkLineType (firstPass.c:253)
-==10206==    by 0x8052A0D: executeFirstPass (firstPass.c:2101)
-==10206==    by 0x804B94D: main (Assembler.c:41)
-==10206==  Uninitialised value was created by a heap allocation
-==10206==    at 0x402D17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10206==    by 0x804BB90: parseLine (utilities.c:79)
-==10206==    by 0x804C87E: checkLineType (firstPass.c:112)
-==10206==    by 0x8052A0D: executeFirstPass (firstPass.c:2101)
-==10206==    by 0x804B94D: main (Assembler.c:41)
-==10206== 
-==10206== Invalid read of size 1
-==10206==    at 0x4030378: strlen (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10206==    by 0x804D042: checkLineType (firstPass.c:253)
-==10206==    by 0x8052A0D: executeFirstPass (firstPass.c:2101)
-==10206==    by 0x804B94D: main (Assembler.c:41)
-==10206==  Address 0x0 is not stack'd, malloc'd or (recently) free'd
-==10206== 
-==10206== 
-==10206== Process terminating with default action of signal 11 (SIGSEGV)
-==10206==  Access not within mapped region at address 0x0
-==10206==    at 0x4030378: strlen (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10206==    by 0x804D042: checkLineType (firstPass.c:253)
-==10206==    by 0x8052A0D: executeFirstPass (firstPass.c:2101)
-==10206==    by 0x804B94D: main (Assembler.c:41)
-==10206==  If you believe this happened as a result of a stack
-==10206==  overflow in your program's main thread (unlikely but
-==10206==  possible), you can try to increase the size of the
-==10206==  main thread stack using the --main-stacksize= flag.
-==10206==  The main thread stack size used in this run was 8388608.
-==10206== 
-==10206== HEAP SUMMARY:
-==10206==     in use at exit: 1,132 bytes in 31 blocks
-==10206==   total heap usage: 377 allocs, 346 frees, 31,656 bytes allocated
-==10206== 
-==10206== Searching for pointers to 31 not-freed blocks
-==10206== Checked 54,200 bytes
-==10206== 
-==10206== 5 bytes in 1 blocks are still reachable in loss record 1 of 17
-==10206==    at 0x402D17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10206==    by 0x80488DA: createNode (dataStructures.c:13)
-==10206==    by 0x8048AFE: addNode (dataStructures.c:60)
-==10206==    by 0x804DEBA: checkLineType (firstPass.c:532)
-==10206==    by 0x8052A0D: executeFirstPass (firstPass.c:2101)
-==10206==    by 0x804B94D: main (Assembler.c:41)
-==10206== 
-==10206== 9 bytes in 1 blocks are still reachable in loss record 2 of 17
-==10206==    at 0x402D17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10206==    by 0x8048976: createNode (dataStructures.c:23)
-==10206==    by 0x8048AFE: addNode (dataStructures.c:60)
-==10206==    by 0x804DEBA: checkLineType (firstPass.c:532)
-==10206==    by 0x8052A0D: executeFirstPass (firstPass.c:2101)
-==10206==    by 0x804B94D: main (Assembler.c:41)
-==10206== 
-==10206== 12 bytes in 1 blocks are still reachable in loss record 3 of 17
-==10206==    at 0x402D17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10206==    by 0x804BB90: parseLine (utilities.c:79)
-==10206==    by 0x804C87E: checkLineType (firstPass.c:112)
-==10206==    by 0x8052A0D: executeFirstPass (firstPass.c:2101)
-==10206==    by 0x804B94D: main (Assembler.c:41)
-==10206== 
-==10206== 12 bytes in 1 blocks are still reachable in loss record 4 of 17
-==10206==    at 0x402F0B8: calloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10206==    by 0x804CF8D: checkLineType (firstPass.c:241)
-==10206==    by 0x8052A0D: executeFirstPass (firstPass.c:2101)
-==10206==    by 0x804B94D: main (Assembler.c:41)
-==10206== 
-==10206== 13 bytes in 2 blocks are still reachable in loss record 5 of 17
-==10206==    at 0x402D17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10206==    by 0x804BC5C: parseLine (utilities.c:92)
-==10206==    by 0x804C87E: checkLineType (firstPass.c:112)
-==10206==    by 0x8052A0D: executeFirstPass (firstPass.c:2101)
-==10206==    by 0x804B94D: main (Assembler.c:41)
-==10206== 
-==10206== 13 bytes in 2 blocks are still reachable in loss record 6 of 17
-==10206==    at 0x402F0B8: calloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10206==    by 0x804D053: checkLineType (firstPass.c:253)
-==10206==    by 0x8052A0D: executeFirstPass (firstPass.c:2101)
-==10206==    by 0x804B94D: main (Assembler.c:41)
-==10206== 
-==10206== 14 bytes in 1 blocks are still reachable in loss record 7 of 17
-==10206==    at 0x402F0B8: calloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10206==    by 0x80528DA: executeFirstPass (firstPass.c:2069)
-==10206==    by 0x804B94D: main (Assembler.c:41)
-==10206== 
-==10206== 16 bytes in 1 blocks are still reachable in loss record 8 of 17
-==10206==    at 0x402D17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10206==    by 0x80488AA: createNode (dataStructures.c:8)
-==10206==    by 0x8048AFE: addNode (dataStructures.c:60)
-==10206==    by 0x804DEBA: checkLineType (firstPass.c:532)
-==10206==    by 0x8052A0D: executeFirstPass (firstPass.c:2101)
-==10206==    by 0x804B94D: main (Assembler.c:41)
-==10206== 
-==10206== 25 bytes in 5 blocks are still reachable in loss record 9 of 17
-==10206==    at 0x402D17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10206==    by 0x8048976: createNode (dataStructures.c:23)
-==10206==    by 0x8048AFE: addNode (dataStructures.c:60)
-==10206==    by 0x805265E: handleLabel (firstPass.c:1992)
-==10206==    by 0x804E0B2: checkLineType (firstPass.c:575)
-==10206==    by 0x8052A0D: executeFirstPass (firstPass.c:2101)
-==10206==    by 0x804B94D: main (Assembler.c:41)
-==10206== 
-==10206== 29 bytes in 1 blocks are still reachable in loss record 10 of 17
-==10206==    at 0x402F0B8: calloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10206==    by 0x804BA32: cleanLine (utilities.c:24)
-==10206==    by 0x80529F8: executeFirstPass (firstPass.c:2100)
-==10206==    by 0x804B94D: main (Assembler.c:41)
-==10206== 
-==10206== 31 bytes in 5 blocks are still reachable in loss record 11 of 17
-==10206==    at 0x402D17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10206==    by 0x80488DA: createNode (dataStructures.c:13)
-==10206==    by 0x8048AFE: addNode (dataStructures.c:60)
-==10206==    by 0x805265E: handleLabel (firstPass.c:1992)
-==10206==    by 0x804E0B2: checkLineType (firstPass.c:575)
-==10206==    by 0x8052A0D: executeFirstPass (firstPass.c:2101)
-==10206==    by 0x804B94D: main (Assembler.c:41)
-==10206== 
-==10206== 32 bytes in 1 blocks are still reachable in loss record 12 of 17
-==10206==    at 0x402F0B8: calloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10206==    by 0x8049458: executePreAssembler (preAssembler.c:218)
-==10206==    by 0x804B93A: main (Assembler.c:40)
-==10206== 
-==10206== 33 bytes in 1 blocks are still reachable in loss record 13 of 17
-==10206==    at 0x402F0B8: calloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10206==    by 0x804B8A1: main (Assembler.c:24)
-==10206== 
-==10206== 80 bytes in 5 blocks are still reachable in loss record 14 of 17
-==10206==    at 0x402D17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10206==    by 0x80488AA: createNode (dataStructures.c:8)
-==10206==    by 0x8048AFE: addNode (dataStructures.c:60)
-==10206==    by 0x805265E: handleLabel (firstPass.c:1992)
-==10206==    by 0x804E0B2: checkLineType (firstPass.c:575)
-==10206==    by 0x8052A0D: executeFirstPass (firstPass.c:2101)
-==10206==    by 0x804B94D: main (Assembler.c:41)
-==10206== 
-==10206== 120 bytes in 1 blocks are still reachable in loss record 15 of 17
-==10206==    at 0x402F2CC: realloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10206==    by 0x8048C81: addLine (dataStructures.c:115)
-==10206==    by 0x804FDB1: handleInstruction (firstPass.c:1208)
-==10206==    by 0x804E0ED: checkLineType (firstPass.c:583)
-==10206==    by 0x8052A0D: executeFirstPass (firstPass.c:2101)
-==10206==    by 0x804B94D: main (Assembler.c:41)
-==10206== 
-==10206== 344 bytes in 1 blocks are still reachable in loss record 16 of 17
-==10206==    at 0x402D17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10206==    by 0x40AE359: __fopen_internal (iofopen.c:69)
-==10206==    by 0x40AE41D: fopen@@GLIBC_2.1 (iofopen.c:97)
-==10206==    by 0x80528AB: executeFirstPass (firstPass.c:2061)
-==10206==    by 0x804B94D: main (Assembler.c:41)
-==10206== 
-==10206== 344 bytes in 1 blocks are still reachable in loss record 17 of 17
-==10206==    at 0x402D17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10206==    by 0x40AE359: __fopen_internal (iofopen.c:69)
-==10206==    by 0x40AE41D: fopen@@GLIBC_2.1 (iofopen.c:97)
-==10206==    by 0x8052950: executeFirstPass (firstPass.c:2080)
-==10206==    by 0x804B94D: main (Assembler.c:41)
-==10206== 
-==10206== LEAK SUMMARY:
-==10206==    definitely lost: 0 bytes in 0 blocks
-==10206==    indirectly lost: 0 bytes in 0 blocks
-==10206==      possibly lost: 0 bytes in 0 blocks
-==10206==    still reachable: 1,132 bytes in 31 blocks
-==10206==         suppressed: 0 bytes in 0 blocks
-==10206== 
-==10206== ERROR SUMMARY: 2 errors from 2 contexts (suppressed: 0 from 0)
-==10206== 
-==10206== 1 errors in context 1 of 2:
-==10206== Invalid read of size 1
-==10206==    at 0x4030378: strlen (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10206==    by 0x804D042: checkLineType (firstPass.c:253)
-==10206==    by 0x8052A0D: executeFirstPass (firstPass.c:2101)
-==10206==    by 0x804B94D: main (Assembler.c:41)
-==10206==  Address 0x0 is not stack'd, malloc'd or (recently) free'd
-==10206== 
-==10206== 
-==10206== 1 errors in context 2 of 2:
-==10206== Use of uninitialised value of size 4
-==10206==    at 0x4030378: strlen (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10206==    by 0x804D042: checkLineType (firstPass.c:253)
-==10206==    by 0x8052A0D: executeFirstPass (firstPass.c:2101)
-==10206==    by 0x804B94D: main (Assembler.c:41)
-==10206==  Uninitialised value was created by a heap allocation
-==10206==    at 0x402D17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10206==    by 0x804BB90: parseLine (utilities.c:79)
-==10206==    by 0x804C87E: checkLineType (firstPass.c:112)
-==10206==    by 0x8052A0D: executeFirstPass (firstPass.c:2101)
-==10206==    by 0x804B94D: main (Assembler.c:41)
-==10206== 
-==10206== ERROR SUMMARY: 2 errors from 2 contexts (suppressed: 0 from 0)
+==10661== Memcheck, a memory error detector
+==10661== Copyright (C) 2002-2015, and GNU GPL'd, by Julian Seward et al.
+==10661== Using Valgrind-3.11.0 and LibVEX; rerun with -h for copyright info
+==10661== Command: ./assembler tests/courseExamples/1/1.as
+==10661== Parent PID: 4546
+==10661== 
+--10661-- 
+--10661-- Valgrind options:
+--10661--    --leak-check=full
+--10661--    --show-leak-kinds=all
+--10661--    --track-origins=yes
+--10661--    --verbose
+--10661--    --log-file=valgrind-out.txt
+--10661-- Contents of /proc/version:
+--10661--   Linux version 4.4.0-21-generic (buildd@lgw01-06) (gcc version 5.3.1 20160413 (Ubuntu 5.3.1-14ubuntu2) ) #37-Ubuntu SMP Mon Apr 18 18:34:49 UTC 2016
+--10661-- 
+--10661-- Arch and hwcaps: X86, LittleEndian, x86-mmxext-sse1-sse2-sse3
+--10661-- Page sizes: currently 4096, max supported 4096
+--10661-- Valgrind library directory: /usr/lib/valgrind
+--10661-- Reading syms from /lib/i386-linux-gnu/ld-2.23.so
+--10661--   Considering /lib/i386-linux-gnu/ld-2.23.so ..
+--10661--   .. CRC mismatch (computed c63914e9 wanted 16e97b4f)
+--10661--   Considering /usr/lib/debug/lib/i386-linux-gnu/ld-2.23.so ..
+--10661--   .. CRC is valid
+--10661-- Reading syms from /home/user/Desktop/ממן 14/assembler
+--10661-- Reading syms from /usr/lib/valgrind/memcheck-x86-linux
+--10661--   Considering /usr/lib/valgrind/memcheck-x86-linux ..
+--10661--   .. CRC mismatch (computed 6036da3f wanted 652e483f)
+--10661--    object doesn't have a symbol table
+--10661--    object doesn't have a dynamic symbol table
+--10661-- Scheduler: using generic scheduler lock implementation.
+--10661-- Reading suppressions file: /usr/lib/valgrind/default.supp
+==10661== embedded gdbserver: reading from /tmp/vgdb-pipe-from-vgdb-to-10661-by-user-on-???
+==10661== embedded gdbserver: writing to   /tmp/vgdb-pipe-to-vgdb-from-10661-by-user-on-???
+==10661== embedded gdbserver: shared mem   /tmp/vgdb-pipe-shared-mem-vgdb-10661-by-user-on-???
+==10661== 
+==10661== TO CONTROL THIS PROCESS USING vgdb (which you probably
+==10661== don't want to do, unless you know exactly what you're doing,
+==10661== or are doing some strange experiment):
+==10661==   /usr/lib/valgrind/../../bin/vgdb --pid=10661 ...command...
+==10661== 
+==10661== TO DEBUG THIS PROCESS USING GDB: start GDB like this
+==10661==   /path/to/gdb ./assembler
+==10661== and then give GDB the following command
+==10661==   target remote | /usr/lib/valgrind/../../bin/vgdb --pid=10661
+==10661== --pid is optional if only one valgrind process is running
+==10661== 
+--10661-- REDIR: 0x4018e70 (ld-linux.so.2:strlen) redirected to 0x380490f2 (???)
+--10661-- REDIR: 0x4018c30 (ld-linux.so.2:index) redirected to 0x380490cd (???)
+--10661-- Reading syms from /usr/lib/valgrind/vgpreload_core-x86-linux.so
+--10661--   Considering /usr/lib/valgrind/vgpreload_core-x86-linux.so ..
+--10661--   .. CRC mismatch (computed 5b95c0c4 wanted 39e79efa)
+--10661--    object doesn't have a symbol table
+--10661-- Reading syms from /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so
+--10661--   Considering /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so ..
+--10661--   .. CRC mismatch (computed 4d5a1526 wanted 33571d5b)
+--10661--    object doesn't have a symbol table
+==10661== WARNING: new redirection conflicts with existing -- ignoring it
+--10661--     old: 0x04018e70 (strlen              ) R-> (0000.0) 0x380490f2 ???
+--10661--     new: 0x04018e70 (strlen              ) R-> (2007.0) 0x04030410 strlen
+--10661-- Reading syms from /lib/i386-linux-gnu/libc-2.23.so
+--10661--   Considering /lib/i386-linux-gnu/libc-2.23.so ..
+--10661--   .. CRC mismatch (computed cdf598bf wanted efd88871)
+--10661--   Considering /usr/lib/debug/lib/i386-linux-gnu/libc-2.23.so ..
+--10661--   .. CRC is valid
+--10661-- REDIR: 0x40c74b0 (libc.so.6:strncasecmp) redirected to 0x4027560 (_vgnU_ifunc_wrapper)
+--10661-- REDIR: 0x40ce140 (libc.so.6:memrchr) redirected to 0x4027560 (_vgnU_ifunc_wrapper)
+--10661-- REDIR: 0x40e0b20 (libc.so.6:wcslen) redirected to 0x4027560 (_vgnU_ifunc_wrapper)
+--10661-- REDIR: 0x40c57e0 (libc.so.6:__GI_strrchr) redirected to 0x402fe00 (__GI_strrchr)
+--10661-- REDIR: 0x40c5580 (libc.so.6:strlen) redirected to 0x4027560 (_vgnU_ifunc_wrapper)
+--10661-- REDIR: 0x40ce440 (libc.so.6:__strlen_sse2_bsf) redirected to 0x4030370 (strlen)
+--10661-- REDIR: 0x40c1810 (libc.so.6:calloc) redirected to 0x402f010 (calloc)
+--10661-- REDIR: 0x40c4f90 (libc.so.6:strcpy) redirected to 0x4027560 (_vgnU_ifunc_wrapper)
+--10661-- REDIR: 0x40ce570 (libc.so.6:__strcpy_ssse3) redirected to 0x4030450 (strcpy)
+--10661-- REDIR: 0x40c6350 (libc.so.6:strstr) redirected to 0x4034700 (strstr)
+--10661-- REDIR: 0x40c0f00 (libc.so.6:malloc) redirected to 0x402d110 (malloc)
+--10661-- REDIR: 0x40c6a30 (libc.so.6:__GI_memchr) redirected to 0x40316d0 (__GI_memchr)
+--10661-- REDIR: 0x40c7680 (libc.so.6:__GI_memcpy) redirected to 0x4031fb0 (__GI_memcpy)
+--10661-- REDIR: 0x40c5700 (libc.so.6:strncmp) redirected to 0x4027560 (_vgnU_ifunc_wrapper)
+--10661-- REDIR: 0x4185560 (libc.so.6:__strncmp_ssse3) redirected to 0x4030ab0 (strncmp)
+--10661-- REDIR: 0x40c55c0 (libc.so.6:__GI_strlen) redirected to 0x4030390 (__GI_strlen)
+--10661-- REDIR: 0x40c1470 (libc.so.6:free) redirected to 0x402e2f0 (free)
+--10661-- REDIR: 0x40c9280 (libc.so.6:strchrnul) redirected to 0x40340b0 (strchrnul)
+--10661-- REDIR: 0x40c70d0 (libc.so.6:__GI_mempcpy) redirected to 0x40342c0 (__GI_mempcpy)
+--10661-- REDIR: 0x40c91b0 (libc.so.6:__GI___rawmemchr) redirected to 0x4034110 (__GI___rawmemchr)
+--10661-- REDIR: 0x40c4ee0 (libc.so.6:strcmp) redirected to 0x4027560 (_vgnU_ifunc_wrapper)
+--10661-- REDIR: 0x41840f0 (libc.so.6:__strcmp_ssse3) redirected to 0x4031450 (strcmp)
+--10661-- REDIR: 0x40c1520 (libc.so.6:realloc) redirected to 0x402f250 (realloc)
+--10661-- REDIR: 0x40c4ae0 (libc.so.6:strcat) redirected to 0x4027560 (_vgnU_ifunc_wrapper)
+--10661-- REDIR: 0x40d9b30 (libc.so.6:__strcat_ssse3) redirected to 0x4030030 (strcat)
+--10661-- REDIR: 0x40c7610 (libc.so.6:memcpy) redirected to 0x4027560 (_vgnU_ifunc_wrapper)
+--10661-- REDIR: 0x4177b10 (libc.so.6:__memcpy_ssse3) redirected to 0x4031cc0 (memcpy)
+--10661-- REDIR: 0x40c4ce0 (libc.so.6:index) redirected to 0x4027560 (_vgnU_ifunc_wrapper)
+--10661-- REDIR: 0x40df420 (libc.so.6:__strchr_sse2_bsf) redirected to 0x402fff0 (index)
+==10661== 
+==10661== HEAP SUMMARY:
+==10661==     in use at exit: 0 bytes in 0 blocks
+==10661==   total heap usage: 489 allocs, 489 frees, 41,363 bytes allocated
+==10661== 
+==10661== All heap blocks were freed -- no leaks are possible
+==10661== 
+==10661== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+==10661== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)

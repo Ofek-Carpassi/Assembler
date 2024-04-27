@@ -67,7 +67,7 @@ int isLabelNameLegal(char *label)
 /* Purpose is explained in the header file */
 int isInstruction(char *word)
 {
-    int i = 0, j=0; /* Create a variable to save the index of the instruction */
+    int i = 0; /* Create a variable to save the index of the instruction */
     /* Loop through the instruction names */
 	if(word[strlen(word)-1] == '\n') word[strlen(word)-1] = '\0';
 	if(word[strlen(word)-1] == '\r') word[strlen(word)-1] = '\0';
@@ -101,6 +101,7 @@ char *checkLineType(char *line, char *originalLine)
 
     if (wordAmount == 0) /* If the are no words in the line */
     {
+		printf("WORDAMOUNT==0\n");
         printIntError(ERROR_CODE_45); /* Print an error message */
         free(line); /* Free the line */
         free(originalLine); /* Free the original line */
@@ -724,9 +725,6 @@ char *operandHandling(char *operand, Node **symbolTableHead, int addressingMetho
     /* registers */
     else if (operand[0] == 'r' && addressingMethod == 3)
     {
-        /* Get the register number */
-		for(i = 0; i < strlen(operand);i++)
-			printf("%d\n", operand[i]);
         registerNumber = 0;
         if(operand[strlen(operand)-1] == '\n')
             operand[strlen(operand)-1] = '\0';
@@ -888,12 +886,52 @@ char *handleTwoRegisters(char *soruceRegister, char *destinationRegister)
     char *result;
     char *emptyReturn;
     size_t totalLength;
+	int sourceRegisterNumber = 0;
+	int destinationRegisterNumber = 0;
+	int i = 0;
     /*
     The number of the source register will be coded at bits 5-7.
     The number of the destination register will be coded at bits 2-4.
     */
-    int sourceRegisterNumber = soruceRegister[1] - '0';
-    int destinationRegisterNumber = destinationRegister[1] - '0';
+    if(soruceRegister[strlen(soruceRegister)-1] == '\n')
+        soruceRegister[strlen(soruceRegister)-1] = '\0';
+	if(soruceRegister[strlen(soruceRegister)-1] == '\r')
+        soruceRegister[strlen(soruceRegister)-1] = '\0';
+    for(i = 1; (unsigned)i < strlen(soruceRegister); i++)
+    {
+        if(!isdigit(soruceRegister[i]))
+        {
+            printExtError(ERROR_CODE_32, fileLoc);
+            noErrors = 0;
+            emptyReturn = (char *)calloc(1, sizeof(char));
+            if (emptyReturn == NULL){
+                printIntError(ERROR_CODE_10);
+                exit(1);
+            }
+            return emptyReturn;
+        }
+        sourceRegisterNumber = sourceRegisterNumber * 10 + (soruceRegister[i] - '0');
+    }
+
+	if(destinationRegister[strlen(destinationRegister)-1] == '\n')
+        destinationRegister[strlen(destinationRegister)-1] = '\0';
+	if(destinationRegister[strlen(destinationRegister)-1] == '\r')
+        destinationRegister[strlen(destinationRegister)-1] = '\0';
+    for(i = 1; (unsigned)i < strlen(destinationRegister); i++)
+    {
+        if(!isdigit(destinationRegister[i]))
+        {
+            printExtError(ERROR_CODE_32, fileLoc);
+            noErrors = 0;
+            emptyReturn = (char *)calloc(1, sizeof(char));
+            if (emptyReturn == NULL){
+                printIntError(ERROR_CODE_10);
+                exit(1);
+            }
+            return emptyReturn;
+        }
+        destinationRegisterNumber = destinationRegisterNumber * 10 + (destinationRegister[i] - '0');
+    }
 
     if(sourceRegisterNumber < 0 || sourceRegisterNumber > 7){
         printExtError(ERROR_CODE_32, fileLoc);
@@ -930,10 +968,6 @@ char *handleTwoRegisters(char *soruceRegister, char *destinationRegister)
     strcat(result, sourceBinary);
     strcat(result, destinationBinary);
     strcat(result, "00\0");
-
-    printf("sourceBinary: %s\n", sourceBinary);
-    printf("destinationBinary: %s\n", destinationBinary);
-    printf("result: %s\n", result);
 
     free(sourceBinary);
     free(destinationBinary);
@@ -1259,7 +1293,6 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
         if(sourceAddressingMethod == 3 && destinationAddressingMethod == 3)
         {
             regs = handleTwoRegisters(sourceOperand, destinationOperand);
-            printf("regs: %s\n", regs);
             totalLength = strlen("0000") + strlen(opcode) + strlen(sourceAddressing) + strlen(destinationAddressing) + strlen("00\n") + strlen(regs) + 1;
             result = (char *)calloc(totalLength, sizeof(char));
             if(result == NULL){
@@ -2052,7 +2085,6 @@ void handleConstant(char **parsedLine, Node **symbolTableHead, int wordAmount)
 
 void executeFirstPass(char *file, char **outputFileName)
 {
-    int i;
     char line[MAX_LINE_LENGTH + 1];
     char *cleanedLine, *noCommas;
     char *binaryLine;
@@ -2128,12 +2160,6 @@ void executeFirstPass(char *file, char **outputFileName)
         current = current->next;
     }
 
-    /* Print the linesDataArray */
-    for(i = 0; i < linesDataArraySize; i++)
-    {
-        printf("line: %d, src: %d, dest: %d\n", linesDataArray[i].binaryLinesWritten, linesDataArray[i].firstLabelIndex, linesDataArray[i].secondLabelIndex);
-    }
-
     if(noErrors)
         executeSecondPass(file, *outputFileName, symbolTable, IC, DC, linesDataArray);
 
@@ -2149,6 +2175,7 @@ void executeFirstPass(char *file, char **outputFileName)
     /* Free the linesDataArray */
     free(linesDataArray);
 }
+
 
 
 

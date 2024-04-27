@@ -1,0 +1,18 @@
+MAIN: mov r1,r9
+RUN: cmp #-5,r3
+add r10,r15
+jsr RUN
+prn STR
+hlttt
+jmp LOOP
+STA$RT: sub r2,r7
+clr STR
+red r7
+hlt
+notr2
+inc r12
+bne MAIN
+EXTERNVAR: .data 100
+STR: .string "YAY"
+ARR: .data 1,2,3,4,5
+K: .data 10,gg,dd,yy
