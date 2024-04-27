@@ -200,6 +200,7 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead, 
     Node *current = NULL;
     int found = 0;
     int numbersAmount = 0;
+    char *entry = NULL;
     char *binaryLine = NULL;
     char *binaryNumber = NULL;
     char *newBinaryLine = NULL;
@@ -449,7 +450,10 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead, 
             found = 0;
             current = searchNodeInList(symbolTableHead, label, &found);
             if (found) {
-                current->data = "entry";
+                entry = (char *)calloc(strlen("entry\0") + 1, sizeof(char));
+                strcpy(entry, "entry");
+                free(current->data);
+                current->data = entry;
             }
             free(label);
         }
@@ -522,7 +526,4 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead, 
         fclose(entryFile);
     if(externsCount > 0)
         fclose(externFile);
-
-    free(entryFile);
-    free(externFile);
 }

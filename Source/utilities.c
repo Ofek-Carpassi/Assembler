@@ -88,12 +88,46 @@ char** parseLine(char* input, int numWords, location* loc, int* noErrors) {
         return NULL;
     }
 
-    token = strtok(input, " ,\t");
-
-    while (token != NULL && wordCount < numWords) {
-        result[wordCount] = (char*)calloc(strlen(token) + 1, sizeof(char));
-        if (result[wordCount] == NULL) {
+    if (strstr(input, ".string")) {
+        result[0] = (char*)calloc(8, sizeof(char)); 
+        if (result[0] == NULL) {
             printIntError(10);
+            *noErrors = 0;
+            free(result);
+            return NULL;
+        }
+        strcpy(result[0], ".string");
+
+        result[1] = (char*)calloc(strlen(input) - 7, sizeof(char)); 
+        if (result[1] == NULL) {
+            printIntError(10);
+            *noErrors = 0;
+            free(result[0]);
+            free(result);
+            return NULL;
+        }
+        strcpy(result[1], input + 8); 
+    } else {
+        token = strtok(input, " ,\t");
+
+        while (token != NULL && wordCount < numWords) {
+            result[wordCount] = (char*)calloc(strlen(token) + 1, sizeof(char));
+            if (result[wordCount] == NULL) {
+                printIntError(10);
+                *noErrors = 0;
+                for (i = 0; i < wordCount; i++) {
+                    free(result[i]);
+                }
+                free(result);
+                return NULL;
+            }
+            strcpy(result[wordCount], token);
+            token = strtok(NULL, " ,\t");
+            wordCount++;
+        }
+
+        if (wordCount != numWords) {
+            printIntError(45);
             *noErrors = 0;
             for (i = 0; i < wordCount; i++) {
                 free(result[i]);
@@ -101,19 +135,6 @@ char** parseLine(char* input, int numWords, location* loc, int* noErrors) {
             free(result);
             return NULL;
         }
-        strcpy(result[wordCount], token);
-        token = strtok(NULL, " ,\t");
-        wordCount++;
-    }
-
-    if (wordCount != numWords) {
-        printIntError(45);
-        *noErrors = 0;
-        for (i = 0; i < wordCount; i++) {
-            free(result[i]);
-        }
-        free(result);
-        return NULL;
     }
 
     return result;
@@ -142,19 +163,21 @@ int isNumber(char *str)
 /* Explained in the header file */
 int countWords(char *line)
 {
-    /* Initialize the count to 0 */
     int count = 0;
     int i = 0;
-    /* Loop through the line */
+    int inString = 0;  
+
     while(line[i] != '\0')
     {
-        /* If the current char is a char and the next char is a space, increment the count */
-        if(line[i] != ' ' && line[i+1] == ' ')
+        if(line[i] == '"') {
+            inString = !inString;  
+        } else if(!inString && line[i] != ' ' && (line[i+1] == ' ' || line[i+1] == '\0')) {
             count++;
+        }
         i++;
     }
-    /* Return the count (add 1 because the last word doesn't have a space after it) */
-    return count+1;
+
+    return count;
 }
 
 /* Explained in the header file */

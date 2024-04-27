@@ -2,7 +2,7 @@
 CC = gcc
 
 # Compiler flags
-CFLAGS = -Wall -Wextra -pedantic
+CFLAGS = -Wall -ansi -pedantic
 
 # Source files
 SOURCES = Source/dataStructures.c Source/Errors.c Source/firstPass.c Source/preAssembler.c Source/Assembler.c Source/utilities.c Source/secondPass.c 
@@ -14,14 +14,14 @@ HEADERS = Header/dataStructures.h Header/errors.h Header/firstPass.h Header/glob
 OBJECTS = $(SOURCES:.c=.o)
 
 # Target executable
-TARGET = testing
+TARGET = assembler
 
 # Default target
 all: $(TARGET)
 
 # Build the target
 $(TARGET): $(OBJECTS)
-	$(CC) $(CFLAGS) -o $(TARGET) $(OBJECTS)
+	$(CC) $(CFLAGS) -g -o $(TARGET) $(OBJECTS)
 
 # Build object files
 %.o: %.c $(HEADERS)
@@ -33,4 +33,4 @@ clean:
 
 # Run testing
 run:
-	valgrind --leak-check=full ./$(TARGET)
+	./$(TARGET)

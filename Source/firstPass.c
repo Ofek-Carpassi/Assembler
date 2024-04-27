@@ -296,6 +296,18 @@ char *checkLineType(char *line, char *originalLine)
         for(i = 0; i < wordAmount-1; i++)
         {
             free(parsedLine[i]);
+            if(parsedLine[i+1] == NULL){
+                printIntError(ERROR_CODE_10);
+                for(i = 0; i < wordAmount; i++)
+                    free(parsedLine[i]);
+                free(parsedLine);
+                free(label);
+                free(line);
+                free(originalLine);
+                exit(1);
+            }
+            if(parsedLine[i+1][strlen(parsedLine[i+1])-1] == '\n')
+                parsedLine[i+1][strlen(parsedLine[i+1])-1] = '\0';
             parsedLine[i] = (char *)calloc(strlen(parsedLine[i+1])+1, sizeof(char));
             if (parsedLine[i] == NULL){
                 printIntError(ERROR_CODE_10);
@@ -2031,6 +2043,7 @@ void executeFirstPass(char *file, char **outputFileName)
     }
     
     fileLoc.fileName = file;    
+    fileLoc.line = 1;
 
     while(fgets(line, MAX_LINE_LENGTH, inputFile) != NULL) 
     {
@@ -2053,7 +2066,7 @@ void executeFirstPass(char *file, char **outputFileName)
         free(cleanedLine);
 
         lineNumberSrcFile++;
-        fileLoc.line = lineNumberSrcFile;
+        fileLoc.line++;
     }
     fclose(inputFile);
     fclose(outputFile);
@@ -2075,7 +2088,15 @@ void executeFirstPass(char *file, char **outputFileName)
     if(noErrors)
         executeSecondPass(file, *outputFileName, symbolTable, IC, DC, linesDataArray);
 
-    freeList(symbolTable);
+    /* Loop through the symbol table and free the nodes */
+    while (symbolTable != NULL)
+    {
+        current = symbolTable;
+        symbolTable = symbolTable->next;
+        free(current->name);
+        free(current->data);
+        free(current);
+    }
     /* Free the linesDataArray */
     free(linesDataArray);
 }

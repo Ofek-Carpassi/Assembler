@@ -323,3 +323,4 @@ void executePreAssembler(char *file, char **outputFileName)
     /* Free the macro list */
     freeList(macroList);
 }
+
