@@ -82,7 +82,7 @@ int isInstruction(char *word)
 /* Purpose is explained in the header file */
 char *checkLineType(char *line, char *originalLine)
 {
-    int wordAmount, i = 0, j = 0, instructionIndex, isLabel, lineErrors = 1;
+    int wordAmount, i = 0, j = 0, instructionIndex, isLabel, lineErrors = 1, tmpWordAmount;
     char **parsedLine, *label, *restOfLine, *binaryLine, *firstVariable;
     char *emptyReturn, *constantReturn, *labelPart;
     /* Return an empty string if the line is empty - the executer will write nothing to the output file */
@@ -307,19 +307,11 @@ char *checkLineType(char *line, char *originalLine)
                 free(originalLine);
                 exit(1);
             }
-            strcpy(parsedLine[i], parsedLine[i+1]);
+            strcpy(parsedLine[i], parsedLine[i+1]);            
         }
 
-        /* Remove the last word */
+        /* Free the last word */
         free(parsedLine[wordAmount-1]);
-        parsedLine = (char **)realloc(parsedLine, (wordAmount-1) * sizeof(char *));
-        if (parsedLine == NULL){
-            printIntError(ERROR_CODE_10);
-            free(line);
-            free(originalLine);
-            free(label);
-            exit(1);
-        }
         /* Decrement the word amount */
         wordAmount--;
         /* Check if the length of the label is legal */
@@ -386,11 +378,12 @@ char *checkLineType(char *line, char *originalLine)
     else if(strcmp(firstVariable, ".string") == 0)
     {   
         /* If the first word is a label - add the label to the symbol table */
+        tmpWordAmount = wordAmount;
         if(isLabel){
-            wordAmount--;
+            tmpWordAmount--;
             handleLabel(label, &symbolTable, STRING);
         } 
-        if(wordAmount > 2){
+        if(tmpWordAmount > 2){
             printExtError(ERROR_CODE_38, fileLoc);
             noErrors = 0;
             for(i = 0; i < wordAmount; i++)
@@ -407,7 +400,7 @@ char *checkLineType(char *line, char *originalLine)
             }
             return emptyReturn;
         }
-        if(wordAmount < 1){
+        if(tmpWordAmount < 1){
             printExtError(ERROR_CODE_17, fileLoc);
             noErrors = 0;
             for(i = 0; i < wordAmount; i++)
@@ -425,7 +418,7 @@ char *checkLineType(char *line, char *originalLine)
             return emptyReturn;
         }
         /* Use handleString to translate the string to binary */
-        binaryLine = handleString(parsedLine[1]);
+        binaryLine = handleString(parsedLine, parsedLine[1], wordAmount);
 
         /* Free the parsed line and return the result */
         for(i = 0; i < wordAmount; i++)
@@ -921,6 +914,9 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
             emptyReturn = (char *)calloc(1, sizeof(char));
             if (emptyReturn == NULL){
                 printIntError(ERROR_CODE_10);
+                for(i = 0; i < wordAmount; i++)
+                    free(parsedLine[i]);
+                free(parsedLine);
                 exit(1);
             }
             return emptyReturn;
@@ -931,6 +927,9 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
         if (result == NULL)
         {
             printIntError(ERROR_CODE_10);
+            for(i = 0; i < wordAmount; i++)
+                free(parsedLine[i]);
+            free(parsedLine);
             exit(1);
         }
         if(lineNumber == 1)
@@ -942,6 +941,9 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
             if (result == NULL)
             {
                 printIntError(ERROR_CODE_10);
+                for(i = 0; i < wordAmount; i++)
+                    free(parsedLine[i]);
+                free(parsedLine);
                 exit(1);
             }
             strcat(result, "\n0000");
@@ -965,6 +967,9 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
             emptyReturn = (char *)calloc(1, sizeof(char));
             if (emptyReturn == NULL){
                 printIntError(ERROR_CODE_10);
+                for(i = 0; i < wordAmount; i++)
+                    free(parsedLine[i]);
+                free(parsedLine);   
                 exit(1);
             }
             return emptyReturn;
@@ -977,6 +982,9 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
             emptyReturn = (char *)calloc(1, sizeof(char));
             if (emptyReturn == NULL){
                 printIntError(ERROR_CODE_10);
+                for(i = 0; i < wordAmount; i++)
+                    free(parsedLine[i]);
+                free(parsedLine);
                 exit(1);
             }
             return emptyReturn;
@@ -990,6 +998,9 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
             inBrackets = (char *)calloc(strlen(operand), sizeof(char));
             if(inBrackets == NULL){
                 printIntError(ERROR_CODE_10);
+                for(i = 0; i < wordAmount; i++)
+                    free(parsedLine[i]);
+                free(parsedLine);
                 exit(1);
             }
 
@@ -1011,6 +1022,9 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
             beforeBrackets = (char *)calloc(strlen(operand), sizeof(char));
             if(beforeBrackets == NULL){
                 printIntError(ERROR_CODE_10);
+                for(i = 0; i < wordAmount; i++)
+                    free(parsedLine[i]);
+                free(parsedLine);
                 exit(1);
             }
 
@@ -1036,6 +1050,9 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
             if(result == NULL)
             {
                 printIntError(ERROR_CODE_10);
+                for(i = 0; i < wordAmount; i++)
+                    free(parsedLine[i]);
+                free(parsedLine);
                 exit(1);
             }
 
@@ -1048,6 +1065,9 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
                 if(result == NULL)
                 {
                     printIntError(ERROR_CODE_10);
+                    for(i = 0; i < wordAmount; i++)
+                        free(parsedLine[i]);
+                    free(parsedLine);
                     exit(1);
                 }
                 strcat(result, "\n0000");
@@ -1077,6 +1097,9 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
         variable = (char *)calloc(strlen(operand), sizeof(char));
         if(variable == NULL){
             printIntError(ERROR_CODE_10);
+            for(i = 0; i < wordAmount; i++)
+                free(parsedLine[i]);
+            free(parsedLine);
             exit(1);
         }
 
@@ -1094,6 +1117,9 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
         result = (char *)calloc(totalLength, sizeof(char));
         if(result == NULL){
             printIntError(ERROR_CODE_10);
+            for(i = 0; i < wordAmount; i++)
+                free(parsedLine[i]);
+            free(parsedLine);
             exit(1);
         }
 
@@ -1105,6 +1131,9 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
             result = (char *)realloc(result, totalLength);
             if(result == NULL){
                 printIntError(ERROR_CODE_10);
+                for(i = 0; i < wordAmount; i++)
+                    free(parsedLine[i]);
+                free(parsedLine);
                 exit(1);
             }
             strcat(result, "\n0000");
@@ -1137,6 +1166,9 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
             emptyReturn = (char *)calloc(1, sizeof(char));
             if (emptyReturn == NULL){
                 printIntError(ERROR_CODE_10);
+                for(i = 0; i < wordAmount; i++)
+                    free(parsedLine[i]);
+                free(parsedLine);
                 exit(1);
             }
             return emptyReturn;
@@ -1145,6 +1177,9 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
         sourceOperand = (char *)calloc(strlen(parsedLine[1])+1, sizeof(char));
         if(sourceOperand == NULL){
             printIntError(ERROR_CODE_10);
+            for(i = 0; i < wordAmount; i++)
+                free(parsedLine[i]);
+            free(parsedLine);
             exit(1);
         }
         strcpy(sourceOperand, parsedLine[1]);
@@ -1152,6 +1187,9 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
         destinationOperand = (char *)calloc(strlen(parsedLine[2])+1, sizeof(char));
         if(destinationOperand == NULL){
             printIntError(ERROR_CODE_10);
+            for(i = 0; i < wordAmount; i++)
+                free(parsedLine[i]);
+            free(parsedLine);
             exit(1);
         }
         strcpy(destinationOperand, parsedLine[2]);
@@ -1169,6 +1207,9 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
             result = (char *)calloc(totalLength, sizeof(char));
             if(result == NULL){
                 printIntError(ERROR_CODE_10);
+                for(i = 0; i < wordAmount; i++)
+                    free(parsedLine[i]);
+                free(parsedLine);
                 exit(1);
             }
 
@@ -1180,6 +1221,9 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
                 result = (char *)realloc(result, totalLength);
                 if(result == NULL){
                     printIntError(ERROR_CODE_10);
+                    for(i = 0; i < wordAmount; i++)
+                        free(parsedLine[i]);
+                    free(parsedLine);
                     exit(1);
                 }
                 strcat(result, "\n0000");
@@ -1209,6 +1253,9 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
             inBracketsSrc = (char *)calloc(strlen(sourceOperand), sizeof(char));
             if(inBracketsSrc == NULL){
                 printIntError(ERROR_CODE_10);
+                for(i = 0; i < wordAmount; i++)
+                    free(parsedLine[i]);
+                free(parsedLine);
                 exit(1);
             }
 
@@ -1228,6 +1275,9 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
             beforeBracketsSrc = (char *)calloc(strlen(sourceOperand), sizeof(char));
             if(beforeBracketsSrc == NULL){
                 printIntError(ERROR_CODE_10);
+                for(i = 0; i < wordAmount; i++)
+                    free(parsedLine[i]);
+                free(parsedLine);
                 exit(1);
             }
 
@@ -1252,6 +1302,9 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
             inBracketsDest = (char *)calloc(strlen(destinationOperand), sizeof(char));
             if(inBracketsDest == NULL){
                 printIntError(ERROR_CODE_10);
+                for(i = 0; i < wordAmount; i++)
+                    free(parsedLine[i]);
+                free(parsedLine);
                 exit(1);
             }
 
@@ -1274,6 +1327,9 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
 
             if(beforeBracketsDest == NULL){
                 printIntError(ERROR_CODE_10);
+                for(i = 0; i < wordAmount; i++)
+                    free(parsedLine[i]);
+                free(parsedLine);
                 exit(1);
             }
 
@@ -1298,6 +1354,9 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
             result = (char *)calloc(totalLength, sizeof(char));
             if(result == NULL){
                 printIntError(ERROR_CODE_10);
+                for(i = 0; i < wordAmount; i++)
+                    free(parsedLine[i]);
+                free(parsedLine);
                 exit(1);
             }
 
@@ -1309,6 +1368,9 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
                 result = (char *)realloc(result, totalLength);
                 if(result == NULL){
                     printIntError(ERROR_CODE_10);
+                    for(i = 0; i < wordAmount; i++)
+                        free(parsedLine[i]);
+                    free(parsedLine);
                     exit(1);
                 }
                 strcat(result, "\n0000");
@@ -1346,6 +1408,9 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
             inBrackets = (char *)calloc(strlen(sourceOperand), sizeof(char));
             if(inBrackets == NULL){
                 printIntError(ERROR_CODE_10);
+                for(i = 0; i < wordAmount; i++)
+                    free(parsedLine[i]);
+                free(parsedLine);
                 exit(1);
             }
 
@@ -1365,6 +1430,9 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
             beforeBrackets = (char *)calloc(strlen(sourceOperand), sizeof(char));
             if(beforeBrackets == NULL){
                 printIntError(ERROR_CODE_10);
+                for(i = 0; i < wordAmount; i++)
+                    free(parsedLine[i]);
+                free(parsedLine);
                 exit(1);
             }
 
@@ -1401,6 +1469,9 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
             result = (char *)calloc(totalLength, sizeof(char));
             if(result == NULL){
                 printIntError(ERROR_CODE_10);
+                for(i = 0; i < wordAmount; i++)
+                    free(parsedLine[i]);
+                free(parsedLine);
                 exit(1);
             }
 
@@ -1412,6 +1483,9 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
                 result = (char *)realloc(result, totalLength);
                 if(result == NULL){
                     printIntError(ERROR_CODE_10);
+                    for(i = 0; i < wordAmount; i++)
+                        free(parsedLine[i]);
+                    free(parsedLine);
                     exit(1);
                 }
                 strcat(result, "\n0000");
@@ -1456,6 +1530,9 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
             inBrackets = (char *)calloc(strlen(destinationOperand), sizeof(char));
             if(inBrackets == NULL){
                 printIntError(ERROR_CODE_10);
+                for(i = 0; i < wordAmount; i++)
+                    free(parsedLine[i]);
+                free(parsedLine);
                 exit(1);
             }
 
@@ -1475,6 +1552,9 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
             beforeBrackets = (char *)calloc(strlen(destinationOperand), sizeof(char));
             if(beforeBrackets == NULL){
                 printIntError(ERROR_CODE_10);
+                for(i = 0; i < wordAmount; i++)
+                    free(parsedLine[i]);
+                free(parsedLine);
                 exit(1);
             }
 
@@ -1498,6 +1578,9 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
             result = (char *)calloc(totalLength, sizeof(char));
             if(result == NULL){
                 printIntError(ERROR_CODE_10);
+                for(i = 0; i < wordAmount; i++)
+                    free(parsedLine[i]);
+                free(parsedLine);
                 exit(1);
             }
 
@@ -1509,6 +1592,9 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
                 result = (char *)realloc(result, totalLength);
                 if(result == NULL){
                     printIntError(ERROR_CODE_10);
+                    for(i = 0; i < wordAmount; i++)
+                        free(parsedLine[i]);
+                    free(parsedLine);
                     exit(1);
                 }
                 strcat(result, "\n0000");
@@ -1567,6 +1653,9 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
         result = (char *)calloc(totalLength, sizeof(char));
         if(result == NULL){
             printIntError(ERROR_CODE_10);
+            for(i = 0; i < wordAmount; i++)
+                free(parsedLine[i]);
+            free(parsedLine);
             exit(1);
         }
 
@@ -1578,6 +1667,9 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
             result = (char *)realloc(result, totalLength);
             if(result == NULL){
                 printIntError(ERROR_CODE_10);
+                for(i = 0; i < wordAmount; i++)
+                    free(parsedLine[i]);
+                free(parsedLine);
                 exit(1);
             }
             strcat(result, "\n0000");
@@ -1618,6 +1710,9 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
     emptyReturn = (char *)calloc(6, sizeof(char));
     if (emptyReturn == NULL){
         printIntError(ERROR_CODE_10);
+        for(i = 0; i < wordAmount; i++)
+            free(parsedLine[i]);
+        free(parsedLine);
         exit(1);
     }
     strcpy(emptyReturn, "ERROR\0");
@@ -1625,7 +1720,7 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
 }
 
 /* Purpose is explained in the header file */
-char* handleString(char *line) {
+char* handleString(char **parsedLine, char *line, int wordAmount){
     int amountOfChars = 0;
     int i = 0;
     int lengthOfBinaryLine = 0;
@@ -1640,6 +1735,9 @@ char* handleString(char *line) {
     binaryLine = (char *)calloc(lengthOfBinaryLine+1, sizeof(char)); /* Create a new string to store the binary line */
     if(binaryLine == NULL){
         printIntError(ERROR_CODE_10);
+        for(i = 0; i < wordAmount; i++)
+            free(parsedLine[i]);
+        free(parsedLine);
         exit(1);
     }
 
@@ -1678,6 +1776,9 @@ char* handleString(char *line) {
         emptyReturn = (char *)calloc(1, sizeof(char));
         if(emptyReturn == NULL){
             printIntError(ERROR_CODE_10);
+            for(i = 0; i < wordAmount; i++)
+                free(parsedLine[i]);
+            free(parsedLine);
             exit(1);
         }
         return emptyReturn;
@@ -1715,6 +1816,9 @@ char *handleData(char *parsedLine[], Node **symbolTableHead, int wordAmount)
     char *binaryLine = (char *)calloc(15, sizeof(char)); /* Create a new string to store the binary line */
     if(binaryLine == NULL){
         printIntError(ERROR_CODE_10);
+        for(i = 0; i < wordAmount; i++)
+            free(parsedLine[i]);
+        free(parsedLine);
         exit(1);
     }
 
@@ -1733,6 +1837,9 @@ char *handleData(char *parsedLine[], Node **symbolTableHead, int wordAmount)
             binaryLine = (char *)realloc(binaryLine, sizeof(char) * (strlen(binaryLine) + strlen(binaryNumber) + 2));
             if(binaryLine == NULL){
                 printIntError(ERROR_CODE_10);
+                for(i = 0; i < wordAmount; i++)
+                    free(parsedLine[i]);
+                free(parsedLine);
                 exit(1);
             }
             if(lineNumber == 1)
@@ -1750,6 +1857,9 @@ char *handleData(char *parsedLine[], Node **symbolTableHead, int wordAmount)
             variable = (char *)calloc(strlen(parsedLine[i])+1, sizeof(char));
             if(variable == NULL){
                 printIntError(ERROR_CODE_10);
+                for(i = 0; i < wordAmount; i++)
+                    free(parsedLine[i]);
+                free(parsedLine);
                 exit(1);
             }
             strcpy(variable, parsedLine[i]);
@@ -1782,6 +1892,9 @@ char *handleData(char *parsedLine[], Node **symbolTableHead, int wordAmount)
                 emptyReturn = (char *)calloc(1, sizeof(char));
                 if(emptyReturn == NULL){
                     printIntError(ERROR_CODE_10);
+                    for(i = 0; i < wordAmount; i++)
+                        free(parsedLine[i]);
+                    free(parsedLine);
                     exit(1);
                 }
                 return emptyReturn;

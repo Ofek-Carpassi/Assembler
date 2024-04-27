@@ -73,7 +73,7 @@ char *cleanLine(char *line)
 char** parseLine(char* input, int numWords, location* loc, int* noErrors) {
     char** result = NULL;
     char* token;
-    int i = 0, j = 0, wordCount = 0;
+    int i = 0, wordCount = 0;
 
     if (input == NULL) {
         printIntError(45);
@@ -95,8 +95,8 @@ char** parseLine(char* input, int numWords, location* loc, int* noErrors) {
         if (result[wordCount] == NULL) {
             printIntError(10);
             *noErrors = 0;
-            for (j = 0; j < wordCount; j++) {
-                free(result[j]);
+            for (i = 0; i < wordCount; i++) {
+                free(result[i]);
             }
             free(result);
             return NULL;
@@ -109,8 +109,8 @@ char** parseLine(char* input, int numWords, location* loc, int* noErrors) {
     if (wordCount != numWords) {
         printIntError(45);
         *noErrors = 0;
-        for (j = 0; j < wordCount; j++) {
-            free(result[j]);
+        for (i = 0; i < wordCount; i++) {
+            free(result[i]);
         }
         free(result);
         return NULL;

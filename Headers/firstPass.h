@@ -91,7 +91,7 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
  * @param line The line to handle.
  * @return The string in binary.
  */
-char *handleString(char *line);
+char* handleString(char **parsedLine, char *line, int wordAmount);
 
 /**
  * @brief This function handles a data.
