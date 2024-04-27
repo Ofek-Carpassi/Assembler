@@ -69,12 +69,11 @@ int isInstruction(char *word)
 {
     int i = 0, j=0; /* Create a variable to save the index of the instruction */
     /* Loop through the instruction names */
+	if(word[strlen(word)-1] == '\n') word[strlen(word)-1] = '\0';
+	if(word[strlen(word)-1] == '\r') word[strlen(word)-1] = '\0';
     for(i = 0; i < OPCODES_COUNT; i++)
     {
-		for(j=0; j<3; j++)
-			if(word[j] != opcodes[i].name[j])
-				break;
-		if(j==3) return i;
+		if(strcmp(word, opcodes[i].name) == 0) return i;
     }
     return -1; /* Return -1 if the word is not an instruction name */
 }
@@ -83,10 +82,10 @@ int isInstruction(char *word)
 char *checkLineType(char *line, char *originalLine)
 {
     int wordAmount, i = 0, j = 0, instructionIndex, isLabel, lineErrors = 1, tmpWordAmount;
-    char **parsedLine, *label, *restOfLine, *binaryLine, *firstVariable;
+    char **tmpParsedLine, *label, *restOfLine, *binaryLine, *firstVariable, **parsedLine = NULL;
     char *emptyReturn, *constantReturn, *labelPart;
     /* Return an empty string if the line is empty - the executer will write nothing to the output file */
-    if (line[0] == ';' || line[0] == '\n')
+    if (line[0] == ';' || line[0] == '\n' || line[0] == '\r' || line[0] == '\0')
     {
         emptyReturn = (char *)calloc(1, sizeof(char));
         if (emptyReturn == NULL){
@@ -110,7 +109,7 @@ char *checkLineType(char *line, char *originalLine)
 
     /* Parse the line */
     
-    parsedLine = parseLine(line, wordAmount, &fileLoc, &lineErrors);
+    tmpParsedLine = parseLine(line, wordAmount, &fileLoc, &lineErrors);
     
     if(lineErrors == 0)
     {
@@ -126,12 +125,12 @@ char *checkLineType(char *line, char *originalLine)
         }
         return emptyReturn;
     }
-    isLegalCommas(originalLine, &noErrors, &fileLoc, parsedLine, wordAmount);
+    isLegalCommas(originalLine, &noErrors, &fileLoc, tmpParsedLine, wordAmount);
     /* run on the first word and check if there's a : in it - not at the end of the word 
     this means the line looks like <label>:<word> and we need to split it to two words */
-    for(i = 0; (unsigned)i < strlen(parsedLine[0])-1; i++)
+    for(i = 0; (unsigned)i < strlen(tmpParsedLine[0])-1; i++)
     {
-        if(parsedLine[0][i] == ':')
+        if(tmpParsedLine[0][i] == ':')
         {
             wordAmount++;
             
@@ -140,35 +139,35 @@ char *checkLineType(char *line, char *originalLine)
             {
                 printIntError(ERROR_CODE_10);
                 for(i = 0; i < wordAmount; i++)
-                    free(parsedLine[i]);
-                free(parsedLine);
+                    free(tmpParsedLine[i]);
+                free(tmpParsedLine);
                 free(line);
                 free(originalLine);
                 exit(1);
             }
             for(j = 0; j < i+1; j++)
-                labelPart[j] = parsedLine[0][j];
+                labelPart[j] = tmpParsedLine[0][j];
 
             labelPart[i+1] = '\0';
 
-            restOfLine = (char *)calloc(strlen(parsedLine[0])-i-1, sizeof(char));
+            restOfLine = (char *)calloc(strlen(tmpParsedLine[0])-i-1, sizeof(char));
             if (restOfLine == NULL)
             {
                 printIntError(ERROR_CODE_10);
                 for(i = 0; i < wordAmount; i++)
-                    free(parsedLine[i]);
-                free(parsedLine);
+                    free(tmpParsedLine[i]);
+                free(tmpParsedLine);
                 free(line);
                 free(originalLine);
                 free(labelPart);
                 exit(1);
             }
-            for(j = i+1; (unsigned)j < strlen(parsedLine[0])-1; j++)
-                restOfLine[j-i-1] = parsedLine[0][j];
+            for(j = i+1; (unsigned)j < strlen(tmpParsedLine[0])-1; j++)
+                restOfLine[j-i-1] = tmpParsedLine[0][j];
 
-            restOfLine[strlen(parsedLine[0])-i-2] = '\0';
+            restOfLine[strlen(tmpParsedLine[0])-i-2] = '\0';
 
-            parsedLine = (char **)realloc(parsedLine, wordAmount * sizeof(char *));
+            parsedLine = (char **)calloc(wordAmount, sizeof(char *));
             if (parsedLine == NULL){
                 printIntError(ERROR_CODE_10);
                 for(i = 0; i < wordAmount; i++)
@@ -180,26 +179,8 @@ char *checkLineType(char *line, char *originalLine)
                 free(restOfLine);
                 exit(1);
             }
-            
-            for(j = wordAmount-1; j > 1; j--)
-            {
-                if(j != wordAmount-1)
-                    free(parsedLine[j]);
-                parsedLine[j] = (char *)calloc(strlen(parsedLine[j-1])+1, sizeof(char));
-                if (parsedLine[j] == NULL){
-                    printIntError(ERROR_CODE_10);
-                    for(i = 0; i < wordAmount; i++)
-                        free(parsedLine[i]);
-                    free(parsedLine);
-                    free(line);
-                    free(originalLine);
-                    free(labelPart);
-                    free(restOfLine);
-                    exit(1);
-                }
-                strcpy(parsedLine[j], parsedLine[j-1]);
-            }
-            free(parsedLine[0]);
+
+            /* At the first word we need to add the label */
             parsedLine[0] = (char *)calloc(strlen(labelPart)+1, sizeof(char));
             if (parsedLine[0] == NULL){
                 printIntError(ERROR_CODE_10);
@@ -214,7 +195,6 @@ char *checkLineType(char *line, char *originalLine)
             }
             strcpy(parsedLine[0], labelPart);
 
-            free(parsedLine[1]);
             parsedLine[1] = (char *)calloc(strlen(restOfLine)+1, sizeof(char));
             if (parsedLine[1] == NULL){
                 printIntError(ERROR_CODE_10);
@@ -229,9 +209,62 @@ char *checkLineType(char *line, char *originalLine)
             }
             strcpy(parsedLine[1], restOfLine);
 
+            /* And the rest of the words */
+            for(j = 1; j < wordAmount-1; j++)
+            {
+                parsedLine[j+1] = (char *)calloc(strlen(tmpParsedLine[j])+1, sizeof(char));
+                if (parsedLine[j+1] == NULL){
+                    printIntError(ERROR_CODE_10);
+                    for(i = 0; i < wordAmount; i++)
+                        free(parsedLine[i]);
+                    free(parsedLine);
+                    free(line);
+                    free(originalLine);
+                    free(labelPart);
+                    free(restOfLine);
+                    exit(1);
+                }
+                strcpy(parsedLine[j+1], tmpParsedLine[j]);
+            }
+            
+            for(i = 0; i < wordAmount; i++)
+                free(tmpParsedLine[i]);
+            free(tmpParsedLine);
+
             free(labelPart);
             free(restOfLine);
         }
+    }
+
+    if(parsedLine == NULL)
+    {
+        parsedLine = (char **)calloc(wordAmount, sizeof(char *));
+        if (parsedLine == NULL){
+            printIntError(ERROR_CODE_10);
+            for(i = 0; i < wordAmount; i++)
+                free(parsedLine[i]);
+            free(parsedLine);
+            free(line);
+            free(originalLine);
+            exit(1);
+        }
+        for(i = 0; i < wordAmount; i++)
+        {
+            parsedLine[i] = (char *)calloc(strlen(tmpParsedLine[i])+1, sizeof(char));
+            if (parsedLine[i] == NULL){
+                printIntError(ERROR_CODE_10);
+                for(i = 0; i < wordAmount; i++)
+                    free(parsedLine[i]);
+                free(parsedLine);
+                free(line);
+                free(originalLine);
+                exit(1);
+            }
+            strcpy(parsedLine[i], tmpParsedLine[i]);
+        }
+        for(i = 0; i < wordAmount; i++)
+            free(tmpParsedLine[i]);
+        free(tmpParsedLine);
     }
     
     /* Check the first word in the line is .define - constant declaration */
@@ -296,14 +329,17 @@ char *checkLineType(char *line, char *originalLine)
         for(i = 0; i < wordAmount-1; i++)
         {
             free(parsedLine[i]);
+			parsedLine[i] = NULL;
             if(parsedLine[i+1] == NULL){
                 printIntError(ERROR_CODE_10);
                 for(i = 0; i < wordAmount; i++)
-                    free(parsedLine[i]);
+				{
+					if(parsedLine[i] != NULL)
+						free(parsedLine[i]);
+				}
                 free(parsedLine);
                 free(label);
                 free(line);
-                free(originalLine);
                 exit(1);
             }
             if(parsedLine[i+1][strlen(parsedLine[i+1])-1] == '\n')
@@ -689,8 +725,12 @@ char *operandHandling(char *operand, Node **symbolTableHead, int addressingMetho
     else if (operand[0] == 'r' && addressingMethod == 3)
     {
         /* Get the register number */
+		for(i = 0; i < strlen(operand);i++)
+			printf("%d\n", operand[i]);
         registerNumber = 0;
         if(operand[strlen(operand)-1] == '\n')
+            operand[strlen(operand)-1] = '\0';
+		if(operand[strlen(operand)-1] == '\r')
             operand[strlen(operand)-1] = '\0';
         for(i = 1; (unsigned)i < strlen(operand); i++)
         {
@@ -708,7 +748,7 @@ char *operandHandling(char *operand, Node **symbolTableHead, int addressingMetho
             registerNumber = registerNumber * 10 + (operand[i] - '0');
         }
         /* Convert the register number to a binary string */
-        if(registerNumber < 0 || registerNumber > 7 || strlen(operand) != 2)
+        if(registerNumber < 0 || registerNumber > 7)
         {
             printExtError(ERROR_CODE_32, fileLoc);
             noErrors = 0;
@@ -890,6 +930,10 @@ char *handleTwoRegisters(char *soruceRegister, char *destinationRegister)
     strcat(result, sourceBinary);
     strcat(result, destinationBinary);
     strcat(result, "00\0");
+
+    printf("sourceBinary: %s\n", sourceBinary);
+    printf("destinationBinary: %s\n", destinationBinary);
+    printf("result: %s\n", result);
 
     free(sourceBinary);
     free(destinationBinary);
@@ -1215,6 +1259,7 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
         if(sourceAddressingMethod == 3 && destinationAddressingMethod == 3)
         {
             regs = handleTwoRegisters(sourceOperand, destinationOperand);
+            printf("regs: %s\n", regs);
             totalLength = strlen("0000") + strlen(opcode) + strlen(sourceAddressing) + strlen(destinationAddressing) + strlen("00\n") + strlen(regs) + 1;
             result = (char *)calloc(totalLength, sizeof(char));
             if(result == NULL){
@@ -1245,8 +1290,6 @@ char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmoun
             strcat(result, destinationAddressing);
             strcat(result, "00\n");
             strcat(result, regs);
-            /* Remove the last \n */
-            result[strlen(result) - 1] = '\0';
 
             lineNumber += 2;
             IC += (lineNumber - originalLineNumber);
@@ -1807,7 +1850,6 @@ char* handleString(char **parsedLine, char *line, int wordAmount){
 
     /* We need to update DC by the amount of chars we coded including the null terminator */
     DC += amountOfChars;
-
     lineNumber++;
 
     /* Write the line numbers to the file */
@@ -2010,6 +2052,7 @@ void handleConstant(char **parsedLine, Node **symbolTableHead, int wordAmount)
 
 void executeFirstPass(char *file, char **outputFileName)
 {
+    int i;
     char line[MAX_LINE_LENGTH + 1];
     char *cleanedLine, *noCommas;
     char *binaryLine;
@@ -2085,6 +2128,12 @@ void executeFirstPass(char *file, char **outputFileName)
         current = current->next;
     }
 
+    /* Print the linesDataArray */
+    for(i = 0; i < linesDataArraySize; i++)
+    {
+        printf("line: %d, src: %d, dest: %d\n", linesDataArray[i].binaryLinesWritten, linesDataArray[i].firstLabelIndex, linesDataArray[i].secondLabelIndex);
+    }
+
     if(noErrors)
         executeSecondPass(file, *outputFileName, symbolTable, IC, DC, linesDataArray);
 
@@ -2100,3 +2149,6 @@ void executeFirstPass(char *file, char **outputFileName)
     /* Free the linesDataArray */
     free(linesDataArray);
 }
+
+
+

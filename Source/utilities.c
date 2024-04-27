@@ -70,74 +70,43 @@ char *cleanLine(char *line)
 }
 
 /* Explained in the header file */
-char** parseLine(char* input, int numWords, location* loc, int* noErrors) {
-    char** result = NULL;
-    char* token;
-    int i = 0, wordCount = 0;
-
-    if (input == NULL) {
-        printIntError(45);
-        *noErrors = 0;
-        return NULL;
+char** parseLine(char* line, int num_words, location *loc, int *noErrors){
+    int word_index = 0;
+    int word_start = 0;
+    int in_quotes = 0;
+    int i = 0;
+    int len = strlen(line);
+    char** words = (char**)malloc(num_words * sizeof(char*));
+    if(words == NULL)
+    {
+        printIntError(ERROR_CODE_10);
+        exit(1);
     }
 
-    result = (char**)calloc(numWords, sizeof(char*));
-    if (result == NULL) {
-        printIntError(10);
-        *noErrors = 0;
-        return NULL;
-    }
-
-    if (strstr(input, ".string")) {
-        result[0] = (char*)calloc(8, sizeof(char)); 
-        if (result[0] == NULL) {
-            printIntError(10);
-            *noErrors = 0;
-            free(result);
-            return NULL;
-        }
-        strcpy(result[0], ".string");
-
-        result[1] = (char*)calloc(strlen(input) - 7, sizeof(char)); 
-        if (result[1] == NULL) {
-            printIntError(10);
-            *noErrors = 0;
-            free(result[0]);
-            free(result);
-            return NULL;
-        }
-        strcpy(result[1], input + 8); 
-    } else {
-        token = strtok(input, " ,\t");
-
-        while (token != NULL && wordCount < numWords) {
-            result[wordCount] = (char*)calloc(strlen(token) + 1, sizeof(char));
-            if (result[wordCount] == NULL) {
-                printIntError(10);
-                *noErrors = 0;
-                for (i = 0; i < wordCount; i++) {
-                    free(result[i]);
+    for (i = 0; i <= len; i++) {
+        if (line[i] == '"') {
+            in_quotes = !in_quotes;
+        } else if ((line[i] == ' ' || line[i] == '\t' || line[i] == ',' || line[i] == '\0') && !in_quotes) {
+            int word_len = i - word_start;
+            if (word_len > 0) {
+                words[word_index] = (char*)malloc((word_len + 1) * sizeof(char));
+                if(words[word_index] == NULL)
+                {
+                    printIntError(ERROR_CODE_10);
+                    for(i = 0; i < word_index; i++)
+                        free(words[i]);
+                    free(words);
+                    exit(1);
                 }
-                free(result);
-                return NULL;
+                memcpy(words[word_index], &line[word_start], word_len);
+                words[word_index][word_len] = '\0';
+                word_index++;
             }
-            strcpy(result[wordCount], token);
-            token = strtok(NULL, " ,\t");
-            wordCount++;
-        }
-
-        if (wordCount != numWords) {
-            printIntError(45);
-            *noErrors = 0;
-            for (i = 0; i < wordCount; i++) {
-                free(result[i]);
-            }
-            free(result);
-            return NULL;
+            word_start = i + 1;
         }
     }
 
-    return result;
+    return words;
 }
 
 /* Explained in the header file */
@@ -163,20 +132,15 @@ int isNumber(char *str)
 /* Explained in the header file */
 int countWords(char *line)
 {
-    int count = 0;
-    int i = 0;
-    int inString = 0;  
-
-    while(line[i] != '\0')
+    /* Count the amount of spaces + 1 */
+    int i = 0, count = 1, inQuotes = 0;
+    for(i = 0; i < strlen(line); i++)
     {
-        if(line[i] == '"') {
-            inString = !inString;  
-        } else if(!inString && line[i] != ' ' && (line[i+1] == ' ' || line[i+1] == '\0')) {
+        if(line[i] == '"')
+            inQuotes = !inQuotes;
+        else if(line[i] == ' ' && !inQuotes)
             count++;
-        }
-        i++;
     }
-
     return count;
 }
 
@@ -277,7 +241,7 @@ char *getAddressingMethod(char *operand, Node *symbolTable, int *addressingMetho
     }
 
     /* If register addressing method */
-    if(operand[0] == 'r')
+    if(operand[0] == 'r' && isdigit(operand[1]))
     {
         *addressingMethod = 3;
         return "11";
@@ -402,3 +366,4 @@ void isLegalCommas(char *line, int *noErrors, location *loc, char **parsedLine, 
         }
     }
 }
+

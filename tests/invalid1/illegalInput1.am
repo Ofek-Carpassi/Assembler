@@ -21,10 +21,10 @@ LOOP2: cmp r5, r6
 dec r5 r2
 not r2
 clr r6
-addi r4, 4
+add r4, 4
 red r9
 jsr LOOP2
 rtss
 END2: hlt
 STR2: .string "mn op q r
-DATA2: .data 10,-15,25
+DATA2: .data 10,-15,25

@@ -21,7 +21,7 @@ LOOP2: cmp r5, r6
     dec r5 r2
     not r2
     clr r6
-    addi r4, 4
+    add r4, 4
     red r9
     jsr LOOP2
 rtss

@@ -1,12 +1,12 @@
 .entry START
     .extern EXTERN
 MAIN:   mov r1, r2
-    LOOP:   cmp -5, r3
+    LOOP:   cmp #-5, r3
 bne ENDLOOP
-add @r4, R0
+add r4, R0
 jsr SUBROUTINE
 prn STR
-lea ARR, @r5
+lea ARR, r5
 SUBROUTINE: bne EXTERNVAR
 hlt
 ENDLOOP: dec K
