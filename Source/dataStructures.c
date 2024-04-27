@@ -4,13 +4,11 @@
 #include "../Headers/dataStructures.h"
 #include "../Headers/errors.h"
 
-/* This function creates a new node */
 Node* createNode(char* name, char* data, int line) {
     /* Allocate memory for the new node */
     Node* newNode = (Node*)malloc(sizeof(Node));
     if (newNode == NULL) {
-        printIntError(ERROR_CODE_10);
-        exit(1);
+        return NULL;
     }
 
     /* Allocate memory for the name and data */
@@ -19,6 +17,7 @@ Node* createNode(char* name, char* data, int line) {
         free(newNode);
         printIntError(ERROR_CODE_10);
         exit(1);
+        return NULL;
     }
 	if(name[strlen(name)-1] == '\n') name[strlen(name)-1] = '\0';
     /* Save the name of the node */
@@ -30,6 +29,7 @@ Node* createNode(char* name, char* data, int line) {
         free(newNode);
         printIntError(ERROR_CODE_10);
         exit(1);
+        return NULL;
     }
     /* Save the data of the node */
     strcpy(newNode->data, data);
@@ -45,17 +45,20 @@ Node* createNode(char* name, char* data, int line) {
 Node* searchNodeInList(Node* head, char* name, int *found) {
     /* Initialize the current node */
     Node* current = head;
-    /* Search for the node */
-    if(name[strlen(name) - 1] == ':' || name[strlen(name) - 1] == '\n' || name[strlen(name) - 1] == '\r' || name[strlen(name) - 1] == '\t' || name[strlen(name) - 1] == '\0'){
+	int i = 0;
+  /* Search for the node */
+    if(name[strlen(name) - 1] == ':' || name[strlen(name) - 1] == '\n') {
         name[strlen(name) - 1] = '\0';
     }
     while (current != NULL) {
-        /* If the names match, return the node */
-        if(strcmp(current->name, name) == 0)
-        {
-            *found = 1;
-            return current;
-        }
+        for(i = 0; i<strlen(current->name); i++)
+			if(name[i] != (current->name)[i])
+				break;
+		if(i == strlen(current->name))
+		{
+			*found = 1;
+			return current;
+		}
         current = current->next;
     }
     /* If the node was not found, return NULL */
@@ -69,7 +72,7 @@ void addNode(Node** head, char* name, char* data, int line) {
     Node* newNode = createNode(name, data, line);
     if (newNode == NULL) {
         printIntError(ERROR_CODE_10);
-        exit(1);
+        return;
     }
 
     /* Add the new node to the list */
@@ -95,13 +98,19 @@ void freeList(Node* head) {
     }
 }
 
-/* This function creates a new lineData */
+void printList(Node* head) {
+    Node* current = head;
+    while (current != NULL) {
+        printf("Name: %s, Data: %s, Line: %d\n", current->name, current->data, current->line);
+        current = current->next;
+    }
+}
+
 lineData *createLineData(int binaryLinesWritten, int firstLabelIndex, int secondLabelIndex) {
     /* Allocate memory for the new lineData */
     lineData *newLineData = (lineData*)malloc(sizeof(lineData));
     if (newLineData == NULL) {
-        printIntError(ERROR_CODE_10);
-        exit(1);
+        return NULL;
     }
 
     /* Save the binaryLinesWritten, firstLabelIndex, and secondLabelIndex */
@@ -118,7 +127,7 @@ void addLine(lineData **array, int binaryLinesWritten, int firstLabelIndex, int 
     lineData *newLineData = createLineData(binaryLinesWritten, firstLabelIndex, secondLabelIndex);
     if (newLineData == NULL) {
         printIntError(ERROR_CODE_10);
-        exit(1);
+        return;
     }
 
     /* Add the newLineData to the array */
@@ -128,7 +137,7 @@ void addLine(lineData **array, int binaryLinesWritten, int firstLabelIndex, int 
         if (temp == NULL) {
             printIntError(ERROR_CODE_10);
             free(newLineData);
-            exit(1);
+            return;
         }
         /* Save the newLineData */
         *array = temp;
@@ -136,7 +145,7 @@ void addLine(lineData **array, int binaryLinesWritten, int firstLabelIndex, int 
     if (*array == NULL) {
         printIntError(ERROR_CODE_10);
         free(newLineData);
-        exit(1);
+        return;
     }
 
     /* Save the newLineData */
@@ -151,3 +160,4 @@ void addLine(lineData **array, int binaryLinesWritten, int firstLabelIndex, int 
     /* Free the newLineData */
     free(newLineData);
 }
+

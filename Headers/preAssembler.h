@@ -1,3 +1,19 @@
+/*
+The pre assembler algorithm will work as follows:
+1. preAssemblerExecuter will be called with the source file.
+2. Create a new file to write to.
+3. Read the source file line by line.
+4. If the line is EOF - go to step 6.
+5. After each line is read the function will do the following:
+    a. Clean the line from white spaces using "cleanLine" and return the cleaned line.
+    b. Check if the line is a macro call or macro declaration.
+    c. If the line isn't a macro call or macro declaration - copy the line to the new file using "copyLineToFile" and return to step 3.
+    d. If the line is a macro call - replace the macro call with the macro's definition using "replaceMacroCall" and return to step 3.
+    e. If the line is a macro declaration - check if the macro's name is valid using "isValidMacroName" and add the macro to the macros linked list using "saveMacroToList" and return to step 3.
+    f. If the line is a comment (starts with ';') - ignore the line and return to step 3.
+6. Free the memory and close the files.
+*/
+
 #ifndef PREASSEM_H
 #define PREASSEM_H
 

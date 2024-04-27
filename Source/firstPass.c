@@ -46,7 +46,7 @@ int isOperandIllegal(char *operand)
     /* Check if the operand doesn't contain any illegal characters */
     int i;
     /* Remove the \n from the operand */
-    if(operand[strlen(operand)-1] == '\n' || operand[strlen(operand)-1] == '\r' || operand[strlen(operand)-1] == '\t' || operand[strlen(operand)-1] == '\0')
+    if(operand[strlen(operand)-1] == '\n')
         operand[strlen(operand)-1] = '\0';
     if(isdigit(operand[0]))
         return 1;
@@ -1012,7 +1012,7 @@ char *handleTwoRegisters(char *soruceRegister, char *destinationRegister)
         printIntError(ERROR_CODE_10);
         exit(1);
     }
-    
+        
     /* Add the binary numbers to the binary line */
     strcat(result, "000000");
     strcat(result, sourceBinary);

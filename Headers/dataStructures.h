@@ -9,7 +9,12 @@ typedef struct Node {
     struct Node* next;
 } Node;
 
-/* A struct used to store information about each instruction. */
+typedef struct lineNumbers {
+    unsigned int binaryLinesWritten;
+    unsigned int firstLabelIndex;
+    unsigned int secondLabelIndex;
+} lineNumbers;
+
 typedef struct OPCODE {
     char *name;
     char *binary;

@@ -1,31 +1,24 @@
 .entry START
-    .extern Z
-MAIN: mov r2, START
-LOOP1: jmp L2
-prn -4
-bne Z
-sub r1, r3
-    bne L4
-L2:  inc J
-    .entry LOOP1
-jmp Z
-END1: hlt
-STR1: .string "ghijkl"
-START: .data 8,-12,20
-J: .data  33
-    .extern L4
-
-; Using rest of the opcodes
-    LOOP2: cmp r5, r6
-    dec r5
+    .extern EXTERN
+MAIN:   mov r1, r2
+    LOOP:   cmp #-5, r3
+bne ENDLOOP
+add r4, R0
+jsr SUBROUTINE
+prn STR
+lea ARR, r5
+SUBROUTINE: bne EXTERNVAR
+hlt
+ENDLOOP: dec K
+jmp LOOP
+START:  sub r2, r7
+    clr STR
+red r7
     not r2
-    clr r6
-    add r4, r5
-    red r1
-    jsr LOOP2
-rts
-END2: hlt
-STR2: .string "mnopqr"
-DATA2: .data 10,-15,25
-L: .data  44
-    .extern L5
+    inc R0
+bne MAIN
+EXTERNVAR: .data 100
+STR:    .string "Hello, World!"
+ARR:    .data 1, 2, 3, 4, 5
+K:      .data 10
+R0:	.data 15, 17

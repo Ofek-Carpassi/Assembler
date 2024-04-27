@@ -16,6 +16,34 @@ int isEntry(char *line) {
     return (strstr(line, ".entry") != NULL);
 }
 
+int getWordCount(char *line) {
+    if (strstr(line, ".data") != NULL || strstr(line, ".extern") != NULL) {
+        /* We'll count the number of commas in the line and add 1 */
+        int count = 0;
+        int i = 0;
+        for (i = 0; i < strlen(line); i++) {
+            if (line[i] == ',') {
+                count++;
+            }
+        }
+        return count + 1;
+    } else if (strstr(line, ".string") != NULL) {
+        /* We'll count the number of chars in the "" */
+        int count = 0;
+        int i = 0;
+        while (line[i] != '"') {
+            i++;
+        }
+        i++;
+        while (line[i] != '"') {
+            count++;
+            i++;
+        }
+        return count + 1;
+    }
+    return 0;
+}
+
 char *convertToEncryptedBase4(char *binaryLine) {
     int binaryLineLength = strlen(binaryLine);
     int base4LineLength = binaryLineLength / 2;
@@ -204,7 +232,7 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead, 
 
     while (fgets(line, MAX_LINE_LENGTH, file) != NULL) {
         /* If the line contains .entry or the line is empty - we'll skip it */
-        if (strstr(line, ".extern") != NULL || strlen(line) == 1 || line[strlen(line) - 1] == '\n' || line[strlen(line) - 1] == '\r' || line[strlen(line)-1] == '\0')
+        if (strstr(line, ".extern") != NULL || strlen(line) == 1)
             continue;
         /* If the line doesn't have .entry - we'll do the if statement */
         if (isEntry(line) == 0 && !strstr(line, ".define")) {
@@ -508,5 +536,4 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead, 
     if(externsCount > 0)
         fclose(externFile);
 }
-
 

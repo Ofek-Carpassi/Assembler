@@ -6,6 +6,14 @@
 #include "../Headers/dataStructures.h"
 #include "../Headers/utilities.h"
 
+void freeStringArray(char **array, int size)
+{
+    int i = 0;
+    for(i = 0; i < size; i++)
+        free(array[i]);
+    free(array);
+}
+
 /* Explained in the header file */
 char *cleanLine(char *line)
 {
@@ -82,18 +90,17 @@ char** parseLine(char* line, int num_words, location *loc, int *noErrors){
             int word_len = i - word_start;
             if (word_len > 0) {
                 words[word_index] = (char*)malloc((word_len + 1) * sizeof(char));
-		if (words[word_index] == NULL) {
-		    printIntError(ERROR_CODE_10);
-		    for (i = 0; i < word_index; i++) {
-			free(words[i]);
-		    }
-		    free(words);
-		    exit(1);
-		} else {
-		    memcpy(words[word_index], &line[word_start], word_len);
-		    words[word_index][word_len] = '\0';
-		    word_index++;
-		}
+                if(words[word_index] == NULL)
+                {
+                    printIntError(ERROR_CODE_10);
+                    for(i = 0; i < word_index; i++)
+                        free(words[i]);
+                    free(words);
+                    exit(1);
+                }
+                memcpy(words[word_index], &line[word_start], word_len);
+                words[word_index][word_len] = '\0';
+                word_index++;
             }
             word_start = i + 1;
         }
@@ -327,7 +334,9 @@ void isLegalCommas(char *line, int *noErrors, location *loc, char **parsedLine, 
         currentWord = 1;
         startingIndex = i;
     }
+    /*printf("line: %s\n", line);*/
     for(; i < strlen(line); i++) {
+        /*printf("line[%d]: %c\n", i, line[i]);*/
         
         if(line[i] == ',') {
             if(hasSeenComma) {
