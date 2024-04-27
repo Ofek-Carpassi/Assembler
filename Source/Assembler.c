@@ -11,6 +11,7 @@
 
 int main(int argc, char *argv[])
 {
+    /* Declare the variables */
     int i;
     location tmpLocation;
     char *inputFile, *preAssemblerOutput, *firstPassOutput;
@@ -28,8 +29,10 @@ int main(int argc, char *argv[])
             exit(1);
         }
         strcpy(inputFile, argv[i]);
+        /* Update the location */
         tmpLocation.fileName = inputFile;
         tmpLocation.line = 0;
+        /* Make sure the file ends with ".as" */
         if(strstr(inputFile, ".as") == NULL)
         {
             printExtError(ERROR_CODE_8, tmpLocation);

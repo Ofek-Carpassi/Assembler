@@ -6,14 +6,6 @@
 #include "../Headers/dataStructures.h"
 #include "../Headers/utilities.h"
 
-void freeStringArray(char **array, int size)
-{
-    int i = 0;
-    for(i = 0; i < size; i++)
-        free(array[i]);
-    free(array);
-}
-
 /* Explained in the header file */
 char *cleanLine(char *line)
 {

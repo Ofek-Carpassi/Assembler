@@ -6,9 +6,6 @@
 /**
  * @brief This function is used to clean a line from white spaces.
  * 
- * This function will clean a line from white spaces and return the cleaned line.
- * The function adds a space at the end of the line and returns the cleaned line.
- * 
  * @param line - a string containing the line to clean.
  * @return - a string containing the cleaned line.
  */
@@ -17,14 +14,15 @@ char *cleanLine(char *line);
 /**
  * @brief This function is used to parse a line.
  * 
- * This function will parse a line and updates an array with the parsed output.
+ * This function will parse a line and return an array of strings containing the words in the line.
  * 
  * @param line - a string containing the line to parse.
- * @param parsedOutput - an array to update with the parsed output.
+ * @param num_words - the number of words in the line.
+ * @param loc - a pointer to the location of the line.
+ * @param noErrors - a pointer to the number of errors.
+ * @return - an array of strings containing the words in the line.
  */
-char **parseLine(char *line, int wordAmount, location *loc, int *noErrors);
-
-void freeStringArray(char **array, int size);
+char** parseLine(char* line, int num_words, location *loc, int *noErrors);
 
 /**
  * @brief This function is used to check if a string is a number.
@@ -49,31 +47,23 @@ int countWords(char *line);
 /**
  * @brief This function is used to convert an integer to binary.
  * 
- * This function will convert an integer to binary and update the binary array with the binary representation.
+ * This function will convert an integer to binary and return the binary representation.
  * 
  * @param num - an integer to convert to binary.
- * @param binary - an array to update with the binary representation.
+ * @param bits - the number of bits to convert the integer to.
+ * @return - a string containing the binary representation of the integer.
  */
 char *intToBinary(int num, int bits);
 
 /**
- * @brief This function is used to convert an integer to a binary string.
+ * @brief This function is used to get the addressing method of an operand.
  * 
- * This function will convert an integer to a binary string and return the binary string.
+ * This function will get the addressing method of an operand and return the operand without the addressing method.
  * 
- * @param num - an integer to convert to a binary string.
- * @return - a string containing the binary representation of the integer.
- */
-char *intToBinaryString(int num, int bits);
-
-/**
- * @brief This function is used to check the addressing method of an operand.
- * 
- * This function will check the addressing method of an operand.
- * The function returns the binary representation of the addressing method.
- * 
- * @param operand - a string containing the operand to check the addressing method of.
- * @return - a binary representation of the addressing method.
+ * @param operand - a string containing the operand to get the addressing method of.
+ * @param symbolTable - a pointer to the symbol table.
+ * @param addressingMethod - a pointer to the addressing method of the operand.
+ * @return - a string containing the addressing method in binary.
  */
 char *getAddressingMethod(char *operand, Node *symbolTable, int *addressingMethod);
 
@@ -87,6 +77,15 @@ char *getAddressingMethod(char *operand, Node *symbolTable, int *addressingMetho
  */
 char *removeCommas(char *line);
 
+/**
+ * @brief This function is used to check if all the commas in a line are legal.
+ * 
+ * @param line - a string containing the line to check the commas in.
+ * @param noErrors - a pointer to the number of errors.
+ * @param loc - a pointer to the location of the line.
+ * @param parsedLine - an array of strings containing the words in the line.
+ * @param wordAmount - the number of words in the line.
+ */
 void isLegalCommas(char *line, int *noErrors, location *loc, char **parsedLine, int wordAmount);
 
 #endif

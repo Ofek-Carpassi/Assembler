@@ -29,138 +29,111 @@ Algorithm:
 19. Start the second pass.
 */
 
-/**
- * @brief This function calculates the length of an instruction.
- * 
- * This function counts the amount of word in the instruction and returns it.
- * 
- * @param line The line to calculate the length of.
- * @return The amount of words in the instruction.
- */
-void calcLength(char **parsedLine, int wordAmount);
+/* Check if an operand is illegal */
+int isOperandIllegal(char *operand);
 
-/**
- * @brief This function handles an instruction with two operands.
- * 
- * This function receives the two operands and a pointer to the head of the symbol table.
- * The function writes the binary code of the addressing method of the operands to the binary line.
- * The function returns 1 if the operation was successful, 0 otherwise.
- * 
- * @param operandOne The first operand.
- * @param operandTwo The second operand.
- * @param symbolTableHead A pointer to the head of the symbol table.
- * @param binaryLine A pointer to the binary line.
- * @return 1 if the operation was successful, 0 otherwise.
- */
-char *handleTwoOperands(char *operandOne, char *operandTwo, Node **symbolTableHead, char *binaryLine);
+/* Check if a label is illegal */
+int isLabelIllegal(char *label);
 
-/**
- * @brief This function handles an instruction with one operand.
- * 
- * This function receives the operand and a pointer to the head of the symbol table.
- * The function writes the binary code of the addressing method of the operand to the binary line.
- * The function returns 1 if the operation was successful, 0 otherwise.
- * 
- * @param operand The operand.
- * @param symbolTableHead A pointer to the head of the symbol table.
- * @param binaryLine A pointer to the binary line.
- * @return 1 if the operation was successful, 0 otherwise.
- */
-char *handleOneOperand(char *operand, Node **symbolTableHead, char *binaryLine);
+/* Check if a word is an instruction */
+int isInstruction(char *word);
 
 /**
  * @brief This function handles a code declaration.
  * 
- * This function adds the label to the symbol table with code as its type and its value as IC+100.
- * The function receives the line to handle and the symbol table (a pointer to the head of the linked list).
- * The function returns 1 if the label was added to the symbol table, 0 otherwise.
+ * This function converts any instruction to binary and returns it.
  * 
- * @param line The line to handle.
- * @param symbolTableHead A pointer to the head of the linked list.
- * @return 1 if the label was added to the symbol table, 0 otherwise.
+ * @param parsedLine The line parsed by the space.
+ * @param symbolTableHead A pointer to the head of the symbol table.
+ * @param wordAmount The amount of words in the line.
+ * @return The binary code of the instruction.
  */
 char *handleInstruction(char **parsedLine, Node **symbolTableHead, int wordAmount);
 
 /**
  * @brief This function handles a string.
  * 
- * This function gets a line with string declaration and translates the string to binary and writes it to the output file.
- * This function recieves the line to handle.
- * The function returns the string in binary.
+ * This function gets a line with string declaration and converts the string to binary and writes it to the output file.
  * 
+ * @param parsedLine The line parsed by the space.
  * @param line The line to handle.
- * @return The string in binary.
+ * @param wordAmount The amount of words in the line.
  */
 char* handleString(char **parsedLine, char *line, int wordAmount);
 
 /**
  * @brief This function handles a data.
  * 
- * This function gets a line with data declaration and translates the data to binary and writes it to the output file.
- * The function receives the line to handle and the symbol table (a pointer to the head of the linked list).
- * The function returns the data in binary.
+ * This function gets a line with data declaration and converts the data to binary and writes it to the output file.
  * 
- * @param line The line to handle.
- * @param symbolTableHead A pointer to the head of the linked list.
- * @return The data in binary.
+ * @param parsedLine The line parsed by the space.
+ * @param symbolTableHead A pointer to the head of the symbol table.
+ * @param wordAmount The amount of words in the line.
+ * @return The binary code of the data.
  */
 char *handleData(char *parsedLine[], Node **symbolTableHead, int wordAmount);
 
 /**
  * @brief This function handles a label.
  * 
- * This function adds the label to the symbol table with code as its type and its value as IC+100.
- * The function receives the line to handle and the symbol table (a pointer to the head of the linked list).
- * The function returns 1 if the label was added to the symbol table, 0 otherwise.
+ * This function adds the label to the symbol table with the type of the label.
  * 
- * @param line The line to handle.
- * @param symbolTableHead A pointer to the head of the linked list.
- * @return 1 if the label was added to the symbol table, 0 otherwise.
+ * @param label The label to handle.
+ * @param symbolTableHead A pointer to the head of the symbol table.
+ * @param type The type of the label.
  */
 void handleLabel(char *label, Node **symbolTableHead, int type);
 
 /**
  * @brief This function handles a constant.
  * 
- * This function adds the constant to the symbol table with mdefine as its type and its value as its value.
- * The function receives the line to handle and the symbol table (a pointer to the head of the linked list).
- * The function returns 1 if the constant was added to the symbol table, 0 otherwise.
+ * This function adds the constant to the symbol table with the constant value.
  * 
- * @param line The line to handle.
- * @param symbolTableHead A pointer to the head of the linked list.
- * @return 1 if the constant was added to the symbol table, 0 otherwise.
+ * @param parsedLine The line parsed by the space.
+ * @param symbolTableHead A pointer to the head of the symbol table.
+ * @param wordAmount The amount of words in the line.
  */
 void handleConstant(char **parsedLine, Node **symbolTableHead, int wordAmount);
 
 /**
- * @brief This function checks the type of the line and returns it.
+ * @brief This function checks the type of the line.
  * 
- * This function checks if the line is empty, a comment, a constant declaration, 
- * a label declaration, a data declaration, a string declaration, 
- * an entry declaration, an extern declaration, or an instruction.
- * The function returns a string with the type of the line.
- * The function also writes the line to the output file.
+ * This function checks the type of the line, converts it to binary and returns it.
  * 
- * @param line The line to check.
- * @return 
- *          1 if the line is empty or a comment
- *          2 if the line is a constant declaration
- *          3 if the line is a label declaration
- *          4 if the line is a data declaration
- *          5 if the line is a string declaration
- *          6 if the line is an entry declaration
- *          7 if the line is an extern declaration
- *          8 if the line is an instruction
- *          0 if the line is illegal - an error
+ * @param line The line cleaned to check.
+ * @param originalLine The original line.
+ * @return The binary code of the line.
  */
 char *checkLineType(char *line, char *originalLine);
 
+/**
+ * @brief This function gets an operand and returns it in binary.
+ * 
+ * This function gets any type of operand, and all of the information needed to convert it to binary.
+ * 
+ * @param operand The operand to convert.
+ * @param symbolTableHead A pointer to the head of the symbol table.
+ * @param addressingMethod The addressing method of the operand.
+ * @param isConstant A flag to check if the operand is a constant.
+ * @param isSource A flag to check if the operand is a source operand.
+ * @param hasLabel A flag to check if the operand has a label.
+ * @return The binary code of the operand.
+ */
 char *operandHandling(char *operand, Node **symbolTableHead, int addressingMethod, int isConstant, int isSource, int *hasLabel);
 
+/**
+ * @brief This function handles the special case of two registers.
+ * 
+ * This function gets two registers and returns them in binary.
+ * 
+ * @param soruceRegister The source register.
+ * @param destinationRegister The destination register.
+ * @return The binary code of the two registers.
+ */
 char *handleTwoRegisters(char *soruceRegister, char *destinationRegister);
 
 /**
- * @brief This function executes the first pass algorithm
+ * @brief This function executes the first pass algorithm and then starts the second pass.
  * 
  * @param file - The input file to read from.
  * @param outputFileName - The name of the output file.
