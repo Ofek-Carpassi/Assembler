@@ -469,7 +469,7 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead, 
     fclose(obj);
     fclose(tmpFile);
 
-    /*remove(tmpFileName);*/
+    remove(tmpFileName);
     /*remove("lineNumbers.txt");*/
 
     free(outputFileName);
@@ -536,4 +536,5 @@ void executeSecondPass(char *srcFile, char *tmpFileName, Node *symbolTableHead, 
     if(externsCount > 0)
         fclose(externFile);
 }
+
 
