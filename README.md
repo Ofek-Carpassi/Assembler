@@ -1,6 +1,6 @@
 # 🔧 Assembler
 
-## Project Grade: UNKNOWN
+## Project Grade: 94
 
 Welcome to the Assembler repository, the culmination of our efforts in the "Systems Programming Laboratory" (20465) course at the Israel Open University. Crafted with precision in C, this repository houses a sophisticated assembler tailored for a specific assembly language, aimed at emulating the functionality of common system programs.
 
